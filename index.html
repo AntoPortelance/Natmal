@@ -134,6 +134,22 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .s-stars .on{color:var(--yellow)}
 .s-stars .new{animation:star .55s ease-out both;color:var(--yellow)}
 @keyframes star{0%{color:var(--line);transform:scale(.6)}60%{transform:scale(1.35)}100%{color:var(--yellow);transform:none}}
+.exam{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:color-mix(in srgb,var(--yellow) 12%,var(--paper))}
+.exam h3{margin:0;font-size:16px;line-height:1.3}
+.exam p{margin:2px 0 10px;font-size:13px;color:var(--muted)}
+.tests{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.test{padding:8px 0;border-radius:8px;border:1px solid var(--line);background:var(--paper);font-weight:600;font-size:15px}
+.test.passed{background:var(--celadon);border-color:var(--celadon);color:var(--paper)}
+.level.locked .exam{opacity:.45}
+.test:disabled,.pill:disabled{cursor:not-allowed;opacity:.5}
+.theme{position:relative;overflow:hidden}
+.theme .bar{position:absolute;left:0;bottom:0;height:3px;background:var(--celadon);border-radius:0 3px 3px 0;transition:width .4s}
+.theme .bar.c{background:var(--yellow)}
+.wc{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+.wc.full{color:var(--celadon)}
+.level .words-total{margin:-6px 0 10px;font-size:13px;color:var(--muted)}
+.word{position:relative}
+.word .dot{position:absolute;top:8px;right:8px;width:7px;height:7px;border-radius:50%;background:var(--red)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
@@ -281,7 +297,19 @@ const STR = {
     doneC:"Défi réussi : tu as retrouvé chaque mot à partir du français.",
     playChallenge:"Jouer en défi", next:x => `Thème suivant : ${x}`,
     replay:"Rejouer avec une nouvelle grille", toThemes:"Retour aux thèmes",
-    locked:(id, n) => `🔒 Termine le niveau ${id} pour débloquer (${n} sur 4)`,
+    locked:(id, n) => `🔒 Réussis l'examen ${id} pour débloquer (${n} sur 4)`,
+    exam:id => `Examen ${id}`, examKo:"시험",
+    examNote:next => `16 mots par épreuve, seulement en français. Réussis les 4 épreuves pour ${next ? "débloquer le niveau " + next : "valider le niveau"}.`,
+    examProgress:n => `${n} sur 4`, test:k => `Épreuve ${k}`, testOf:(id, k) => `Examen ${id}, épreuve ${k} sur 4`,
+    hintN:n => `Indice (${n})`,
+    testDone:(k, left, next) => `Épreuve ${k} réussie. Encore ${left} pour ${next ? "débloquer le niveau " + next : "valider le niveau"}.`,
+    examDone:id => `Examen ${id} réussi, bravo !`, levelDone:"Tu as validé le niveau le plus avancé du jeu.",
+    nextTest:"Épreuve suivante",
+    levelWords:(n, m) => `${n} / ${m} mots découverts`, newWord:"nouveau mot",
+    countD:(n, m) => `${n} mot${n > 1 ? "s" : ""} découvert${n > 1 ? "s" : ""} sur ${m}`, countC:(n, m) => `${n} mot${n > 1 ? "s" : ""} sur ${m} réussi${n > 1 ? "s" : ""} en défi`,
+    progD:(n, left) => `${n > 0 ? "+" + n + " nouveau" + (n > 1 ? "x" : "") + " mot" + (n > 1 ? "s" : "") + ". " : ""}Encore ${left} mot${left > 1 ? "s" : ""} à découvrir pour l'étoile.`,
+    progC:(n, left) => `${n > 0 ? "+" + n + " mot" + (n > 1 ? "s" : "") + " réussi" + (n > 1 ? "s" : "") + " en défi. " : ""}Encore ${left} pour l'étoile Défi.`,
+    keepD:"Continuer la découverte", keepC:"Continuer le défi",
     unlocked:id => `🔓 Niveau ${id} débloqué !`
   },
   en: {
@@ -298,7 +326,19 @@ const STR = {
     doneC:"Challenge complete: you found every word from its English meaning.",
     playChallenge:"Play in Challenge", next:x => `Next theme: ${x}`,
     replay:"Replay with a new grid", toThemes:"Back to themes",
-    locked:(id, n) => `🔒 Finish ${id} to unlock (${n} of 4)`,
+    locked:(id, n) => `🔒 Pass the ${id} exam to unlock (${n} of 4)`,
+    exam:id => `${id} exam`, examKo:"시험",
+    examNote:next => `16 words per test, English only. Pass all 4 tests to ${next ? "unlock " + next : "complete the level"}.`,
+    examProgress:n => `${n} of 4`, test:k => `Test ${k}`, testOf:(id, k) => `${id} exam, test ${k} of 4`,
+    hintN:n => `Hint (${n})`,
+    testDone:(k, left, next) => `Test ${k} passed. ${left} more to ${next ? "unlock " + next : "complete the level"}.`,
+    examDone:id => `${id} exam passed, well done!`, levelDone:"You've completed the most advanced level in the game.",
+    nextTest:"Next test",
+    levelWords:(n, m) => `${n} / ${m} words discovered`, newWord:"new word",
+    countD:(n, m) => `${n} of ${m} words discovered`, countC:(n, m) => `${n} of ${m} words passed in Challenge`,
+    progD:(n, left) => `${n > 0 ? "+" + n + " new word" + (n > 1 ? "s" : "") + ". " : ""}${left} more word${left > 1 ? "s" : ""} to discover for the star.`,
+    progC:(n, left) => `${n > 0 ? "+" + n + " word" + (n > 1 ? "s" : "") + " passed in Challenge. " : ""}${left} more for the Challenge star.`,
+    keepD:"Keep discovering", keepC:"Keep going in Challenge",
     unlocked:id => `🔓 ${id} unlocked!`
   }
 };
@@ -310,14 +350,46 @@ try { prog = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { 
 if (typeof prog.sound !== "boolean") prog.sound = true;
 prog.themes = prog.themes || {};
 prog.seen = prog.seen || {};
+prog.exams = prog.exams || {};
+prog.seenC = prog.seenC || {};
+prog.unlocked = prog.unlocked || [];
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(prog)); } catch (e) {} };
 const starsOf = id => prog.themes[id] || {};
 const doneD = id => !!starsOf(id).d;
 /* Un niveau s'ouvre quand tous les thèmes du précédent ont l'étoile Découverte ; un niveau déjà entamé ne se referme jamais */
+const EXAM_HINTS = 3;
+/* Chaque mot appartient à un seul thème */
+const WT = {};
+THEMES.forEach(t => t.words.forEach(w => { WT[w.ko] = t; }));
+const countIn = (store, t) => t.words.filter(w => (store[t.id] || []).includes(w.ko)).length;
+/* Les mots trouvés en examen étaient rangés sous l'examen : on les rend à leur thème */
+Object.keys(prog.seen).filter(k => k.startsWith("exam-")).forEach(k => {
+  prog.seen[k].forEach(ko => { const t = WT[ko]; if (t) { const a = prog.seen[t.id] || (prog.seen[t.id] = []); if (!a.includes(ko)) a.push(ko); } });
+  delete prog.seen[k];
+});
+/* Une étoile s'allume quand les 16 mots du thème sont trouvés ; les étoiles déjà gagnées restent acquises */
+function updateStars(t) {
+  const s = { ...starsOf(t.id) };
+  if (countIn(prog.seen, t) === t.words.length) s.d = true;
+  if (countIn(prog.seenC, t) === t.words.length) s.c = true;
+  prog.themes[t.id] = s;
+}
+THEMES.forEach(updateStars); save();
+const passedTests = l => (prog.exams[l.id] || []).filter(Boolean).length;
+/* Épreuve e d'un niveau : les mots n° e, e+4, e+8, e+12 de chaque thème, soit 16 mots ; les 4 épreuves couvrent tout le niveau */
+const examWords = (l, e) => l.themes.flatMap(t => t.words.filter((_, i) => i % 4 === e));
+const started = l => l.themes.some(t => { const s = starsOf(t.id); return s.d || s.c; }) || passedTests(l) > 0;
+/* Un niveau s'ouvre quand l'examen du précédent est réussi ; un niveau déjà ouvert ne se referme jamais */
 function isUnlocked(li) {
-  if (li === 0) return true;
-  if (LEVELS[li].themes.some(t => { const s = starsOf(t.id); return s.d || s.c; })) return true;
-  return LEVELS[li - 1].themes.every(t => doneD(t.id));
+  const l = LEVELS[li];
+  return li === 0 || prog.unlocked.includes(l.id) || started(l) || passedTests(LEVELS[li - 1]) === 4;
+}
+/* Ancienne règle (thèmes découverts) : les niveaux déjà ouverts ainsi le restent */
+if (!prog.rulesV2) {
+  LEVELS.forEach((l, li) => {
+    if (li > 0 && (started(l) || LEVELS[li - 1].themes.every(t => doneD(t.id)))) prog.unlocked.push(l.id);
+  });
+  prog.rulesV2 = true; save();
 }
 
 /* Langue : celle choisie, sinon celle du téléphone */
@@ -420,19 +492,39 @@ function renderHome() {
     const el = document.createElement("div");
     el.className = "level" + (open ? "" : " locked");
     const note = open ? `<p class="note">${l.note[LANG]}</p>`
-      : `<p class="lock">${T().locked(prev.id, prev.themes.filter(t => doneD(t.id)).length)}</p>`;
-    el.innerHTML = `<div class="badge">${l.id}</div><div><h2>${l.name[LANG]}</h2>${note}<div class="themes"></div></div>`;
+      : `<p class="lock">${T().locked(prev.id, passedTests(prev))}</p>`;
+    const found = l.themes.reduce((n, t) => n + countIn(prog.seen, t), 0), all = l.themes.reduce((n, t) => n + t.words.length, 0);
+    const total = open ? `<p class="words-total">${T().levelWords(found, all)}</p>` : "";
+    el.innerHTML = `<div class="badge">${l.id}</div><div><h2>${l.name[LANG]}</h2>${note}${total}<div class="themes"></div></div>`;
     const box = el.querySelector(".themes");
     l.themes.forEach(t => {
       const s = starsOf(t.id), n = (s.d ? 1 : 0) + (s.c ? 1 : 0); got += n;
       const b = document.createElement("button");
       b.className = "theme";
-      b.innerHTML = `<span class="t-ko ko">${t.ko}</span><span class="t-fr">${t[LANG]}</span>
+      const m = t.words.length, nd = countIn(prog.seen, t), nc = countIn(prog.seenC, t);
+      const onC = !!s.d, n2 = onC ? nc : nd, full = onC && nc === m;
+      const wc = `<span class="wc${full ? " full" : ""}" aria-label="${onC ? T().countC(nc, m) : T().countD(nd, m)}">${full ? "✓ " : onC ? "🎯 " : ""}${n2}/${m}</span>`;
+      b.innerHTML = `<span class="t-ko ko">${t.ko}</span><span class="t-fr">${t[LANG]}</span>${wc}
+        <span class="bar${onC ? " c" : ""}" style="width:${Math.round(n2 / m * 100)}%"></span>
         <span class="stars" aria-label="${T().starsLabel(n)}"><span class="${s.d?"on":""}">★</span><span class="${s.c?"on":""}">★</span></span>`;
       b.disabled = !open;
       b.onclick = () => startGame(t.id, s.d && !s.c ? "c" : "d");
       box.appendChild(b);
     });
+    const nextL = LEVELS[li + 1], res = prog.exams[l.id] || [];
+    const ex = document.createElement("div");
+    ex.className = "exam";
+    ex.innerHTML = `<h3>📝 ${T().exam(l.id)}, ${T().examProgress(passedTests(l))}</h3><p>${T().examNote(nextL && nextL.id)}</p><div class="tests"></div>`;
+    [0, 1, 2, 3].forEach(e => {
+      const b = document.createElement("button");
+      b.className = "test" + (res[e] ? " passed" : "");
+      b.textContent = res[e] ? `✓ ${e + 1}` : `${e + 1}`;
+      b.setAttribute("aria-label", T().test(e + 1));
+      b.disabled = !open;
+      b.onclick = () => startExam(li, e);
+      ex.querySelector(".tests").appendChild(b);
+    });
+    el.querySelector(".themes").after(ex);
     $("ladder").appendChild(el);
   });
   $("total").textContent = T().total(got, THEMES.length * 2);
@@ -471,24 +563,41 @@ let S = null;
 const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
 /* 8 mots par partie : Découverte privilégie les mots jamais trouvés, Défi ceux déjà découverts */
 function pickWords(t, mode) {
-  const seen = new Set(prog.seen[t.id] || []);
-  const fresh = shuffle(t.words.filter(w => !seen.has(w.ko))), old = shuffle(t.words.filter(w => seen.has(w.ko)));
-  return (mode === "c" ? old.concat(fresh) : fresh.concat(old)).slice(0, 8);
+  const seen = new Set(prog.seen[t.id] || []), seenC = new Set(prog.seenC[t.id] || []);
+  if (mode === "c") {
+    /* Défi : d'abord les mots découverts pas encore réussis en défi, puis les autres pas encore réussis, puis le reste */
+    const a = t.words.filter(w => seen.has(w.ko) && !seenC.has(w.ko)), b = t.words.filter(w => !seen.has(w.ko) && !seenC.has(w.ko));
+    return shuffle(a).concat(shuffle(b), shuffle(t.words.filter(w => seenC.has(w.ko)))).slice(0, 8);
+  }
+  return shuffle(t.words.filter(w => !seen.has(w.ko))).concat(shuffle(t.words.filter(w => seen.has(w.ko)))).slice(0, 8);
 }
-function markSeen(t, ko) {
-  const arr = prog.seen[t.id] || (prog.seen[t.id] = []);
-  if (!arr.includes(ko)) { arr.push(ko); save(); }
+/* Enregistre un mot trouvé ; renvoie vrai s'il est nouveau pour le compteur du mode en cours */
+function markSeen(ko, challenge) {
+  const t = WT[ko]; if (!t) return false;
+  const add = store => { const a = store[t.id] || (store[t.id] = []); if (a.includes(ko)) return false; a.push(ko); return true; };
+  const newD = add(prog.seen), newC = challenge ? add(prog.seenC) : false;
+  updateStars(t); save();
+  return challenge ? newC : newD;
+}
+const isNew = (ko, challenge) => { const t = WT[ko]; return !!t && !((challenge ? prog.seenC : prog.seen)[t.id] || []).includes(ko); };
+function startExam(li, e) {
+  const l = LEVELS[li];
+  begin({ id:`exam-${l.id}-${e}`, ko:T().examKo, level:l }, "c", examWords(l, e), { li, e });
 }
 function startGame(themeId, mode, words) {
   const t = THEMES.find(x => x.id === themeId);
+  begin(t, mode, words || pickWords(t, mode), null);
+}
+function begin(t, mode, words, exam) {
   const lvl = t.level;
-  words = words || pickWords(t, mode);
-  const res = generate(words, lvl.size, lvl.dirs);
+  const res = exam ? generate(words, 8, ALL8.slice(0, 2)) : generate(words, lvl.size, lvl.dirs);
   const pool = [...new Set(lvl.themes.flatMap(x => x.words.flatMap(w => [...w.ko])))];
   res.g.forEach(row => row.forEach((v, c) => { if (v === null) row[c] = pool[rnd(pool.length)]; }));
-  S = { t, mode, words, g:res.g, size:res.size, starts:res.starts, found:new Map(), lines:[], sel:null, pending:null };
+  S = { t, mode, words, exam, hintsLeft:EXAM_HINTS, newCount:0, starsBefore:{ ...starsOf(t.id) }, g:res.g, size:res.size, starts:res.starts, found:new Map(), lines:[], sel:null, pending:null };
   $("home").hidden = true; $("game").hidden = false; $("sheet").hidden = true;
-  $("g-ko").textContent = t.ko; $("g-fr").textContent = `${lvl.id}, ${t[LANG]}`;
+  $("g-ko").textContent = t.ko;
+  $("g-fr").textContent = exam ? T().testOf(lvl.id, exam.e + 1) : `${lvl.id}, ${t[LANG]}`;
+  $("modes").hidden = !!exam; $("regen").hidden = !!exam;
   window.scrollTo(0, 0);
   renderGame();
 }
@@ -497,6 +606,7 @@ function renderGame() {
   const { size, g } = S;
   document.querySelectorAll(".modes button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === S.mode));
   $("sound").textContent = prog.sound ? "🔊" : "🔇";
+  updateHint();
   const cells = $("cells");
   cells.style.gridTemplateColumns = `repeat(${size},1fr)`;
   cells.style.gridTemplateRows = `repeat(${size},1fr)`;
@@ -527,7 +637,8 @@ function renderWords(justFound) {
     b.className = "word" + (f ? " found" : "") + (i === justFound ? " pop" : "");
     if (f) b.style.setProperty("--c", f);
     const showKo = S.mode === "d" || f;
-    b.innerHTML = `<span class="w-ko ko">${showKo ? w.ko : `<span class="hidden-ko">${"○".repeat([...w.ko].length)}</span>`}</span><span class="w-fr">${w[LANG]}</span>`;
+    const dot = !f && isNew(w.ko, S.mode === "c" && !S.exam) ? `<span class="dot" aria-label="${T().newWord}"></span>` : "";
+    b.innerHTML = `${dot}<span class="w-ko ko">${showKo ? w.ko : `<span class="hidden-ko">${"○".repeat([...w.ko].length)}</span>`}</span><span class="w-fr">${w[LANG]}</span>`;
     b.onclick = () => { if (S.mode === "d" || f) speak(w.ko); };
     box.appendChild(b);
   });
@@ -597,7 +708,7 @@ function check(path) {
     const color = COLORS[S.found.size % COLORS.length], ko = S.words[i].ko;
     S.found.set(i, color);
     S.lines.push({ a:path[0], b:path[path.length - 1], color });
-    markSeen(S.t, ko);
+    if (markSeen(ko, S.mode === "c" && !S.exam)) S.newCount++;
     sfx("ok"); setTimeout(() => speak(ko), 280);
     $("preview").textContent = "";
     drawSvg(); drawFound(true); renderWords(i);
@@ -607,7 +718,7 @@ function check(path) {
       el.classList.remove("pop", "hint"); void el.offsetWidth;
       el.style.animationDelay = (k * 45) + "ms"; el.classList.add("pop");
     });
-    if (S.found.size === S.words.length) setTimeout(finish, 900);
+    if (S.found.size === S.words.length) { const game = S; setTimeout(() => { if (S === game) finish(); }, 900); }
   } else {
     sfx("bad");
     const pv = $("preview");
@@ -617,8 +728,13 @@ function check(path) {
   }
 }
 
+function updateHint() {
+  $("hint").textContent = S && S.exam ? T().hintN(S.hintsLeft) : T().hint;
+  $("hint").disabled = !!(S && S.exam && S.hintsLeft <= 0);
+}
 /* Indice : fait clignoter la première syllabe d'un mot pas encore trouvé */
 $("hint").onclick = () => {
+  if (S.exam) { if (S.hintsLeft <= 0) return; S.hintsLeft--; updateHint(); }
   const left = S.words.map((_, i) => i).filter(i => !S.found.has(i));
   if (!left.length) return;
   const i = left[rnd(left.length)];
@@ -627,36 +743,61 @@ $("hint").onclick = () => {
   el.classList.remove("hint", "pop"); el.style.animationDelay = ""; void el.offsetWidth; el.classList.add("hint");
 };
 $("regen").onclick = () => startGame(S.t.id, S.mode);
-$("back").onclick = () => { S = null; $("game").hidden = true; $("home").hidden = false; $("sheet").hidden = true; renderHome(); window.scrollTo(0, 0); };
+$("back").onclick = () => { S = null; updateHint(); $("game").hidden = true; $("home").hidden = false; $("sheet").hidden = true; renderHome(); window.scrollTo(0, 0); };
 $("sound").onclick = () => setSound(!prog.sound);
 document.querySelectorAll(".modes button").forEach(b => b.onclick = () => { if (b.dataset.mode !== S.mode) startGame(S.t.id, b.dataset.mode, S.words); });
 window.addEventListener("resize", () => { if (S && !$("game").hidden) { const px = $("board").clientWidth / S.size; $("cells").style.fontSize = Math.max(14, px * .5) + "px"; } });
 
 /* Fin de thème */
+function finishExam() {
+  const L = T(), { li, e } = S.exam, l = LEVELS[li], nextL = LEVELS[li + 1];
+  const wasOpen = nextL ? isUnlocked(li + 1) : true;
+  const res = prog.exams[l.id] || (prog.exams[l.id] = [false, false, false, false]);
+  res[e] = true; save();
+  const n = passedTests(l), words = S.words;
+  $("s-stars").hidden = true;
+  $("s-sub").textContent = n < 4 ? L.testDone(e + 1, 4 - n, nextL && nextL.id)
+    : L.examDone(l.id) + " " + (nextL ? (!wasOpen ? L.unlocked(nextL.id) : "") : L.levelDone);
+  if (n === 4) setTimeout(() => sfx("star"), 250);
+  $("recap").innerHTML = words.map(w => `<li><span class="ko">${w.ko}</span><span>${w[LANG]}</span></li>`).join("");
+  $("recap").querySelectorAll("li").forEach((li2, i) => li2.onclick = () => speak(words[i].ko));
+  const acts = $("s-actions"); acts.innerHTML = "";
+  const add = (label, primary, fn) => { const b = document.createElement("button"); b.className = "btn" + (primary ? " primary" : ""); b.textContent = label; b.onclick = fn; acts.appendChild(b); };
+  const nextTest = [0, 1, 2, 3].find(k => !res[k]);
+  if (nextTest !== undefined) add(L.nextTest, true, () => startExam(li, nextTest));
+  else if (nextL) add(L.next(nextL.themes[0][LANG]), true, () => startGame(nextL.themes[0].id, "d"));
+  add(L.toThemes, nextTest === undefined && !nextL, () => $("back").onclick());
+  $("sheet").hidden = false;
+}
 function finish() {
+  if (S.exam) return finishExam();
+  $("s-stars").hidden = false;
   const t = S.t, L = T(), words = S.words;
   const wasOpen = LEVELS.map((_, li) => isUnlocked(li));
-  const before = { ...starsOf(t.id) };
-  prog.themes[t.id] = { ...before, [S.mode]: true }; save();
-  const after = prog.themes[t.id];
+  const before = S.starsBefore, after = { ...starsOf(t.id) }, m = S.mode;
   ["d", "c"].forEach((m, k) => {
     const sp = $("s-stars").children[k];
     sp.className = after[m] ? (before[m] ? "on" : "new") : "";
     sp.style.animationDelay = (250 + k * 350) + "ms";
   });
   $("s-stars").setAttribute("aria-label", L.starsLabel((after.d ? 1 : 0) + (after.c ? 1 : 0)));
-  if (!before[S.mode]) setTimeout(() => sfx("star"), S.mode === "d" ? 250 : 600);
-  const newly = LEVELS.find((l, li) => !wasOpen[li] && isUnlocked(li));
-  $("s-sub").textContent = (S.mode === "d" ? L.doneD : L.doneC) + (newly ? " " + L.unlocked(newly.id) : "");
+  const gained = ["d", "c"].filter(k => after[k] && !before[k]);
+  if (gained.length) setTimeout(() => sfx("star"), gained[0] === "d" ? 250 : 600);
+  const left = t.words.length - countIn(m === "c" ? prog.seenC : prog.seen, t);
+  const starNow = after[m];
+  const msg = starNow ? (before[m] ? (m === "d" ? L.doneD : L.doneC) : (m === "d" ? L.doneD : L.doneC))
+    : (m === "d" ? L.progD(S.newCount, left) : L.progC(S.newCount, left));
+  $("s-sub").textContent = msg;
   const idx = THEMES.findIndex(x => x.id === t.id);
   const next = THEMES[idx + 1] && isUnlocked(LEVELS.indexOf(THEMES[idx + 1].level)) ? THEMES[idx + 1] : null;
   $("recap").innerHTML = words.map(w => `<li><span class="ko">${w.ko}</span><span>${w[LANG]}</span></li>`).join("");
   $("recap").querySelectorAll("li").forEach((li, i) => li.onclick = () => speak(words[i].ko));
   const acts = $("s-actions"); acts.innerHTML = "";
   const add = (label, primary, fn) => { const b = document.createElement("button"); b.className = "btn" + (primary ? " primary" : ""); b.textContent = label; b.onclick = fn; acts.appendChild(b); };
-  if (S.mode === "d") add(L.playChallenge, true, () => startGame(t.id, "c", words));
-  if (next) add(L.next(next[LANG]), S.mode === "c", () => startGame(next.id, "d"));
-  add(L.replay, false, () => startGame(t.id, S.mode));
+  if (!starNow) add(m === "d" ? L.keepD : L.keepC, true, () => startGame(t.id, m));
+  if (m === "d") add(L.playChallenge, starNow, () => startGame(t.id, "c"));
+  if (next) add(L.next(next[LANG]), starNow && m === "c", () => startGame(next.id, "d"));
+  if (starNow) add(L.replay, false, () => startGame(t.id, m));
   add(L.toThemes, false, () => $("back").onclick());
   $("sheet").hidden = false;
 }
