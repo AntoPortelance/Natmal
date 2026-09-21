@@ -120,6 +120,20 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .install{margin:0 0 22px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;display:flex;gap:10px;align-items:flex-start}
 .install p{margin:0;flex:1}
 .install button{background:none;border:0;color:var(--muted);font-size:18px;line-height:1;padding:2px 4px}
+.level.locked .badge,.level.locked h2,.level.locked .theme{opacity:.45}
+.theme:disabled{cursor:not-allowed}
+.lock{margin:4px 0 10px;font-size:14px;font-weight:500}
+.board svg line.draw{animation:draw .35s ease-out}
+@keyframes draw{from{stroke-dashoffset:1}}
+.cell.pop{animation:bounce .38s ease-out both}
+@keyframes bounce{40%{transform:scale(1.35)}100%{transform:none}}
+.word.pop{animation:wpop .4s ease-out}
+@keyframes wpop{40%{transform:scale(1.07)}100%{transform:none}}
+.s-stars{font-size:34px;letter-spacing:6px;color:var(--line);margin:8px 0 2px;line-height:1}
+.s-stars span{display:inline-block}
+.s-stars .on{color:var(--yellow)}
+.s-stars .new{animation:star .55s ease-out both;color:var(--yellow)}
+@keyframes star{0%{color:var(--line);transform:scale(.6)}60%{transform:scale(1.35)}100%{color:var(--yellow);transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
@@ -151,7 +165,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
     </div>
     <div class="preview ko" id="preview" aria-live="polite"></div>
     <div class="board" id="board">
-      <svg id="svg" aria-hidden="true"></svg>
+      <svg id="svg" aria-hidden="true"><g id="found-g"></g><g id="sel-g"></g></svg>
       <div class="cells ko" id="cells"></div>
     </div>
     <div class="statusbar">
@@ -188,6 +202,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 <div class="sheet" id="sheet" hidden>
   <div class="inner">
     <h3 class="ko">잘했어요!</h3>
+    <div class="s-stars" id="s-stars"><span>★</span><span>★</span></div>
     <p id="s-sub"></p>
     <ul class="recap" id="recap"></ul>
     <div class="actions" id="s-actions"></div>
@@ -204,46 +219,46 @@ const LEVELS = [
     name:{ fr:"Premiers mots", en:"First words" },
     note:{ fr:"Mots de tous les jours. Ils se lisent de gauche à droite ou de haut en bas.", en:"Everyday words. They read left to right or top to bottom." },
     themes:[
-      { id:"a1-famille", ko:"가족", fr:"Famille", en:"Family", words:W("엄마=maman=mom;아빠=papa=dad;언니=grande sœur (dit par une fille)=older sister (said by a woman);누나=grande sœur (dit par un garçon)=older sister (said by a man);동생=petit frère, petite sœur=younger sibling;가족=famille=family;할머니=grand-mère=grandmother;할아버지=grand-père=grandfather") },
-      { id:"a1-nourriture", ko:"음식", fr:"Nourriture", en:"Food", words:W("김치=kimchi=kimchi;우유=lait=milk;사과=pomme=apple;커피=café=coffee;라면=ramyeon (nouilles)=ramyeon (instant noodles);과일=fruit=fruit;고기=viande=meat;계란=œuf=egg") },
-      { id:"a1-corps", ko:"몸", fr:"Le corps", en:"The body", words:W("머리=tête, cheveux=head, hair;얼굴=visage=face;다리=jambe=leg;허리=taille, bas du dos=waist, lower back;어깨=épaule=shoulder;입술=lèvres=lips;손가락=doigt=finger;발가락=orteil=toe") },
-      { id:"a1-nombres", ko:"숫자", fr:"Nombres natifs", en:"Native numbers", words:W("하나=un=one;다섯=cinq=five;여섯=six=six;일곱=sept=seven;여덟=huit=eight;아홉=neuf=nine;스물=vingt=twenty;서른=trente=thirty") }
+      { id:"a1-famille", ko:"가족", fr:"Famille", en:"Family", words:W("엄마=maman=mom;아빠=papa=dad;언니=grande sœur (dit par une fille)=older sister (said by a woman);누나=grande sœur (dit par un garçon)=older sister (said by a man);동생=petit frère, petite sœur=younger sibling;가족=famille=family;할머니=grand-mère=grandmother;할아버지=grand-père=grandfather;오빠=grand frère (dit par une fille)=older brother (said by a woman);부모님=parents=parents;남편=mari=husband;아내=épouse=wife;아들=fils=son;아이=enfant=child;삼촌=oncle=uncle;이모=tante (côté maternel)=aunt (mother's sister)") },
+      { id:"a1-nourriture", ko:"음식", fr:"Nourriture", en:"Food", words:W("김치=kimchi=kimchi;우유=lait=milk;사과=pomme=apple;커피=café=coffee;라면=ramyeon (nouilles)=ramyeon (instant noodles);과일=fruit=fruit;고기=viande=meat;계란=œuf=egg;생선=poisson (à manger)=fish (food);채소=légumes=vegetables;김밥=gimbap (rouleau de riz)=gimbap (rice roll);떡볶이=tteokbokki (gâteaux de riz épicés)=tteokbokki (spicy rice cakes);비빔밥=bibimbap=bibimbap;주스=jus=juice;딸기=fraise=strawberry;수박=pastèque=watermelon") },
+      { id:"a1-corps", ko:"몸", fr:"Le corps", en:"The body", words:W("머리=tête, cheveux=head, hair;얼굴=visage=face;다리=jambe=leg;허리=taille, bas du dos=waist, lower back;어깨=épaule=shoulder;입술=lèvres=lips;손가락=doigt=finger;발가락=orteil=toe;이마=front=forehead;눈썹=sourcils=eyebrows;가슴=poitrine=chest;배꼽=nombril=belly button;무릎=genou=knee;팔꿈치=coude=elbow;발목=cheville=ankle;손목=poignet=wrist") },
+      { id:"a1-nombres", ko:"숫자", fr:"Nombres natifs", en:"Native numbers", words:W("하나=un=one;다섯=cinq=five;여섯=six=six;일곱=sept=seven;여덟=huit=eight;아홉=neuf=nine;스물=vingt=twenty;서른=trente=thirty;마흔=quarante=forty;예순=soixante=sixty;일흔=soixante-dix=seventy;여든=quatre-vingts=eighty;아흔=quatre-vingt-dix=ninety;첫째=premier=first;둘째=deuxième=second;셋째=troisième=third") }
     ]},
   { id:"A2", size:7, dirs:ALL8.slice(0,3),
     name:{ fr:"Se débrouiller", en:"Getting by" },
     note:{ fr:"La ville, les transports, les premiers verbes. Les diagonales entrent en jeu.", en:"Town, transportation, first verbs. Diagonals come into play." },
     themes:[
-      { id:"a2-lieux", ko:"장소", fr:"Lieux en ville", en:"Places in town", words:W("학교=école=school;병원=hôpital=hospital;은행=banque=bank;시장=marché=market;공원=parc=park;식당=restaurant=restaurant;약국=pharmacie=pharmacy;도서관=bibliothèque=library") },
-      { id:"a2-transports", ko:"교통", fr:"Transports", en:"Transportation", words:W("버스=bus=bus;지하철=métro=subway;기차=train=train;택시=taxi=taxi;비행기=avion=airplane;자전거=vélo=bicycle;공항=aéroport=airport;정류장=arrêt (de bus)=(bus) stop") },
-      { id:"a2-meteo", ko:"날씨", fr:"Saisons et météo", en:"Seasons and weather", words:W("날씨=météo=weather;여름=été=summer;가을=automne=fall, autumn;겨울=hiver=winter;바람=vent=wind;구름=nuage=cloud;하늘=ciel=sky;우산=parapluie=umbrella") },
-      { id:"a2-verbes", ko:"동사", fr:"Verbes courants", en:"Common verbs", words:W("먹다=manger=to eat;가다=aller=to go;오다=venir=to come;자다=dormir=to sleep;보다=voir, regarder=to see, to watch;읽다=lire=to read;배우다=apprendre=to learn;만나다=rencontrer=to meet") }
+      { id:"a2-lieux", ko:"장소", fr:"Lieux en ville", en:"Places in town", words:W("학교=école=school;병원=hôpital=hospital;은행=banque=bank;시장=marché=market;공원=parc=park;식당=restaurant=restaurant;약국=pharmacie=pharmacy;도서관=bibliothèque=library;우체국=bureau de poste=post office;경찰서=commissariat=police station;백화점=grand magasin=department store;편의점=supérette=convenience store;미용실=salon de coiffure=hair salon;영화관=cinéma=movie theater;박물관=musée=museum;빵집=boulangerie=bakery") },
+      { id:"a2-transports", ko:"교통", fr:"Transports", en:"Transportation", words:W("버스=bus=bus;지하철=métro=subway;기차=train=train;택시=taxi=taxi;비행기=avion=airplane;자전거=vélo=bicycle;공항=aéroport=airport;정류장=arrêt (de bus)=(bus) stop;오토바이=moto=motorcycle;트럭=camion=truck;자동차=voiture=car;신호등=feu tricolore=traffic light;횡단보도=passage piéton=crosswalk;고속도로=autoroute=highway;운전=conduite=driving;승객=passager=passenger") },
+      { id:"a2-meteo", ko:"날씨", fr:"Saisons et météo", en:"Seasons and weather", words:W("날씨=météo=weather;여름=été=summer;가을=automne=fall, autumn;겨울=hiver=winter;바람=vent=wind;구름=nuage=cloud;하늘=ciel=sky;우산=parapluie=umbrella;계절=saison=season;햇빛=lumière du soleil=sunlight;태풍=typhon=typhoon;장마=saison des pluies=rainy season;번개=éclair=lightning;천둥=tonnerre=thunder;안개=brouillard=fog;무지개=arc-en-ciel=rainbow") },
+      { id:"a2-verbes", ko:"동사", fr:"Verbes courants", en:"Common verbs", words:W("먹다=manger=to eat;가다=aller=to go;오다=venir=to come;자다=dormir=to sleep;보다=voir, regarder=to see, to watch;읽다=lire=to read;배우다=apprendre=to learn;만나다=rencontrer=to meet;마시다=boire=to drink;듣다=écouter=to listen;쓰다=écrire=to write;사다=acheter=to buy;알다=savoir, connaître=to know;앉다=s'asseoir=to sit;일어나다=se lever=to get up;기다리다=attendre=to wait") }
     ]},
   { id:"B1", size:8, dirs:ALL8.slice(0,4),
     name:{ fr:"La vie quotidienne", en:"Everyday life" },
     note:{ fr:"Émotions, travail, santé. Les mots peuvent aussi monter en diagonale.", en:"Emotions, work, health. Words can also go diagonally upward." },
     themes:[
-      { id:"b1-emotions", ko:"감정", fr:"Émotions", en:"Emotions", words:W("기쁘다=être content=to be glad;슬프다=être triste=to be sad;화나다=se mettre en colère=to get angry;무섭다=faire peur, avoir peur=to be scary, to be scared;외롭다=se sentir seul=to feel lonely;행복=bonheur=happiness;걱정=inquiétude=worry;감동=être touché, ému=being moved, touched") },
-      { id:"b1-travail", ko:"직장", fr:"Au travail", en:"At work", words:W("회사=entreprise=company;회의=réunion=meeting;직원=employé=employee;월급=salaire mensuel=monthly salary;출근=aller au travail=going to work;퇴근=quitter le travail=leaving work;면접=entretien d'embauche=job interview;사장님=patron, patronne=boss") },
-      { id:"b1-sante", ko:"건강", fr:"Santé", en:"Health", words:W("감기=rhume=cold;두통=mal de tête=headache;기침=toux=cough;주사=piqûre=shot, injection;의사=médecin=doctor;간호사=infirmier, infirmière=nurse;처방전=ordonnance=prescription;건강=santé=health") },
-      { id:"b1-voyage", ko:"여행", fr:"Voyage", en:"Travel", words:W("여권=passeport=passport;호텔=hôtel=hotel;예약=réservation=reservation;관광=tourisme=sightseeing;여행=voyage=trip, travel;지도=carte, plan=map;환전=change de devises=currency exchange;기념품=souvenir (objet)=souvenir") }
+      { id:"b1-emotions", ko:"감정", fr:"Émotions", en:"Emotions", words:W("기쁘다=être content=to be glad;슬프다=être triste=to be sad;화나다=se mettre en colère=to get angry;무섭다=faire peur, avoir peur=to be scary, to be scared;외롭다=se sentir seul=to feel lonely;행복=bonheur=happiness;걱정=inquiétude=worry;감동=être touché, ému=being moved, touched;부럽다=être envieux=to be envious;창피하다=avoir honte=to be embarrassed;긴장=nervosité, tension=nervousness;실망=déception=disappointment;후회=regret=regret;질투=jalousie=jealousy;그립다=manquer (qqn nous manque)=to miss (someone);설레다=avoir le cœur qui bat=to feel a flutter of excitement") },
+      { id:"b1-travail", ko:"직장", fr:"Au travail", en:"At work", words:W("회사=entreprise=company;회의=réunion=meeting;직원=employé=employee;월급=salaire mensuel=monthly salary;출근=aller au travail=going to work;퇴근=quitter le travail=leaving work;면접=entretien d'embauche=job interview;사장님=patron, patronne=boss;동료=collègue=coworker;야근=heures sup le soir=working late;휴가=congés=time off, vacation;승진=promotion=promotion;사무실=bureau (pièce)=office;명함=carte de visite=business card;이력서=CV=résumé;업무=tâches professionnelles=work duties") },
+      { id:"b1-sante", ko:"건강", fr:"Santé", en:"Health", words:W("감기=rhume=cold;두통=mal de tête=headache;기침=toux=cough;주사=piqûre=shot, injection;의사=médecin=doctor;간호사=infirmier, infirmière=nurse;처방전=ordonnance=prescription;건강=santé=health;치과=dentiste (cabinet)=dentist's office;증상=symptôme=symptom;알레르기=allergie=allergy;진통제=antidouleur=painkiller;수술=opération=surgery;입원=hospitalisation=hospitalization;환자=patient=patient;콧물=nez qui coule=runny nose") },
+      { id:"b1-voyage", ko:"여행", fr:"Voyage", en:"Travel", words:W("여권=passeport=passport;호텔=hôtel=hotel;예약=réservation=reservation;관광=tourisme=sightseeing;여행=voyage=trip, travel;지도=carte, plan=map;환전=change de devises=currency exchange;기념품=souvenir (objet)=souvenir;비자=visa=visa;캐리어=valise=suitcase;숙소=hébergement=accommodation;항공권=billet d'avion=plane ticket;일정=programme, itinéraire=itinerary;출발=départ=departure;도착=arrivée=arrival;경치=paysage=scenery") }
     ]},
   { id:"B2", size:8, dirs:ALL8.slice(0,6),
     name:{ fr:"Comprendre le monde", en:"Understanding the world" },
     note:{ fr:"Société, médias, adverbes. Certains mots s'écrivent à l'envers.", en:"Society, media, adverbs. Some words are written backward." },
     themes:[
-      { id:"b2-societe", ko:"사회", fr:"Société", en:"Society", words:W("사회=société=society;문화=culture=culture;경제=économie=economy;정치=politique=politics;교육=éducation=education;환경=environnement=environment;인구=population=population;세대=génération=generation") },
-      { id:"b2-medias", ko:"미디어", fr:"Médias et web", en:"Media and the web", words:W("인터넷=internet=internet;기사=article de presse=news article;뉴스=actualités=news;방송=émission, diffusion=broadcast, TV show;광고=publicité=advertisement;정보=information=information;댓글=commentaire en ligne=online comment;검색=recherche en ligne=online search") },
-      { id:"b2-nature", ko:"자연", fr:"Nature et climat", en:"Nature and climate", words:W("기후=climat=climate;오염=pollution=pollution;재활용=recyclage=recycling;에너지=énergie=energy;자연=nature=nature;바다=mer=sea;동물=animal=animal;식물=plante=plant") },
-      { id:"b2-adverbes", ko:"부사", fr:"Adverbes utiles", en:"Useful adverbs", words:W("드디어=enfin=finally;갑자기=soudain=suddenly;아마=peut-être=maybe, probably;절대=jamais (avec négation)=never (with a negative);벌써=déjà=already;계속=sans arrêt=continuously;오히려=au contraire=rather, on the contrary;특히=surtout=especially") }
+      { id:"b2-societe", ko:"사회", fr:"Société", en:"Society", words:W("사회=société=society;문화=culture=culture;경제=économie=economy;정치=politique=politics;교육=éducation=education;환경=environnement=environment;인구=population=population;세대=génération=generation;복지=protection sociale=welfare;선거=élection=election;제도=système, institution=system, institution;평등=égalité=equality;차별=discrimination=discrimination;고령화=vieillissement de la population=population aging;저출산=faible natalité=low birth rate;여론=opinion publique=public opinion") },
+      { id:"b2-medias", ko:"미디어", fr:"Médias et web", en:"Media and the web", words:W("인터넷=internet=internet;기사=article de presse=news article;뉴스=actualités=news;방송=émission, diffusion=broadcast, TV show;광고=publicité=advertisement;정보=information=information;댓글=commentaire en ligne=online comment;검색=recherche en ligne=online search;기자=journaliste=journalist;신문=journal (papier)=newspaper;구독=abonnement=subscription;조회수=nombre de vues=view count;사생활=vie privée=privacy;유튜버=youtubeur=YouTuber;화면=écran=screen;인기=popularité=popularity") },
+      { id:"b2-nature", ko:"자연", fr:"Nature et climat", en:"Nature and climate", words:W("기후=climat=climate;오염=pollution=pollution;재활용=recyclage=recycling;에너지=énergie=energy;자연=nature=nature;바다=mer=sea;동물=animal=animal;식물=plante=plant;지구=Terre=Earth;쓰레기=déchets=trash;산불=feu de forêt=wildfire;가뭄=sécheresse=drought;홍수=inondation=flood;온난화=réchauffement=global warming;탄소=carbone=carbon;멸종=extinction=extinction") },
+      { id:"b2-adverbes", ko:"부사", fr:"Adverbes utiles", en:"Useful adverbs", words:W("드디어=enfin=finally;갑자기=soudain=suddenly;아마=peut-être=maybe, probably;절대=jamais (avec négation)=never (with a negative);벌써=déjà=already;계속=sans arrêt=continuously;오히려=au contraire=rather, on the contrary;특히=surtout=especially;아직=encore, pas encore=still, (not) yet;항상=toujours=always;자주=souvent=often;가끔=parfois=sometimes;전혀=pas du tout=not at all;거의=presque=almost;일부러=exprès=on purpose;게다가=de plus=moreover") }
     ]},
   { id:"C1", size:9, dirs:ALL8,
     name:{ fr:"Penser en coréen", en:"Thinking in Korean" },
     note:{ fr:"Idées abstraites et expressions figées. Les huit directions sont possibles.", en:"Abstract ideas and set phrases. All eight directions are possible." },
     themes:[
-      { id:"c1-abstrait", ko:"추상", fr:"Concepts abstraits", en:"Abstract concepts", words:W("가치관=système de valeurs=set of values;정체성=identité=identity;책임감=sens des responsabilités=sense of responsibility;자존심=amour-propre=pride, self-respect;편견=préjugé=prejudice;갈등=conflit=conflict;모순=contradiction=contradiction;관점=point de vue=point of view") },
-      { id:"c1-sajaseongeo", ko:"사자성어", fr:"Expressions en 4 caractères", en:"Four-character idioms", words:W("일석이조=faire d'une pierre deux coups=to kill two birds with one stone;대기만성=les grands talents se révèlent tard=great talents bloom late;이심전심=se comprendre sans un mot=to understand each other without words;우왕좌왕=s'agiter dans tous les sens=to run around in confusion;자업자득=récolter ce qu'on a semé=you reap what you sow;작심삼일=résolution qui ne tient pas trois jours=resolutions that don't last three days;동문서답=répondre à côté=an answer beside the point;십중팔구=neuf fois sur dix=nine times out of ten") },
-      { id:"c1-economie", ko:"경제와 법", fr:"Économie et droit", en:"Economy and law", words:W("투자=investissement=investment;물가=coût de la vie=cost of living;불황=récession=recession;소비자=consommateur=consumer;계약=contrat=contract;법률=loi, législation=law, legislation;권리=droit (que l'on a)=right (entitlement);의무=devoir, obligation=duty, obligation") },
-      { id:"c1-argumentation", ko:"논리", fr:"Argumenter", en:"Argumentation", words:W("주장=thèse, affirmation=claim, argument;근거=fondement, preuve=grounds, evidence;논리=logique=logic;반박=réfutation=rebuttal;결론=conclusion=conclusion;가설=hypothèse=hypothesis;비판=critique=criticism;분석=analyse=analysis") }
+      { id:"c1-abstrait", ko:"추상", fr:"Concepts abstraits", en:"Abstract concepts", words:W("가치관=système de valeurs=set of values;정체성=identité=identity;책임감=sens des responsabilités=sense of responsibility;자존심=amour-propre=pride, self-respect;편견=préjugé=prejudice;갈등=conflit=conflict;모순=contradiction=contradiction;관점=point de vue=point of view;양심=conscience morale=conscience;본능=instinct=instinct;상상력=imagination=imagination;열등감=complexe d'infériorité=inferiority complex;가능성=possibilité=possibility;자유=liberté=freedom;정의=justice=justice;욕망=désir=desire") },
+      { id:"c1-sajaseongeo", ko:"사자성어", fr:"Expressions en 4 caractères", en:"Four-character idioms", words:W("일석이조=faire d'une pierre deux coups=to kill two birds with one stone;대기만성=les grands talents se révèlent tard=great talents bloom late;이심전심=se comprendre sans un mot=to understand each other without words;우왕좌왕=s'agiter dans tous les sens=to run around in confusion;자업자득=récolter ce qu'on a semé=you reap what you sow;작심삼일=résolution qui ne tient pas trois jours=resolutions that don't last three days;동문서답=répondre à côté=an answer beside the point;십중팔구=neuf fois sur dix=nine times out of ten;금상첨화=la cerise sur le gâteau=the icing on the cake;우여곡절=péripéties=ups and downs;역지사지=se mettre à la place de l'autre=to put yourself in someone's shoes;설상가상=pour couronner le tout (malheur)=to make matters worse;고진감래=après la pluie, le beau temps=no pain, no gain;유비무환=mieux vaut prévenir que guérir=better safe than sorry;죽마고우=ami d'enfance=childhood friend;일취월장=progresser à vue d'œil=to improve by leaps and bounds") },
+      { id:"c1-economie", ko:"경제와 법", fr:"Économie et droit", en:"Economy and law", words:W("투자=investissement=investment;물가=coût de la vie=cost of living;불황=récession=recession;소비자=consommateur=consumer;계약=contrat=contract;법률=loi, législation=law, legislation;권리=droit (que l'on a)=right (entitlement);의무=devoir, obligation=duty, obligation;세금=impôt=tax;대출=prêt bancaire=loan;이자=intérêts=interest;주식=action (en bourse)=stock, share;환율=taux de change=exchange rate;소송=procès (action en justice)=lawsuit;판결=jugement=ruling, verdict;변호사=avocat=lawyer") },
+      { id:"c1-argumentation", ko:"논리", fr:"Argumenter", en:"Argumentation", words:W("주장=thèse, affirmation=claim, argument;근거=fondement, preuve=grounds, evidence;논리=logique=logic;반박=réfutation=rebuttal;결론=conclusion=conclusion;가설=hypothèse=hypothesis;비판=critique=criticism;분석=analyse=analysis;전제=prémisse=premise;반론=objection=counterargument;설득=persuasion=persuasion;타당성=validité=validity;인과관계=lien de cause à effet=cause and effect;요약=résumé=summary;입장=position, point de vue=stance;예시=exemple=example") }
     ]}
 ];
 const THEMES = LEVELS.flatMap(l => l.themes.map(t => ({ ...t, level:l })));
@@ -265,7 +280,9 @@ const STR = {
     doneD:"Thème découvert. Rejoue-le en défi : tu ne verras plus que le français.",
     doneC:"Défi réussi : tu as retrouvé chaque mot à partir du français.",
     playChallenge:"Jouer en défi", next:x => `Thème suivant : ${x}`,
-    replay:"Rejouer avec une nouvelle grille", toThemes:"Retour aux thèmes"
+    replay:"Rejouer avec une nouvelle grille", toThemes:"Retour aux thèmes",
+    locked:(id, n) => `🔒 Termine le niveau ${id} pour débloquer (${n} sur 4)`,
+    unlocked:id => `🔓 Niveau ${id} débloqué !`
   },
   en: {
     title:"낱말 찾기 – Korean word search",
@@ -280,7 +297,9 @@ const STR = {
     doneD:"Theme discovered. Replay it in Challenge: you'll only see the English.",
     doneC:"Challenge complete: you found every word from its English meaning.",
     playChallenge:"Play in Challenge", next:x => `Next theme: ${x}`,
-    replay:"Replay with a new grid", toThemes:"Back to themes"
+    replay:"Replay with a new grid", toThemes:"Back to themes",
+    locked:(id, n) => `🔒 Finish ${id} to unlock (${n} of 4)`,
+    unlocked:id => `🔓 ${id} unlocked!`
   }
 };
 
@@ -290,8 +309,16 @@ let prog = {};
 try { prog = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { prog = {}; }
 if (typeof prog.sound !== "boolean") prog.sound = true;
 prog.themes = prog.themes || {};
+prog.seen = prog.seen || {};
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(prog)); } catch (e) {} };
 const starsOf = id => prog.themes[id] || {};
+const doneD = id => !!starsOf(id).d;
+/* Un niveau s'ouvre quand tous les thèmes du précédent ont l'étoile Découverte ; un niveau déjà entamé ne se referme jamais */
+function isUnlocked(li) {
+  if (li === 0) return true;
+  if (LEVELS[li].themes.some(t => { const s = starsOf(t.id); return s.d || s.c; })) return true;
+  return LEVELS[li - 1].themes.every(t => doneD(t.id));
+}
 
 /* Langue : celle choisie, sinon celle du téléphone */
 let LANG = prog.lang === "fr" || prog.lang === "en" ? prog.lang
@@ -353,14 +380,48 @@ function speak(text) {
 }
 if ("speechSynthesis" in window) { try { speechSynthesis.getVoices(); } catch (e) {} }
 
+/* Effets sonores */
+let AC = null;
+function audio() {
+  if (!AC) {
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    try { AC = new C(); } catch (e) { return null; }
+  }
+  if (AC.state === "suspended") AC.resume().catch(() => {});
+  return AC;
+}
+function tone(freq, t0, dur, type, vol) {
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol, t0 + .015);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(AC.destination);
+  o.start(t0); o.stop(t0 + dur + .05);
+}
+function sfx(kind) {
+  if (!prog.sound || !audio()) return;
+  try {
+    const t = AC.currentTime + .01;
+    if (kind === "ok") { tone(880, t, .18, "sine", .18); tone(1320, t + .09, .22, "sine", .15); }
+    else if (kind === "bad") tone(190, t, .16, "triangle", .12);
+    else if (kind === "star") { tone(1046, t, .25, "sine", .14); tone(1568, t + .1, .35, "sine", .11); }
+  } catch (e) {}
+}
+["touchend", "click"].forEach(ev => document.addEventListener(ev, () => { if (prog.sound) audio(); }, { once:true, passive:true }));
+
 /* Accueil */
 function renderHome() {
   let got = 0;
   $("ladder").innerHTML = "";
-  LEVELS.forEach(l => {
+  LEVELS.forEach((l, li) => {
+    const open = isUnlocked(li), prev = LEVELS[li - 1];
     const el = document.createElement("div");
-    el.className = "level";
-    el.innerHTML = `<div class="badge">${l.id}</div><div><h2>${l.name[LANG]}</h2><p class="note">${l.note[LANG]}</p><div class="themes"></div></div>`;
+    el.className = "level" + (open ? "" : " locked");
+    const note = open ? `<p class="note">${l.note[LANG]}</p>`
+      : `<p class="lock">${T().locked(prev.id, prev.themes.filter(t => doneD(t.id)).length)}</p>`;
+    el.innerHTML = `<div class="badge">${l.id}</div><div><h2>${l.name[LANG]}</h2>${note}<div class="themes"></div></div>`;
     const box = el.querySelector(".themes");
     l.themes.forEach(t => {
       const s = starsOf(t.id), n = (s.d ? 1 : 0) + (s.c ? 1 : 0); got += n;
@@ -368,6 +429,7 @@ function renderHome() {
       b.className = "theme";
       b.innerHTML = `<span class="t-ko ko">${t.ko}</span><span class="t-fr">${t[LANG]}</span>
         <span class="stars" aria-label="${T().starsLabel(n)}"><span class="${s.d?"on":""}">★</span><span class="${s.c?"on":""}">★</span></span>`;
+      b.disabled = !open;
       b.onclick = () => startGame(t.id, s.d && !s.c ? "c" : "d");
       box.appendChild(b);
     });
@@ -406,13 +468,25 @@ function generate(words, size, dirs) {
 
 /* État de partie */
 let S = null;
-function startGame(themeId, mode) {
+const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
+/* 8 mots par partie : Découverte privilégie les mots jamais trouvés, Défi ceux déjà découverts */
+function pickWords(t, mode) {
+  const seen = new Set(prog.seen[t.id] || []);
+  const fresh = shuffle(t.words.filter(w => !seen.has(w.ko))), old = shuffle(t.words.filter(w => seen.has(w.ko)));
+  return (mode === "c" ? old.concat(fresh) : fresh.concat(old)).slice(0, 8);
+}
+function markSeen(t, ko) {
+  const arr = prog.seen[t.id] || (prog.seen[t.id] = []);
+  if (!arr.includes(ko)) { arr.push(ko); save(); }
+}
+function startGame(themeId, mode, words) {
   const t = THEMES.find(x => x.id === themeId);
   const lvl = t.level;
-  const res = generate(t.words, lvl.size, lvl.dirs);
+  words = words || pickWords(t, mode);
+  const res = generate(words, lvl.size, lvl.dirs);
   const pool = [...new Set(lvl.themes.flatMap(x => x.words.flatMap(w => [...w.ko])))];
   res.g.forEach(row => row.forEach((v, c) => { if (v === null) row[c] = pool[rnd(pool.length)]; }));
-  S = { t, mode, g:res.g, size:res.size, starts:res.starts, found:new Map(), lines:[], sel:null, pending:null };
+  S = { t, mode, words, g:res.g, size:res.size, starts:res.starts, found:new Map(), lines:[], sel:null, pending:null };
   $("home").hidden = true; $("game").hidden = false; $("sheet").hidden = true;
   $("g-ko").textContent = t.ko; $("g-fr").textContent = `${lvl.id}, ${t[LANG]}`;
   window.scrollTo(0, 0);
@@ -429,35 +503,35 @@ function renderGame() {
   const px = $("board").clientWidth / size;
   cells.style.fontSize = Math.max(14, px * .5) + "px";
   cells.innerHTML = g.flat().map((ch, i) => `<div class="cell" data-i="${i}">${ch}</div>`).join("");
-  drawSvg();
+  drawSvg(); drawFound(false);
   renderWords();
 }
 
-function lineEl(a, b, color, op) {
-  return `<line x1="${a[1]+.5}" y1="${a[0]+.5}" x2="${b[1]+.5}" y2="${b[0]+.5}" stroke="${color}" stroke-width=".78" stroke-linecap="round" style="opacity:${op}"/>`;
+function lineEl(a, b, color, op, anim) {
+  return `<line ${anim ? 'class="draw" pathLength="1" stroke-dasharray="1"' : ""} x1="${a[1]+.5}" y1="${a[0]+.5}" x2="${b[1]+.5}" y2="${b[0]+.5}" stroke="${color}" stroke-width=".78" stroke-linecap="round" style="opacity:${op}"/>`;
 }
 function drawSvg() {
-  const svg = $("svg");
-  svg.setAttribute("viewBox", `0 0 ${S.size} ${S.size}`);
-  let h = S.lines.map(l => lineEl(l.a, l.b, l.color, "var(--op)")).join("");
+  $("svg").setAttribute("viewBox", `0 0 ${S.size} ${S.size}`);
   const p = S.sel ? S.sel : (S.pending ? [S.pending] : null);
-  if (p && p.length) h += lineEl(p[0], p[p.length - 1], "var(--ink)", ".16");
-  svg.innerHTML = h;
+  $("sel-g").innerHTML = p && p.length ? lineEl(p[0], p[p.length - 1], "var(--ink)", ".16") : "";
+}
+function drawFound(animLast) {
+  $("found-g").innerHTML = S.lines.map((l, k) => lineEl(l.a, l.b, l.color, "var(--op)", animLast && k === S.lines.length - 1)).join("");
 }
 
-function renderWords() {
+function renderWords(justFound) {
   const box = $("words"); box.innerHTML = "";
-  S.t.words.forEach((w, i) => {
+  S.words.forEach((w, i) => {
     const f = S.found.get(i);
     const b = document.createElement("button");
-    b.className = "word" + (f ? " found" : "");
+    b.className = "word" + (f ? " found" : "") + (i === justFound ? " pop" : "");
     if (f) b.style.setProperty("--c", f);
     const showKo = S.mode === "d" || f;
     b.innerHTML = `<span class="w-ko ko">${showKo ? w.ko : `<span class="hidden-ko">${"○".repeat([...w.ko].length)}</span>`}</span><span class="w-fr">${w[LANG]}</span>`;
     b.onclick = () => { if (S.mode === "d" || f) speak(w.ko); };
     box.appendChild(b);
   });
-  $("count").textContent = T().count(S.found.size, S.t.words.length);
+  $("count").textContent = T().count(S.found.size, S.words.length);
 }
 
 /* Sélection au doigt */
@@ -518,16 +592,24 @@ function updatePreview() {
 }
 function check(path) {
   const txt = textOf(path), rev = [...txt].reverse().join("");
-  const i = S.t.words.findIndex((w, k) => !S.found.has(k) && (w.ko === txt || w.ko === rev));
+  const i = S.words.findIndex((w, k) => !S.found.has(k) && (w.ko === txt || w.ko === rev));
   if (i >= 0) {
-    const color = COLORS[S.found.size % COLORS.length];
+    const color = COLORS[S.found.size % COLORS.length], ko = S.words[i].ko;
     S.found.set(i, color);
     S.lines.push({ a:path[0], b:path[path.length - 1], color });
-    speak(S.t.words[i].ko);
+    markSeen(S.t, ko);
+    sfx("ok"); setTimeout(() => speak(ko), 280);
     $("preview").textContent = "";
-    drawSvg(); renderWords();
-    if (S.found.size === S.t.words.length) setTimeout(finish, 650);
+    drawSvg(); drawFound(true); renderWords(i);
+    const cells = $("cells").children;
+    path.forEach(([r, c], k) => {
+      const el = cells[r * S.size + c];
+      el.classList.remove("pop", "hint"); void el.offsetWidth;
+      el.style.animationDelay = (k * 45) + "ms"; el.classList.add("pop");
+    });
+    if (S.found.size === S.words.length) setTimeout(finish, 900);
   } else {
+    sfx("bad");
     const pv = $("preview");
     pv.classList.remove("bad"); void pv.offsetWidth; pv.classList.add("bad");
     drawSvg();
@@ -537,30 +619,42 @@ function check(path) {
 
 /* Indice : fait clignoter la première syllabe d'un mot pas encore trouvé */
 $("hint").onclick = () => {
-  const left = S.t.words.map((_, i) => i).filter(i => !S.found.has(i));
+  const left = S.words.map((_, i) => i).filter(i => !S.found.has(i));
   if (!left.length) return;
   const i = left[rnd(left.length)];
   const [r, c] = S.starts[i];
   const el = $("cells").children[r * S.size + c];
-  el.classList.remove("hint"); void el.offsetWidth; el.classList.add("hint");
+  el.classList.remove("hint", "pop"); el.style.animationDelay = ""; void el.offsetWidth; el.classList.add("hint");
 };
 $("regen").onclick = () => startGame(S.t.id, S.mode);
 $("back").onclick = () => { S = null; $("game").hidden = true; $("home").hidden = false; $("sheet").hidden = true; renderHome(); window.scrollTo(0, 0); };
 $("sound").onclick = () => setSound(!prog.sound);
-document.querySelectorAll(".modes button").forEach(b => b.onclick = () => { if (b.dataset.mode !== S.mode) startGame(S.t.id, b.dataset.mode); });
+document.querySelectorAll(".modes button").forEach(b => b.onclick = () => { if (b.dataset.mode !== S.mode) startGame(S.t.id, b.dataset.mode, S.words); });
 window.addEventListener("resize", () => { if (S && !$("game").hidden) { const px = $("board").clientWidth / S.size; $("cells").style.fontSize = Math.max(14, px * .5) + "px"; } });
 
 /* Fin de thème */
 function finish() {
-  const t = S.t, L = T();
-  prog.themes[t.id] = { ...starsOf(t.id), [S.mode]: true }; save();
-  const next = THEMES[THEMES.findIndex(x => x.id === t.id) + 1];
-  $("s-sub").textContent = S.mode === "d" ? L.doneD : L.doneC;
-  $("recap").innerHTML = t.words.map(w => `<li><span class="ko">${w.ko}</span><span>${w[LANG]}</span></li>`).join("");
-  $("recap").querySelectorAll("li").forEach((li, i) => li.onclick = () => speak(t.words[i].ko));
+  const t = S.t, L = T(), words = S.words;
+  const wasOpen = LEVELS.map((_, li) => isUnlocked(li));
+  const before = { ...starsOf(t.id) };
+  prog.themes[t.id] = { ...before, [S.mode]: true }; save();
+  const after = prog.themes[t.id];
+  ["d", "c"].forEach((m, k) => {
+    const sp = $("s-stars").children[k];
+    sp.className = after[m] ? (before[m] ? "on" : "new") : "";
+    sp.style.animationDelay = (250 + k * 350) + "ms";
+  });
+  $("s-stars").setAttribute("aria-label", L.starsLabel((after.d ? 1 : 0) + (after.c ? 1 : 0)));
+  if (!before[S.mode]) setTimeout(() => sfx("star"), S.mode === "d" ? 250 : 600);
+  const newly = LEVELS.find((l, li) => !wasOpen[li] && isUnlocked(li));
+  $("s-sub").textContent = (S.mode === "d" ? L.doneD : L.doneC) + (newly ? " " + L.unlocked(newly.id) : "");
+  const idx = THEMES.findIndex(x => x.id === t.id);
+  const next = THEMES[idx + 1] && isUnlocked(LEVELS.indexOf(THEMES[idx + 1].level)) ? THEMES[idx + 1] : null;
+  $("recap").innerHTML = words.map(w => `<li><span class="ko">${w.ko}</span><span>${w[LANG]}</span></li>`).join("");
+  $("recap").querySelectorAll("li").forEach((li, i) => li.onclick = () => speak(words[i].ko));
   const acts = $("s-actions"); acts.innerHTML = "";
   const add = (label, primary, fn) => { const b = document.createElement("button"); b.className = "btn" + (primary ? " primary" : ""); b.textContent = label; b.onclick = fn; acts.appendChild(b); };
-  if (S.mode === "d") add(L.playChallenge, true, () => startGame(t.id, "c"));
+  if (S.mode === "d") add(L.playChallenge, true, () => startGame(t.id, "c", words));
   if (next) add(L.next(next[LANG]), S.mode === "c", () => startGame(next.id, "d"));
   add(L.replay, false, () => startGame(t.id, S.mode));
   add(L.toThemes, false, () => $("back").onclick());
