@@ -151,6 +151,14 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .level .words-total{margin:-6px 0 10px;font-size:13px;color:var(--muted)}
 .word{position:relative}
 .word .dot{position:absolute;top:8px;right:8px;width:7px;height:7px;border-radius:50%;background:var(--red)}
+.sheet{transition:background .25s}
+.sheet .inner{animation:sheetup .28s ease-out}
+@keyframes sheetup{from{transform:translateY(100%)}}
+.sheet.closing{background:transparent}
+.sheet.closing .inner{animation:sheetdown .25s ease-in forwards}
+@keyframes sheetdown{to{transform:translateY(105%)}}
+#results{width:100%;margin:0 0 14px}
+#confirm .inner p{margin:6px 0 18px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
@@ -190,6 +198,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
       <button class="pill" id="hint"></button>
       <button class="pill" id="regen"></button>
     </div>
+    <button class="btn primary" id="results" hidden></button>
     <div class="words" id="words"></div>
     <p class="help" id="help"></p>
   </section>
@@ -213,6 +222,17 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
       </div>
     </div>
     <div class="actions"><button class="btn primary" id="set-close"></button></div>
+  </div>
+</div>
+
+<div class="sheet" id="confirm" hidden role="alertdialog" aria-modal="true" aria-labelledby="c-title" aria-describedby="c-text">
+  <div class="inner">
+    <h3 id="c-title"></h3>
+    <p id="c-text"></p>
+    <div class="actions">
+      <button class="btn primary" id="c-stay"></button>
+      <button class="btn" id="c-leave"></button>
+    </div>
   </div>
 </div>
 
@@ -308,6 +328,9 @@ const STR = {
     practiceDone:"Épreuve d'entraînement réussie, bravo !",
     examDone:id => `Examen ${id} réussi, bravo !`, levelDone:"Tu as validé le niveau le plus avancé du jeu.",
     nextTest:"Épreuve suivante",
+    leaveTitle:"Quitter la partie ?", leaveText:"Les mots déjà trouvés restent découverts, mais cette grille sera perdue.",
+    leaveExamTitle:"Quitter l'épreuve ?", leaveExamText:"Aucun mot de cette épreuve ne sera validé.",
+    stay:"Continuer la partie", leave:"Quitter", seeGrid:"Voir la grille", seeResults:"Voir les résultats",
     levelWords:(n, m) => `${n} / ${m} mots découverts`, newWord:"nouveau mot",
     countD:(n, m) => `${n} mot${n > 1 ? "s" : ""} découvert${n > 1 ? "s" : ""} sur ${m}`,
     progD:(n, left) => `${n > 0 ? "+" + n + " nouveau" + (n > 1 ? "x" : "") + " mot" + (n > 1 ? "s" : "") + ". " : ""}Encore ${left} mot${left > 1 ? "s" : ""} à découvrir pour l'étoile.`,
@@ -338,6 +361,9 @@ const STR = {
     practiceDone:"Practice test passed, well done!",
     examDone:id => `${id} exam passed, well done!`, levelDone:"You've completed the most advanced level in the game.",
     nextTest:"Next test",
+    leaveTitle:"Leave this game?", leaveText:"Words you've found stay discovered, but this grid will be lost.",
+    leaveExamTitle:"Leave this test?", leaveExamText:"No words from this test will be validated.",
+    stay:"Keep playing", leave:"Leave", seeGrid:"See the grid", seeResults:"See results",
     levelWords:(n, m) => `${n} / ${m} words discovered`, newWord:"new word",
     countD:(n, m) => `${n} of ${m} words discovered`,
     progD:(n, left) => `${n > 0 ? "+" + n + " new word" + (n > 1 ? "s" : "") + ". " : ""}${left} more word${left > 1 ? "s" : ""} to discover for the star.`,
@@ -459,15 +485,18 @@ $("settings").addEventListener("click", e => { if (e.target === $("settings")) c
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("settings").hidden) closeSettings(); });
 
 /* Son */
-function speak(text) {
-  if (!prog.sound || !("speechSynthesis" in window)) return;
+/* Prononce un mot ; onEnd est appelé quand la voix a fini (ou tout de suite s'il n'y a pas de voix) */
+function speak(text, onEnd) {
+  const done = () => { if (onEnd) { const f = onEnd; onEnd = null; f(); } };
+  if (!prog.sound || !("speechSynthesis" in window)) return done();
   try {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "ko-KR"; u.rate = .85;
     const v = speechSynthesis.getVoices().find(v => (v.lang || "").toLowerCase().startsWith("ko"));
     if (v) u.voice = v;
+    u.onend = done; u.onerror = done;
     speechSynthesis.cancel(); speechSynthesis.speak(u);
-  } catch (e) {}
+  } catch (e) { done(); }
 }
 if ("speechSynthesis" in window) { try { speechSynthesis.getVoices(); } catch (e) {} }
 
@@ -610,8 +639,8 @@ function begin(t, mode, words, exam) {
   const res = exam ? generate(words, 8, ALL8.slice(0, 2)) : generate(words, lvl.size, lvl.dirs);
   const pool = [...new Set(lvl.themes.flatMap(x => x.words.flatMap(w => [...w.ko])))];
   res.g.forEach(row => row.forEach((v, c) => { if (v === null) row[c] = pool[rnd(pool.length)]; }));
-  S = { t, mode, words, exam, hintsLeft:EXAM_HINTS, newCount:0, starsBefore:{ ...starsOf(t.id) }, g:res.g, size:res.size, starts:res.starts, found:new Map(), lines:[], sel:null, pending:null };
-  $("home").hidden = true; $("game").hidden = false; $("sheet").hidden = true;
+  S = { t, mode, words, exam, finished:false, hintsLeft:EXAM_HINTS, newCount:0, starsBefore:{ ...starsOf(t.id) }, g:res.g, size:res.size, starts:res.starts, found:new Map(), lines:[], sel:null, pending:null };
+  $("home").hidden = true; $("game").hidden = false; $("sheet").hidden = true; $("results").hidden = true;
   $("g-ko").textContent = t.ko;
   $("g-fr").textContent = exam ? `${T().exam(lvl.id)}, ${T().examCount(validCount(lvl), levelWords(lvl).length)}` : `${lvl.id}, ${t[LANG]}`;
   $("modes").hidden = !!exam; $("regen").hidden = !!exam;
@@ -690,7 +719,7 @@ function pathBetween(a, b) {
 let drag = null;
 const board = $("board");
 board.addEventListener("pointerdown", e => {
-  if (!S) return;
+  if (!S || S.finished) return;
   const here = cellAt(e);
   let start = here, fromPending = false;
   if (S.pending) { start = S.pending; fromPending = true; S.pending = null; }
@@ -731,7 +760,16 @@ function check(path) {
     S.found.set(i, color);
     S.lines.push({ a:path[0], b:path[path.length - 1], color });
     if (markSeen(ko)) S.newCount++;
-    sfx("ok"); setTimeout(() => speak(ko), 280);
+    const last = S.found.size === S.words.length, game = S;
+    let shown = false;
+    const showEnd = () => { if (shown) return; shown = true; if (S === game) finish(); };
+    if (last) {
+      S.finished = true;
+      /* filet de sécurité si la voix ne signale jamais sa fin */
+      setTimeout(showEnd, 5000);
+    }
+    sfx("ok");
+    setTimeout(() => speak(ko, last ? () => setTimeout(showEnd, prog.sound ? 500 : 800) : null), 280);
     $("preview").textContent = "";
     drawSvg(); drawFound(true); renderWords(i);
     const cells = $("cells").children;
@@ -740,7 +778,6 @@ function check(path) {
       el.classList.remove("pop", "hint"); void el.offsetWidth;
       el.style.animationDelay = (k * 45) + "ms"; el.classList.add("pop");
     });
-    if (S.found.size === S.words.length) { const game = S; setTimeout(() => { if (S === game) finish(); }, 900); }
   } else {
     sfx("bad");
     const pv = $("preview");
@@ -764,12 +801,45 @@ $("hint").onclick = () => {
   const el = $("cells").children[r * S.size + c];
   el.classList.remove("hint", "pop"); el.style.animationDelay = ""; void el.offsetWidth; el.classList.add("hint");
 };
-$("regen").onclick = () => startGame(S.t.id, S.mode);
-$("back").onclick = () => { S = null; updateHint(); $("game").hidden = true; $("home").hidden = false; $("sheet").hidden = true; renderHome(); window.scrollTo(0, 0); };
+function goHome() {
+  S = null; updateHint();
+  $("game").hidden = true; $("home").hidden = false; $("sheet").hidden = true; $("results").hidden = true;
+  renderHome(); window.scrollTo(0, 0);
+}
+/* Demande confirmation si une partie est en cours (au moins un mot trouvé, grille pas finie) */
+let onLeave = null;
+function confirmLeave(action) {
+  if (!S || S.finished || S.found.size === 0) return action();
+  const L = T();
+  $("c-title").textContent = S.exam ? L.leaveExamTitle : L.leaveTitle;
+  $("c-text").textContent = S.exam ? L.leaveExamText : L.leaveText;
+  $("c-stay").textContent = L.stay; $("c-leave").textContent = L.leave;
+  onLeave = action;
+  openSheet("confirm"); $("c-stay").focus();
+}
+$("c-stay").onclick = () => { onLeave = null; closeSheet("confirm"); };
+$("c-leave").onclick = () => { const a = onLeave; onLeave = null; $("confirm").hidden = true; if (a) a(); };
+$("confirm").addEventListener("click", e => { if (e.target === $("confirm")) $("c-stay").onclick(); });
+
+/* Panneaux qui montent du bas et redescendent */
+function openSheet(id) { const el = $(id); el.classList.remove("closing"); el.hidden = false; }
+function closeSheet(id, then) {
+  const el = $(id); if (el.hidden) return;
+  el.classList.add("closing");
+  setTimeout(() => { el.hidden = true; el.classList.remove("closing"); if (then) then(); }, 250);
+}
+/* Écran de fin : on peut le fermer pour revoir sa grille, puis le rouvrir */
+function showResults() { $("results").hidden = true; openSheet("sheet"); }
+function hideResults() { closeSheet("sheet", () => { if (S && S.finished) { $("results").textContent = T().seeResults; $("results").hidden = false; } }); }
+$("results").onclick = showResults;
+$("sheet").addEventListener("click", e => { if (e.target === $("sheet")) hideResults(); });
+
+$("regen").onclick = () => confirmLeave(() => startGame(S.t.id, S.mode));
+$("back").onclick = () => confirmLeave(goHome);
 $("sound").onclick = () => setSound(!prog.sound);
 document.querySelectorAll(".modes button").forEach(b => b.onclick = () => {
   if (b.dataset.mode === S.mode || b.disabled) return;
-  startGame(S.t.id, b.dataset.mode, b.dataset.mode === "c" ? null : undefined);
+  confirmLeave(() => startGame(S.t.id, b.dataset.mode));
 });
 window.addEventListener("resize", () => { if (S && !$("game").hidden) { const px = $("board").clientWidth / S.size; $("cells").style.fontSize = Math.max(14, px * .5) + "px"; } });
 
@@ -793,8 +863,9 @@ function finishExam() {
   if (!done) add(L.nextTest, true, () => startExam(li));
   else if (nextL && !wasDone) add(L.next(nextL.themes[0][LANG]), true, () => startGame(nextL.themes[0].id, "d"));
   else add(L.practiceTest, false, () => startExam(li));
-  add(L.toThemes, done && (wasDone || !nextL), () => $("back").onclick());
-  $("sheet").hidden = false;
+  add(L.toThemes, done && (wasDone || !nextL), goHome);
+  add(L.seeGrid, false, hideResults);
+  showResults();
 }
 function finish() {
   if (S.exam) return finishExam();
@@ -825,8 +896,9 @@ function finish() {
   if (m === "d" && after.d) add(L.playChallenge, !after.c, () => startGame(t.id, "c"));
   if (next) add(L.next(next[LANG]), m === "c" || (after.d && after.c), () => startGame(next.id, "d"));
   if (m === "c" || (after.d && after.c)) add(L.replay, false, () => startGame(t.id, m));
-  add(L.toThemes, false, () => $("back").onclick());
-  $("sheet").hidden = false;
+  add(L.toThemes, false, goHome);
+  add(L.seeGrid, false, hideResults);
+  showResults();
 }
 
 applyLang();
