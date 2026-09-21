@@ -159,6 +159,8 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 @keyframes sheetdown{to{transform:translateY(105%)}}
 #results{width:100%;margin:0 0 14px}
 #confirm .inner p{margin:6px 0 18px}
+.belt-ko{font-size:15px;font-weight:400;color:var(--muted);margin-left:4px}
+.badge svg{width:34px;height:34px;display:block}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
@@ -253,7 +255,7 @@ const W = s => s.split(";").map(p => { const [ko, fr, en] = p.split("="); return
 const ALL8 = [[0,1],[1,0],[1,1],[-1,1],[0,-1],[-1,0],[-1,-1],[1,-1]];
 const LEVELS = [
   { id:"A1", size:7, dirs:ALL8.slice(0,2),
-    name:{ fr:"Premiers mots", en:"First words" },
+    name:{ fr:"Ceinture blanche", en:"White belt" }, belt:{ ko:"흰 띠", bg:"#F7F7F2", fg:"#1C1C1C" },
     note:{ fr:"Mots de tous les jours. Ils se lisent de gauche à droite ou de haut en bas.", en:"Everyday words. They read left to right or top to bottom." },
     themes:[
       { id:"a1-famille", ko:"가족", fr:"Famille", en:"Family", words:W("엄마=maman=mom;아빠=papa=dad;언니=grande sœur (dit par une fille)=older sister (said by a woman);누나=grande sœur (dit par un garçon)=older sister (said by a man);동생=petit frère, petite sœur=younger sibling;가족=famille=family;할머니=grand-mère=grandmother;할아버지=grand-père=grandfather;오빠=grand frère (dit par une fille)=older brother (said by a woman);부모님=parents=parents;남편=mari=husband;아내=épouse=wife;아들=fils=son;아이=enfant=child;삼촌=oncle=uncle;이모=tante (côté maternel)=aunt (mother's sister)") },
@@ -262,7 +264,7 @@ const LEVELS = [
       { id:"a1-nombres", ko:"숫자", fr:"Nombres natifs", en:"Native numbers", words:W("하나=un=one;다섯=cinq=five;여섯=six=six;일곱=sept=seven;여덟=huit=eight;아홉=neuf=nine;스물=vingt=twenty;서른=trente=thirty;마흔=quarante=forty;예순=soixante=sixty;일흔=soixante-dix=seventy;여든=quatre-vingts=eighty;아흔=quatre-vingt-dix=ninety;첫째=premier=first;둘째=deuxième=second;셋째=troisième=third") }
     ]},
   { id:"A2", size:7, dirs:ALL8.slice(0,3),
-    name:{ fr:"Se débrouiller", en:"Getting by" },
+    name:{ fr:"Ceinture jaune", en:"Yellow belt" }, belt:{ ko:"노란 띠", bg:"#E8BE2E", fg:"#1C1C1C" },
     note:{ fr:"La ville, les transports, les premiers verbes. Les diagonales entrent en jeu.", en:"Town, transportation, first verbs. Diagonals come into play." },
     themes:[
       { id:"a2-lieux", ko:"장소", fr:"Lieux en ville", en:"Places in town", words:W("학교=école=school;병원=hôpital=hospital;은행=banque=bank;시장=marché=market;공원=parc=park;식당=restaurant=restaurant;약국=pharmacie=pharmacy;도서관=bibliothèque=library;우체국=bureau de poste=post office;경찰서=commissariat=police station;백화점=grand magasin=department store;편의점=supérette=convenience store;미용실=salon de coiffure=hair salon;영화관=cinéma=movie theater;박물관=musée=museum;빵집=boulangerie=bakery") },
@@ -271,7 +273,7 @@ const LEVELS = [
       { id:"a2-verbes", ko:"동사", fr:"Verbes courants", en:"Common verbs", words:W("먹다=manger=to eat;가다=aller=to go;오다=venir=to come;자다=dormir=to sleep;보다=voir, regarder=to see, to watch;읽다=lire=to read;배우다=apprendre=to learn;만나다=rencontrer=to meet;마시다=boire=to drink;듣다=écouter=to listen;쓰다=écrire=to write;사다=acheter=to buy;알다=savoir, connaître=to know;앉다=s'asseoir=to sit;일어나다=se lever=to get up;기다리다=attendre=to wait") }
     ]},
   { id:"B1", size:8, dirs:ALL8.slice(0,4),
-    name:{ fr:"La vie quotidienne", en:"Everyday life" },
+    name:{ fr:"Ceinture verte", en:"Green belt" }, belt:{ ko:"초록 띠", bg:"#3E8E57", fg:"#FFFFFF" },
     note:{ fr:"Émotions, travail, santé. Les mots peuvent aussi monter en diagonale.", en:"Emotions, work, health. Words can also go diagonally upward." },
     themes:[
       { id:"b1-emotions", ko:"감정", fr:"Émotions", en:"Emotions", words:W("기쁘다=être content=to be glad;슬프다=être triste=to be sad;화나다=se mettre en colère=to get angry;무섭다=faire peur, avoir peur=to be scary, to be scared;외롭다=se sentir seul=to feel lonely;행복=bonheur=happiness;걱정=inquiétude=worry;감동=être touché, ému=being moved, touched;부럽다=être envieux=to be envious;창피하다=avoir honte=to be embarrassed;긴장=nervosité, tension=nervousness;실망=déception=disappointment;후회=regret=regret;질투=jalousie=jealousy;그립다=manquer (qqn nous manque)=to miss (someone);설레다=avoir le cœur qui bat=to feel a flutter of excitement") },
@@ -280,7 +282,7 @@ const LEVELS = [
       { id:"b1-voyage", ko:"여행", fr:"Voyage", en:"Travel", words:W("여권=passeport=passport;호텔=hôtel=hotel;예약=réservation=reservation;관광=tourisme=sightseeing;여행=voyage=trip, travel;지도=carte, plan=map;환전=change de devises=currency exchange;기념품=souvenir (objet)=souvenir;비자=visa=visa;캐리어=valise=suitcase;숙소=hébergement=accommodation;항공권=billet d'avion=plane ticket;일정=programme, itinéraire=itinerary;출발=départ=departure;도착=arrivée=arrival;경치=paysage=scenery") }
     ]},
   { id:"B2", size:8, dirs:ALL8.slice(0,6),
-    name:{ fr:"Comprendre le monde", en:"Understanding the world" },
+    name:{ fr:"Ceinture bleue", en:"Blue belt" }, belt:{ ko:"파란 띠", bg:"#2F62A8", fg:"#FFFFFF" },
     note:{ fr:"Société, médias, adverbes. Certains mots s'écrivent à l'envers.", en:"Society, media, adverbs. Some words are written backward." },
     themes:[
       { id:"b2-societe", ko:"사회", fr:"Société", en:"Society", words:W("사회=société=society;문화=culture=culture;경제=économie=economy;정치=politique=politics;교육=éducation=education;환경=environnement=environment;인구=population=population;세대=génération=generation;복지=protection sociale=welfare;선거=élection=election;제도=système, institution=system, institution;평등=égalité=equality;차별=discrimination=discrimination;고령화=vieillissement de la population=population aging;저출산=faible natalité=low birth rate;여론=opinion publique=public opinion") },
@@ -289,7 +291,7 @@ const LEVELS = [
       { id:"b2-adverbes", ko:"부사", fr:"Adverbes utiles", en:"Useful adverbs", words:W("드디어=enfin=finally;갑자기=soudain=suddenly;아마=peut-être=maybe, probably;절대=jamais (avec négation)=never (with a negative);벌써=déjà=already;계속=sans arrêt=continuously;오히려=au contraire=rather, on the contrary;특히=surtout=especially;아직=encore, pas encore=still, (not) yet;항상=toujours=always;자주=souvent=often;가끔=parfois=sometimes;전혀=pas du tout=not at all;거의=presque=almost;일부러=exprès=on purpose;게다가=de plus=moreover") }
     ]},
   { id:"C1", size:9, dirs:ALL8,
-    name:{ fr:"Penser en coréen", en:"Thinking in Korean" },
+    name:{ fr:"Ceinture noire", en:"Black belt" }, belt:{ ko:"검은 띠", bg:"#18191B", fg:"#FFFFFF" },
     note:{ fr:"Idées abstraites et expressions figées. Les huit directions sont possibles.", en:"Abstract ideas and set phrases. All eight directions are possible." },
     themes:[
       { id:"c1-abstrait", ko:"추상", fr:"Concepts abstraits", en:"Abstract concepts", words:W("가치관=système de valeurs=set of values;정체성=identité=identity;책임감=sens des responsabilités=sense of responsibility;자존심=amour-propre=pride, self-respect;편견=préjugé=prejudice;갈등=conflit=conflict;모순=contradiction=contradiction;관점=point de vue=point of view;양심=conscience morale=conscience;본능=instinct=instinct;상상력=imagination=imagination;열등감=complexe d'infériorité=inferiority complex;가능성=possibilité=possibility;자유=liberté=freedom;정의=justice=justice;욕망=désir=desire") },
@@ -306,7 +308,7 @@ const $ = id => document.getElementById(id);
 const STR = {
   fr: {
     title:"낱말 찾기 – mots mêlés coréens",
-    intro:"Des mots mêlés en coréen, du tout premier mot jusqu'au niveau C1. Chaque thème se joue deux fois : d'abord en découverte, puis en défi.",
+    intro:"Des mots mêlés en coréen, de la ceinture blanche à la ceinture noire. Chaque thème se joue deux fois : d'abord en découverte, puis en défi.",
     total:(n, m) => `${n} étoile${n > 1 ? "s" : ""} sur ${m}`,
     starsLabel:n => `${n} étoile(s) sur 2`,
     install:"Pour installer le jeu comme une app : touche <strong>Partager</strong> dans Safari, puis <strong>Sur l'écran d'accueil</strong>.",
@@ -319,14 +321,14 @@ const STR = {
     doneC:"Défi réussi : deuxième étoile gagnée !", againC:"Défi réussi, bravo !",
     playChallenge:"Jouer en défi", next:x => `Thème suivant : ${x}`,
     replay:"Rejouer avec une nouvelle grille", toThemes:"Retour aux thèmes",
-    locked:(id, n, m) => `🔒 Réussis l'examen ${id} pour débloquer (${n} / ${m} mots validés)`,
-    exam:id => `Examen ${id}`, examKo:"시험",
-    examNote:next => `Chaque épreuve tire 16 mots au hasard parmi ceux pas encore validés, seulement en français. Valide tous les mots pour ${next ? "débloquer le niveau " + next : "terminer le niveau"}.`,
+    locked:(name, n, m) => `🔒 Réussis l'examen de la ${name.toLowerCase()} pour débloquer (${n} / ${m} mots validés)`,
+    exam:name => `Examen de la ${name.toLowerCase()}`, examKo:"시험",
+    examNote:next => `Chaque épreuve tire 16 mots au hasard parmi ceux pas encore validés, seulement en français. Valide tous les mots pour ${next ? "débloquer la " + next.toLowerCase() : "terminer le niveau"}.`,
     examCount:(n, m) => `${n} / ${m} mots validés`, takeTest:"Passer une épreuve", practiceTest:"Rejouer une épreuve",
     hintN:n => `Indice (${n})`,
-    testDone:(g, left, next) => `Épreuve réussie : +${g} mots validés. Encore ${left} pour ${next ? "débloquer le niveau " + next : "terminer le niveau"}.`,
+    testDone:(g, left, next) => `Épreuve réussie : +${g} mots validés. Encore ${left} pour ${next ? "débloquer la " + next.toLowerCase() : "terminer le niveau"}.`,
     practiceDone:"Épreuve d'entraînement réussie, bravo !",
-    examDone:id => `Examen ${id} réussi, bravo !`, levelDone:"Tu as validé le niveau le plus avancé du jeu.",
+    examDone:name => `Examen de la ${name.toLowerCase()} réussi, bravo !`, levelDone:"Tu es ceinture noire de coréen ! 🥋",
     nextTest:"Épreuve suivante",
     leaveTitle:"Quitter la partie ?", leaveText:"Les mots déjà trouvés restent découverts, mais cette grille sera perdue.",
     leaveExamTitle:"Quitter l'épreuve ?", leaveExamText:"Aucun mot de cette épreuve ne sera validé.",
@@ -335,11 +337,11 @@ const STR = {
     countD:(n, m) => `${n} mot${n > 1 ? "s" : ""} découvert${n > 1 ? "s" : ""} sur ${m}`,
     progD:(n, left) => `${n > 0 ? "+" + n + " nouveau" + (n > 1 ? "x" : "") + " mot" + (n > 1 ? "s" : "") + ". " : ""}Encore ${left} mot${left > 1 ? "s" : ""} à découvrir pour l'étoile.`,
     keepD:"Continuer la découverte", challengeLocked:"Découvre les 16 mots pour débloquer le défi",
-    unlocked:id => `🔓 Niveau ${id} débloqué !`
+    unlocked:name => `🔓 ${name} débloquée !`
   },
   en: {
     title:"낱말 찾기 – Korean word search",
-    intro:"Korean word search, from your very first word up to C1. Each theme is played twice: first in Discovery, then in Challenge.",
+    intro:"Korean word search, from white belt to black belt. Each theme is played twice: first in Discovery, then in Challenge.",
     total:(n, m) => `${n} star${n === 1 ? "" : "s"} out of ${m}`,
     starsLabel:n => `${n} of 2 stars`,
     install:"To install the game as an app: tap <strong>Share</strong> in Safari, then <strong>Add to Home Screen</strong>.",
@@ -352,14 +354,14 @@ const STR = {
     doneC:"Challenge passed: second star earned!", againC:"Challenge passed, well done!",
     playChallenge:"Play in Challenge", next:x => `Next theme: ${x}`,
     replay:"Replay with a new grid", toThemes:"Back to themes",
-    locked:(id, n, m) => `🔒 Pass the ${id} exam to unlock (${n} / ${m} words validated)`,
-    exam:id => `${id} exam`, examKo:"시험",
-    examNote:next => `Each test draws 16 random words from those not yet validated, English only. Validate every word to ${next ? "unlock " + next : "complete the level"}.`,
+    locked:(name, n, m) => `🔒 Pass the ${name.toLowerCase()} exam to unlock (${n} / ${m} words validated)`,
+    exam:name => `${name} exam`, examKo:"시험",
+    examNote:next => `Each test draws 16 random words from those not yet validated, English only. Validate every word to ${next ? "unlock the " + next.toLowerCase() : "complete the level"}.`,
     examCount:(n, m) => `${n} / ${m} words validated`, takeTest:"Take a test", practiceTest:"Replay a test",
     hintN:n => `Hint (${n})`,
-    testDone:(g, left, next) => `Test passed: +${g} words validated. ${left} more to ${next ? "unlock " + next : "complete the level"}.`,
+    testDone:(g, left, next) => `Test passed: +${g} words validated. ${left} more to ${next ? "unlock the " + next.toLowerCase() : "complete the level"}.`,
     practiceDone:"Practice test passed, well done!",
-    examDone:id => `${id} exam passed, well done!`, levelDone:"You've completed the most advanced level in the game.",
+    examDone:name => `${name} exam passed, well done!`, levelDone:"You're a Korean black belt! 🥋",
     nextTest:"Next test",
     leaveTitle:"Leave this game?", leaveText:"Words you've found stay discovered, but this grid will be lost.",
     leaveExamTitle:"Leave this test?", leaveExamText:"No words from this test will be validated.",
@@ -368,7 +370,7 @@ const STR = {
     countD:(n, m) => `${n} of ${m} words discovered`,
     progD:(n, left) => `${n > 0 ? "+" + n + " new word" + (n > 1 ? "s" : "") + ". " : ""}${left} more word${left > 1 ? "s" : ""} to discover for the star.`,
     keepD:"Keep discovering", challengeLocked:"Discover all 16 words to unlock Challenge",
-    unlocked:id => `🔓 ${id} unlocked!`
+    unlocked:name => `🔓 ${name} unlocked!`
   }
 };
 
@@ -531,6 +533,14 @@ function sfx(kind) {
 }
 ["touchend", "click"].forEach(ev => document.addEventListener(ev, () => { if (prog.sound) audio(); }, { once:true, passive:true }));
 
+/* Pastille : une ceinture nouée à la couleur du niveau */
+function beltKnot(c) {
+  const e = 'stroke="#888780" stroke-opacity=".55" stroke-width=".8"';
+  return `<svg viewBox="0 0 36 36"><rect x="2" y="13" width="32" height="7" rx="2" fill="${c}" ${e}/>`
+    + `<path d="M15 19 L10 31 L14.5 31 L18 21 Z" fill="${c}" ${e}/><path d="M21 19 L26 31 L21.5 31 L18 21 Z" fill="${c}" ${e}/>`
+    + `<rect x="13.5" y="11" width="9" height="11" rx="2" fill="${c}" ${e}/></svg>`;
+}
+
 /* Accueil */
 function renderHome() {
   let got = 0;
@@ -540,10 +550,10 @@ function renderHome() {
     const el = document.createElement("div");
     el.className = "level" + (open ? "" : " locked");
     const note = open ? `<p class="note">${l.note[LANG]}</p>`
-      : `<p class="lock">${T().locked(prev.id, validCount(prev), levelWords(prev).length)}</p>`;
+      : `<p class="lock">${T().locked(prev.name[LANG], validCount(prev), levelWords(prev).length)}</p>`;
     const found = l.themes.reduce((n, t) => n + countIn(prog.seen, t), 0), all = l.themes.reduce((n, t) => n + t.words.length, 0);
     const total = open ? `<p class="words-total">${T().levelWords(found, all)}</p>` : "";
-    el.innerHTML = `<div class="badge">${l.id}</div><div><h2>${l.name[LANG]}</h2>${note}${total}<div class="themes"></div></div>`;
+    el.innerHTML = `<div class="badge" aria-hidden="true">${beltKnot(l.belt.bg)}</div><div><h2>${l.name[LANG]} <span class="ko belt-ko">${l.belt.ko}</span></h2>${note}${total}<div class="themes"></div></div>`;
     const box = el.querySelector(".themes");
     l.themes.forEach(t => {
       const s = starsOf(t.id), n = (s.d ? 1 : 0) + (s.c ? 1 : 0); got += n;
@@ -561,7 +571,7 @@ function renderHome() {
     const nextL = LEVELS[li + 1], vn = validCount(l), vm = levelWords(l).length, done = vn === vm;
     const ex = document.createElement("div");
     ex.className = "exam";
-    ex.innerHTML = `<h3>📝 ${T().exam(l.id)}, ${done ? "✓ " : ""}${T().examCount(vn, vm)}</h3><p>${T().examNote(nextL && nextL.id)}</p>
+    ex.innerHTML = `<h3>📝 ${T().exam(l.name[LANG])}, ${done ? "✓ " : ""}${T().examCount(vn, vm)}</h3><p>${T().examNote(nextL && nextL.name[LANG])}</p>
       <div class="xbar"><span style="width:${Math.round(vn / vm * 100)}%"></span></div>`;
     const go = document.createElement("button");
     go.className = "test-go" + (done ? " practice" : "");
@@ -642,7 +652,7 @@ function begin(t, mode, words, exam) {
   S = { t, mode, words, exam, finished:false, hintsLeft:EXAM_HINTS, newCount:0, starsBefore:{ ...starsOf(t.id) }, g:res.g, size:res.size, starts:res.starts, found:new Map(), lines:[], sel:null, pending:null };
   $("home").hidden = true; $("game").hidden = false; $("sheet").hidden = true; $("results").hidden = true;
   $("g-ko").textContent = t.ko;
-  $("g-fr").textContent = exam ? `${T().exam(lvl.id)}, ${T().examCount(validCount(lvl), levelWords(lvl).length)}` : `${lvl.id}, ${t[LANG]}`;
+  $("g-fr").textContent = exam ? `${T().exam(lvl.name[LANG])}, ${T().examCount(validCount(lvl), levelWords(lvl).length)}` : `${lvl.name[LANG]}, ${t[LANG]}`;
   $("modes").hidden = !!exam; $("regen").hidden = !!exam;
   window.scrollTo(0, 0);
   renderGame();
@@ -853,8 +863,8 @@ function finishExam() {
   const after = validCount(l), total = levelWords(l).length, done = after === total;
   $("s-stars").hidden = true;
   $("s-sub").textContent = wasDone ? L.practiceDone
-    : !done ? L.testDone(after - before, total - after, nextL && nextL.id)
-    : L.examDone(l.id) + " " + (nextL ? (!wasOpen ? L.unlocked(nextL.id) : "") : L.levelDone);
+    : !done ? L.testDone(after - before, total - after, nextL && nextL.name[LANG])
+    : L.examDone(l.name[LANG]) + " " + (nextL ? (!wasOpen ? L.unlocked(nextL.name[LANG]) : "") : L.levelDone);
   if (done && !wasDone) setTimeout(() => sfx("star"), 250);
   $("recap").innerHTML = words.map(w => `<li><span class="ko">${w.ko}</span><span>${w[LANG]}</span></li>`).join("");
   $("recap").querySelectorAll("li").forEach((li2, i) => li2.onclick = () => speak(words[i].ko));
