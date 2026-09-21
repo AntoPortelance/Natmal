@@ -45,10 +45,16 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 
 /* Accueil */
 .hero{padding:18px 0 26px}
-.langs{display:flex;justify-content:flex-end;margin-bottom:6px}
-.langs div{display:flex;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:3px}
-.langs button{border:0;background:none;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--muted)}
-.langs button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.toprow{display:flex;justify-content:flex-end;margin-bottom:6px}
+.set-group{margin:18px 0 0}
+.set-group h4{margin:0 0 8px;font-size:14px;font-weight:500;color:var(--muted)}
+.opts{display:grid;gap:8px}
+.opt{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;padding:13px 14px;
+  background:var(--paper);border:1px solid var(--line);border-radius:12px;font-weight:500}
+.opt .check{visibility:hidden;color:var(--celadon);font-weight:700}
+.opt[aria-checked="true"]{border-color:var(--ink)}
+.opt[aria-checked="true"] .check{visibility:visible}
+#settings .actions{margin-top:22px}
 .hero h1{margin:0;font-size:clamp(52px,17vw,76px);line-height:1;font-weight:700;letter-spacing:-.02em}
 .hero p{margin:12px 0 0;color:var(--muted);max-width:32ch}
 .total{margin-top:18px;font-weight:500}
@@ -125,7 +131,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
       <button id="install-x">×</button>
     </div>
     <div class="hero">
-      <div class="langs"><div role="group" id="langs"><button data-lang="fr">FR</button><button data-lang="en">EN</button></div></div>
+      <div class="toprow"><button class="icon" id="settings-btn">⚙️</button></div>
       <h1 class="ko">낱말 찾기</h1>
       <p id="intro"></p>
       <div class="total" id="total"></div>
@@ -157,6 +163,27 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
     <p class="help" id="help"></p>
   </section>
 </main>
+
+<div class="sheet" id="settings" hidden role="dialog" aria-modal="true" aria-labelledby="set-title">
+  <div class="inner">
+    <h3 id="set-title"></h3>
+    <div class="set-group">
+      <h4 id="set-lang"></h4>
+      <div class="opts" role="radiogroup" aria-labelledby="set-lang">
+        <button class="opt" role="radio" data-lang="fr">Français<span class="check">✓</span></button>
+        <button class="opt" role="radio" data-lang="en">English<span class="check">✓</span></button>
+      </div>
+    </div>
+    <div class="set-group">
+      <h4 id="set-sound"></h4>
+      <div class="opts" role="radiogroup" aria-labelledby="set-sound">
+        <button class="opt" role="radio" data-sound="on"><span id="sound-on"></span><span class="check">✓</span></button>
+        <button class="opt" role="radio" data-sound="off"><span id="sound-off"></span><span class="check">✓</span></button>
+      </div>
+    </div>
+    <div class="actions"><button class="btn primary" id="set-close"></button></div>
+  </div>
+</div>
 
 <div class="sheet" id="sheet" hidden>
   <div class="inner">
@@ -231,7 +258,7 @@ const STR = {
     total:(n, m) => `${n} étoile${n > 1 ? "s" : ""} sur ${m}`,
     starsLabel:n => `${n} étoile(s) sur 2`,
     install:"Pour installer le jeu comme une app : touche <strong>Partager</strong> dans Safari, puis <strong>Sur l'écran d'accueil</strong>.",
-    hide:"Masquer", langLabel:"Langue", back:"‹ Thèmes", sound:"Son", modesLabel:"Mode de jeu",
+    hide:"Masquer", langLabel:"Langue", settings:"Réglages", soundOn:"Activé", soundOff:"Désactivé", close:"Fermer", back:"‹ Thèmes", sound:"Son", modesLabel:"Mode de jeu",
     discovery:"Découverte", challenge:"Défi", hint:"Indice", regen:"Nouvelle grille",
     count:(n, m) => `${n} sur ${m} trouvés`,
     help:"Glisse le doigt sur les syllabes, ou touche la première puis la dernière. Touche un mot trouvé pour l'entendre.",
@@ -246,7 +273,7 @@ const STR = {
     total:(n, m) => `${n} star${n === 1 ? "" : "s"} out of ${m}`,
     starsLabel:n => `${n} of 2 stars`,
     install:"To install the game as an app: tap <strong>Share</strong> in Safari, then <strong>Add to Home Screen</strong>.",
-    hide:"Hide", langLabel:"Language", back:"‹ Themes", sound:"Sound", modesLabel:"Game mode",
+    hide:"Hide", langLabel:"Language", settings:"Settings", soundOn:"On", soundOff:"Off", close:"Close", back:"‹ Themes", sound:"Sound", modesLabel:"Game mode",
     discovery:"Discovery", challenge:"Challenge", hint:"Hint", regen:"New grid",
     count:(n, m) => `${n} of ${m} found`,
     help:"Swipe across the syllables, or tap the first one then the last. Tap a found word to hear it.",
@@ -277,8 +304,14 @@ function applyLang() {
   $("intro").textContent = t.intro;
   $("install-text").innerHTML = t.install;
   $("install-x").setAttribute("aria-label", t.hide);
-  $("langs").setAttribute("aria-label", t.langLabel);
-  document.querySelectorAll("#langs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === LANG));
+  $("settings-btn").setAttribute("aria-label", t.settings);
+  $("set-title").textContent = t.settings;
+  $("set-lang").textContent = t.langLabel;
+  $("set-sound").textContent = t.sound;
+  $("sound-on").textContent = t.soundOn;
+  $("sound-off").textContent = t.soundOff;
+  $("set-close").textContent = t.close;
+  renderSettings();
   $("back").textContent = t.back;
   $("sound").setAttribute("aria-label", t.sound);
   $("modes").setAttribute("aria-label", t.modesLabel);
@@ -288,9 +321,24 @@ function applyLang() {
   $("regen").textContent = t.regen;
   $("help").textContent = t.help;
 }
-document.querySelectorAll("#langs button").forEach(b => b.onclick = () => {
+/* Panneau Réglages */
+function renderSettings() {
+  document.querySelectorAll("#settings [data-lang]").forEach(b => b.setAttribute("aria-checked", b.dataset.lang === LANG));
+  document.querySelectorAll("#settings [data-sound]").forEach(b => b.setAttribute("aria-checked", (b.dataset.sound === "on") === prog.sound));
+}
+function setSound(on) {
+  prog.sound = on; save(); renderSettings();
+  $("sound").textContent = prog.sound ? "🔊" : "🔇";
+}
+document.querySelectorAll("#settings [data-lang]").forEach(b => b.onclick = () => {
   LANG = b.dataset.lang; prog.lang = LANG; save(); applyLang(); renderHome();
 });
+document.querySelectorAll("#settings [data-sound]").forEach(b => b.onclick = () => setSound(b.dataset.sound === "on"));
+const closeSettings = () => { $("settings").hidden = true; $("settings-btn").focus(); };
+$("settings-btn").onclick = () => { renderSettings(); $("settings").hidden = false; $("set-close").focus(); };
+$("set-close").onclick = closeSettings;
+$("settings").addEventListener("click", e => { if (e.target === $("settings")) closeSettings(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("settings").hidden) closeSettings(); });
 
 /* Son */
 function speak(text) {
@@ -498,7 +546,7 @@ $("hint").onclick = () => {
 };
 $("regen").onclick = () => startGame(S.t.id, S.mode);
 $("back").onclick = () => { S = null; $("game").hidden = true; $("home").hidden = false; $("sheet").hidden = true; renderHome(); window.scrollTo(0, 0); };
-$("sound").onclick = () => { prog.sound = !prog.sound; save(); $("sound").textContent = prog.sound ? "🔊" : "🔇"; };
+$("sound").onclick = () => setSound(!prog.sound);
 document.querySelectorAll(".modes button").forEach(b => b.onclick = () => { if (b.dataset.mode !== S.mode) startGame(S.t.id, b.dataset.mode); });
 window.addEventListener("resize", () => { if (S && !$("game").hidden) { const px = $("board").clientWidth / S.size; $("cells").style.fontSize = Math.max(14, px * .5) + "px"; } });
 

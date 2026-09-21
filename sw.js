@@ -1,5 +1,5 @@
 // Change le numéro de version à chaque mise à jour du jeu
-const CACHE = "natmal-v2";
+const CACHE = "natmal-v3";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
