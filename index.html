@@ -138,11 +138,12 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .exam{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:color-mix(in srgb,var(--yellow) 12%,var(--paper))}
 .exam h3{margin:0;font-size:16px;line-height:1.3}
 .exam p{margin:2px 0 10px;font-size:13px;color:var(--muted)}
-.tests{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.test{padding:8px 0;border-radius:8px;border:1px solid var(--line);background:var(--paper);font-weight:600;font-size:15px}
-.test.passed{background:var(--celadon);border-color:var(--celadon);color:var(--paper)}
+.xbar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin:0 0 10px}
+.xbar span{display:block;height:100%;background:var(--celadon);border-radius:3px}
+.test-go{width:100%;padding:10px;border-radius:8px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);font-weight:600}
+.test-go.practice{background:var(--paper);color:var(--ink);border-color:var(--line)}
 .level.locked .exam{opacity:.45}
-.test:disabled,.pill:disabled{cursor:not-allowed;opacity:.5}
+.test-go:disabled,.pill:disabled{cursor:not-allowed;opacity:.5}
 .theme{position:relative;overflow:hidden}
 .theme .bar{position:absolute;left:0;bottom:0;height:3px;background:var(--celadon);border-radius:0 3px 3px 0;transition:width .4s}
 .wc{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
@@ -298,12 +299,13 @@ const STR = {
     doneC:"Défi réussi : deuxième étoile gagnée !", againC:"Défi réussi, bravo !",
     playChallenge:"Jouer en défi", next:x => `Thème suivant : ${x}`,
     replay:"Rejouer avec une nouvelle grille", toThemes:"Retour aux thèmes",
-    locked:(id, n) => `🔒 Réussis l'examen ${id} pour débloquer (${n} sur 4)`,
+    locked:(id, n, m) => `🔒 Réussis l'examen ${id} pour débloquer (${n} / ${m} mots validés)`,
     exam:id => `Examen ${id}`, examKo:"시험",
-    examNote:next => `16 mots par épreuve, seulement en français. Réussis les 4 épreuves pour ${next ? "débloquer le niveau " + next : "valider le niveau"}.`,
-    examProgress:n => `${n} sur 4`, test:k => `Épreuve ${k}`, testOf:(id, k) => `Examen ${id}, épreuve ${k} sur 4`,
+    examNote:next => `Chaque épreuve tire 16 mots au hasard parmi ceux pas encore validés, seulement en français. Valide tous les mots pour ${next ? "débloquer le niveau " + next : "terminer le niveau"}.`,
+    examCount:(n, m) => `${n} / ${m} mots validés`, takeTest:"Passer une épreuve", practiceTest:"Rejouer une épreuve",
     hintN:n => `Indice (${n})`,
-    testDone:(k, left, next) => `Épreuve ${k} réussie. Encore ${left} pour ${next ? "débloquer le niveau " + next : "valider le niveau"}.`,
+    testDone:(g, left, next) => `Épreuve réussie : +${g} mots validés. Encore ${left} pour ${next ? "débloquer le niveau " + next : "terminer le niveau"}.`,
+    practiceDone:"Épreuve d'entraînement réussie, bravo !",
     examDone:id => `Examen ${id} réussi, bravo !`, levelDone:"Tu as validé le niveau le plus avancé du jeu.",
     nextTest:"Épreuve suivante",
     levelWords:(n, m) => `${n} / ${m} mots découverts`, newWord:"nouveau mot",
@@ -327,12 +329,13 @@ const STR = {
     doneC:"Challenge passed: second star earned!", againC:"Challenge passed, well done!",
     playChallenge:"Play in Challenge", next:x => `Next theme: ${x}`,
     replay:"Replay with a new grid", toThemes:"Back to themes",
-    locked:(id, n) => `🔒 Pass the ${id} exam to unlock (${n} of 4)`,
+    locked:(id, n, m) => `🔒 Pass the ${id} exam to unlock (${n} / ${m} words validated)`,
     exam:id => `${id} exam`, examKo:"시험",
-    examNote:next => `16 words per test, English only. Pass all 4 tests to ${next ? "unlock " + next : "complete the level"}.`,
-    examProgress:n => `${n} of 4`, test:k => `Test ${k}`, testOf:(id, k) => `${id} exam, test ${k} of 4`,
+    examNote:next => `Each test draws 16 random words from those not yet validated, English only. Validate every word to ${next ? "unlock " + next : "complete the level"}.`,
+    examCount:(n, m) => `${n} / ${m} words validated`, takeTest:"Take a test", practiceTest:"Replay a test",
     hintN:n => `Hint (${n})`,
-    testDone:(k, left, next) => `Test ${k} passed. ${left} more to ${next ? "unlock " + next : "complete the level"}.`,
+    testDone:(g, left, next) => `Test passed: +${g} words validated. ${left} more to ${next ? "unlock " + next : "complete the level"}.`,
+    practiceDone:"Practice test passed, well done!",
     examDone:id => `${id} exam passed, well done!`, levelDone:"You've completed the most advanced level in the game.",
     nextTest:"Next test",
     levelWords:(n, m) => `${n} / ${m} words discovered`, newWord:"new word",
@@ -350,7 +353,7 @@ try { prog = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { 
 if (typeof prog.sound !== "boolean") prog.sound = true;
 prog.themes = prog.themes || {};
 prog.seen = prog.seen || {};
-prog.exams = prog.exams || {};
+prog.examWords = prog.examWords || {};
 delete prog.seenC;
 prog.unlocked = prog.unlocked || [];
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(prog)); } catch (e) {} };
@@ -358,6 +361,7 @@ const starsOf = id => prog.themes[id] || {};
 const doneD = id => !!starsOf(id).d;
 /* Un niveau s'ouvre quand tous les thèmes du précédent ont l'étoile Découverte ; un niveau déjà entamé ne se referme jamais */
 const EXAM_HINTS = 3;
+const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
 /* Chaque mot appartient à un seul thème */
 const WT = {};
 THEMES.forEach(t => t.words.forEach(w => { WT[w.ko] = t; }));
@@ -374,14 +378,30 @@ function updateStars(t) {
   prog.themes[t.id] = s;
 }
 THEMES.forEach(updateStars); save();
-const passedTests = l => (prog.exams[l.id] || []).filter(Boolean).length;
-/* Épreuve e d'un niveau : les mots n° e, e+4, e+8, e+12 de chaque thème, soit 16 mots ; les 4 épreuves couvrent tout le niveau */
-const examWords = (l, e) => l.themes.flatMap(t => t.words.filter((_, i) => i % 4 === e));
-const started = l => l.themes.some(t => { const s = starsOf(t.id); return s.d || s.c; }) || passedTests(l) > 0;
+const levelWords = l => l.themes.flatMap(t => t.words);
+const validated = l => new Set(prog.examWords[l.id] || []);
+const validCount = l => { const v = validated(l); return levelWords(l).filter(w => v.has(w.ko)).length; };
+const examPassed = l => validCount(l) === levelWords(l).length;
+/* Anciennes épreuves fixes réussies : leurs mots comptent comme validés */
+if (prog.exams) {
+  LEVELS.forEach(l => (prog.exams[l.id] || []).forEach((ok, e) => {
+    if (!ok) return;
+    const a = prog.examWords[l.id] || (prog.examWords[l.id] = []);
+    l.themes.forEach(t => t.words.forEach((w, i) => { if (i % 4 === e && !a.includes(w.ko)) a.push(w.ko); }));
+  }));
+  delete prog.exams; save();
+}
+/* Épreuve : 16 mots au hasard parmi ceux pas encore validés (complétée par des mots validés si besoin) */
+function drawExam(l) {
+  const v = validated(l), all = levelWords(l);
+  const rest = shuffle(all.filter(w => !v.has(w.ko)));
+  return rest.concat(shuffle(all.filter(w => v.has(w.ko)))).slice(0, 16);
+}
+const started = l => l.themes.some(t => { const s = starsOf(t.id); return s.d || s.c; }) || validCount(l) > 0;
 /* Un niveau s'ouvre quand l'examen du précédent est réussi ; un niveau déjà ouvert ne se referme jamais */
 function isUnlocked(li) {
   const l = LEVELS[li];
-  return li === 0 || prog.unlocked.includes(l.id) || started(l) || passedTests(LEVELS[li - 1]) === 4;
+  return li === 0 || prog.unlocked.includes(l.id) || started(l) || examPassed(LEVELS[li - 1]);
 }
 /* Ancienne règle (thèmes découverts) : les niveaux déjà ouverts ainsi le restent */
 if (!prog.rulesV2) {
@@ -491,7 +511,7 @@ function renderHome() {
     const el = document.createElement("div");
     el.className = "level" + (open ? "" : " locked");
     const note = open ? `<p class="note">${l.note[LANG]}</p>`
-      : `<p class="lock">${T().locked(prev.id, passedTests(prev))}</p>`;
+      : `<p class="lock">${T().locked(prev.id, validCount(prev), levelWords(prev).length)}</p>`;
     const found = l.themes.reduce((n, t) => n + countIn(prog.seen, t), 0), all = l.themes.reduce((n, t) => n + t.words.length, 0);
     const total = open ? `<p class="words-total">${T().levelWords(found, all)}</p>` : "";
     el.innerHTML = `<div class="badge">${l.id}</div><div><h2>${l.name[LANG]}</h2>${note}${total}<div class="themes"></div></div>`;
@@ -509,19 +529,17 @@ function renderHome() {
       b.onclick = () => startGame(t.id, s.d && !s.c ? "c" : "d");
       box.appendChild(b);
     });
-    const nextL = LEVELS[li + 1], res = prog.exams[l.id] || [];
+    const nextL = LEVELS[li + 1], vn = validCount(l), vm = levelWords(l).length, done = vn === vm;
     const ex = document.createElement("div");
     ex.className = "exam";
-    ex.innerHTML = `<h3>📝 ${T().exam(l.id)}, ${T().examProgress(passedTests(l))}</h3><p>${T().examNote(nextL && nextL.id)}</p><div class="tests"></div>`;
-    [0, 1, 2, 3].forEach(e => {
-      const b = document.createElement("button");
-      b.className = "test" + (res[e] ? " passed" : "");
-      b.textContent = res[e] ? `✓ ${e + 1}` : `${e + 1}`;
-      b.setAttribute("aria-label", T().test(e + 1));
-      b.disabled = !open;
-      b.onclick = () => startExam(li, e);
-      ex.querySelector(".tests").appendChild(b);
-    });
+    ex.innerHTML = `<h3>📝 ${T().exam(l.id)}, ${done ? "✓ " : ""}${T().examCount(vn, vm)}</h3><p>${T().examNote(nextL && nextL.id)}</p>
+      <div class="xbar"><span style="width:${Math.round(vn / vm * 100)}%"></span></div>`;
+    const go = document.createElement("button");
+    go.className = "test-go" + (done ? " practice" : "");
+    go.textContent = done ? T().practiceTest : T().takeTest;
+    go.disabled = !open;
+    go.onclick = () => startExam(li);
+    ex.appendChild(go);
     el.querySelector(".themes").after(ex);
     $("ladder").appendChild(el);
   });
@@ -558,7 +576,6 @@ function generate(words, size, dirs) {
 
 /* État de partie */
 let S = null;
-const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
 /* 8 mots par partie. Découverte : 8 nouveaux à la première partie, ensuite 2 nouveaux au plus et des mots à réviser.
    Défi : 8 mots au hasard parmi les 16. */
 const NEW_PER_GAME = 2;
@@ -580,9 +597,9 @@ function markSeen(ko) {
   return true;
 }
 const isNew = ko => { const t = WT[ko]; return !!t && !(prog.seen[t.id] || []).includes(ko); };
-function startExam(li, e) {
+function startExam(li) {
   const l = LEVELS[li];
-  begin({ id:`exam-${l.id}-${e}`, ko:T().examKo, level:l }, "c", examWords(l, e), { li, e });
+  begin({ id:`exam-${l.id}`, ko:T().examKo, level:l }, "c", drawExam(l), { li });
 }
 function startGame(themeId, mode, words) {
   const t = THEMES.find(x => x.id === themeId);
@@ -596,7 +613,7 @@ function begin(t, mode, words, exam) {
   S = { t, mode, words, exam, hintsLeft:EXAM_HINTS, newCount:0, starsBefore:{ ...starsOf(t.id) }, g:res.g, size:res.size, starts:res.starts, found:new Map(), lines:[], sel:null, pending:null };
   $("home").hidden = true; $("game").hidden = false; $("sheet").hidden = true;
   $("g-ko").textContent = t.ko;
-  $("g-fr").textContent = exam ? T().testOf(lvl.id, exam.e + 1) : `${lvl.id}, ${t[LANG]}`;
+  $("g-fr").textContent = exam ? `${T().exam(lvl.id)}, ${T().examCount(validCount(lvl), levelWords(lvl).length)}` : `${lvl.id}, ${t[LANG]}`;
   $("modes").hidden = !!exam; $("regen").hidden = !!exam;
   window.scrollTo(0, 0);
   renderGame();
@@ -758,23 +775,25 @@ window.addEventListener("resize", () => { if (S && !$("game").hidden) { const px
 
 /* Fin de thème */
 function finishExam() {
-  const L = T(), { li, e } = S.exam, l = LEVELS[li], nextL = LEVELS[li + 1];
-  const wasOpen = nextL ? isUnlocked(li + 1) : true;
-  const res = prog.exams[l.id] || (prog.exams[l.id] = [false, false, false, false]);
-  res[e] = true; save();
-  const n = passedTests(l), words = S.words;
+  const L = T(), { li } = S.exam, l = LEVELS[li], nextL = LEVELS[li + 1], words = S.words;
+  const wasOpen = nextL ? isUnlocked(li + 1) : true, wasDone = examPassed(l), before = validCount(l);
+  const a = prog.examWords[l.id] || (prog.examWords[l.id] = []);
+  words.forEach(w => { if (!a.includes(w.ko)) a.push(w.ko); });
+  save();
+  const after = validCount(l), total = levelWords(l).length, done = after === total;
   $("s-stars").hidden = true;
-  $("s-sub").textContent = n < 4 ? L.testDone(e + 1, 4 - n, nextL && nextL.id)
+  $("s-sub").textContent = wasDone ? L.practiceDone
+    : !done ? L.testDone(after - before, total - after, nextL && nextL.id)
     : L.examDone(l.id) + " " + (nextL ? (!wasOpen ? L.unlocked(nextL.id) : "") : L.levelDone);
-  if (n === 4) setTimeout(() => sfx("star"), 250);
+  if (done && !wasDone) setTimeout(() => sfx("star"), 250);
   $("recap").innerHTML = words.map(w => `<li><span class="ko">${w.ko}</span><span>${w[LANG]}</span></li>`).join("");
   $("recap").querySelectorAll("li").forEach((li2, i) => li2.onclick = () => speak(words[i].ko));
   const acts = $("s-actions"); acts.innerHTML = "";
   const add = (label, primary, fn) => { const b = document.createElement("button"); b.className = "btn" + (primary ? " primary" : ""); b.textContent = label; b.onclick = fn; acts.appendChild(b); };
-  const nextTest = [0, 1, 2, 3].find(k => !res[k]);
-  if (nextTest !== undefined) add(L.nextTest, true, () => startExam(li, nextTest));
-  else if (nextL) add(L.next(nextL.themes[0][LANG]), true, () => startGame(nextL.themes[0].id, "d"));
-  add(L.toThemes, nextTest === undefined && !nextL, () => $("back").onclick());
+  if (!done) add(L.nextTest, true, () => startExam(li));
+  else if (nextL && !wasDone) add(L.next(nextL.themes[0][LANG]), true, () => startGame(nextL.themes[0].id, "d"));
+  else add(L.practiceTest, false, () => startExam(li));
+  add(L.toThemes, done && (wasDone || !nextL), () => $("back").onclick());
   $("sheet").hidden = false;
 }
 function finish() {
