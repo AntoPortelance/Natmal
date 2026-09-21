@@ -84,6 +84,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .modes{display:grid;grid-template-columns:1fr 1fr;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:3px;margin-bottom:14px}
 .modes button{border:0;background:none;padding:8px;border-radius:8px;font-weight:500;color:var(--muted)}
 .modes button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.modes button:disabled{opacity:.5;cursor:not-allowed}
 .preview{height:44px;display:flex;align-items:center;justify-content:center;font-size:28px;letter-spacing:.08em}
 .preview.bad{animation:shake .3s}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
@@ -144,7 +145,6 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .test:disabled,.pill:disabled{cursor:not-allowed;opacity:.5}
 .theme{position:relative;overflow:hidden}
 .theme .bar{position:absolute;left:0;bottom:0;height:3px;background:var(--celadon);border-radius:0 3px 3px 0;transition:width .4s}
-.theme .bar.c{background:var(--yellow)}
 .wc{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
 .wc.full{color:var(--celadon)}
 .level .words-total{margin:-6px 0 10px;font-size:13px;color:var(--muted)}
@@ -293,8 +293,9 @@ const STR = {
     discovery:"Découverte", challenge:"Défi", hint:"Indice", regen:"Nouvelle grille",
     count:(n, m) => `${n} sur ${m} trouvés`,
     help:"Glisse le doigt sur les syllabes, ou touche la première puis la dernière. Touche un mot trouvé pour l'entendre.",
-    doneD:"Thème découvert. Rejoue-le en défi : tu ne verras plus que le français.",
-    doneC:"Défi réussi : tu as retrouvé chaque mot à partir du français.",
+    doneD:"Tous les mots sont découverts ! Le défi est débloqué : tu n'y verras que le français.",
+    reviewD:"Révision terminée : tous les mots de ce thème sont découverts.",
+    doneC:"Défi réussi : deuxième étoile gagnée !", againC:"Défi réussi, bravo !",
     playChallenge:"Jouer en défi", next:x => `Thème suivant : ${x}`,
     replay:"Rejouer avec une nouvelle grille", toThemes:"Retour aux thèmes",
     locked:(id, n) => `🔒 Réussis l'examen ${id} pour débloquer (${n} sur 4)`,
@@ -306,10 +307,9 @@ const STR = {
     examDone:id => `Examen ${id} réussi, bravo !`, levelDone:"Tu as validé le niveau le plus avancé du jeu.",
     nextTest:"Épreuve suivante",
     levelWords:(n, m) => `${n} / ${m} mots découverts`, newWord:"nouveau mot",
-    countD:(n, m) => `${n} mot${n > 1 ? "s" : ""} découvert${n > 1 ? "s" : ""} sur ${m}`, countC:(n, m) => `${n} mot${n > 1 ? "s" : ""} sur ${m} réussi${n > 1 ? "s" : ""} en défi`,
+    countD:(n, m) => `${n} mot${n > 1 ? "s" : ""} découvert${n > 1 ? "s" : ""} sur ${m}`,
     progD:(n, left) => `${n > 0 ? "+" + n + " nouveau" + (n > 1 ? "x" : "") + " mot" + (n > 1 ? "s" : "") + ". " : ""}Encore ${left} mot${left > 1 ? "s" : ""} à découvrir pour l'étoile.`,
-    progC:(n, left) => `${n > 0 ? "+" + n + " mot" + (n > 1 ? "s" : "") + " réussi" + (n > 1 ? "s" : "") + " en défi. " : ""}Encore ${left} pour l'étoile Défi.`,
-    keepD:"Continuer la découverte", keepC:"Continuer le défi",
+    keepD:"Continuer la découverte", challengeLocked:"Découvre les 16 mots pour débloquer le défi",
     unlocked:id => `🔓 Niveau ${id} débloqué !`
   },
   en: {
@@ -322,8 +322,9 @@ const STR = {
     discovery:"Discovery", challenge:"Challenge", hint:"Hint", regen:"New grid",
     count:(n, m) => `${n} of ${m} found`,
     help:"Swipe across the syllables, or tap the first one then the last. Tap a found word to hear it.",
-    doneD:"Theme discovered. Replay it in Challenge: you'll only see the English.",
-    doneC:"Challenge complete: you found every word from its English meaning.",
+    doneD:"All words discovered! Challenge unlocked: you'll only see the English.",
+    reviewD:"Review done: every word in this theme is discovered.",
+    doneC:"Challenge passed: second star earned!", againC:"Challenge passed, well done!",
     playChallenge:"Play in Challenge", next:x => `Next theme: ${x}`,
     replay:"Replay with a new grid", toThemes:"Back to themes",
     locked:(id, n) => `🔒 Pass the ${id} exam to unlock (${n} of 4)`,
@@ -335,10 +336,9 @@ const STR = {
     examDone:id => `${id} exam passed, well done!`, levelDone:"You've completed the most advanced level in the game.",
     nextTest:"Next test",
     levelWords:(n, m) => `${n} / ${m} words discovered`, newWord:"new word",
-    countD:(n, m) => `${n} of ${m} words discovered`, countC:(n, m) => `${n} of ${m} words passed in Challenge`,
+    countD:(n, m) => `${n} of ${m} words discovered`,
     progD:(n, left) => `${n > 0 ? "+" + n + " new word" + (n > 1 ? "s" : "") + ". " : ""}${left} more word${left > 1 ? "s" : ""} to discover for the star.`,
-    progC:(n, left) => `${n > 0 ? "+" + n + " word" + (n > 1 ? "s" : "") + " passed in Challenge. " : ""}${left} more for the Challenge star.`,
-    keepD:"Keep discovering", keepC:"Keep going in Challenge",
+    keepD:"Keep discovering", challengeLocked:"Discover all 16 words to unlock Challenge",
     unlocked:id => `🔓 ${id} unlocked!`
   }
 };
@@ -351,7 +351,7 @@ if (typeof prog.sound !== "boolean") prog.sound = true;
 prog.themes = prog.themes || {};
 prog.seen = prog.seen || {};
 prog.exams = prog.exams || {};
-prog.seenC = prog.seenC || {};
+delete prog.seenC;
 prog.unlocked = prog.unlocked || [];
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(prog)); } catch (e) {} };
 const starsOf = id => prog.themes[id] || {};
@@ -371,7 +371,6 @@ Object.keys(prog.seen).filter(k => k.startsWith("exam-")).forEach(k => {
 function updateStars(t) {
   const s = { ...starsOf(t.id) };
   if (countIn(prog.seen, t) === t.words.length) s.d = true;
-  if (countIn(prog.seenC, t) === t.words.length) s.c = true;
   prog.themes[t.id] = s;
 }
 THEMES.forEach(updateStars); save();
@@ -501,11 +500,10 @@ function renderHome() {
       const s = starsOf(t.id), n = (s.d ? 1 : 0) + (s.c ? 1 : 0); got += n;
       const b = document.createElement("button");
       b.className = "theme";
-      const m = t.words.length, nd = countIn(prog.seen, t), nc = countIn(prog.seenC, t);
-      const onC = !!s.d, n2 = onC ? nc : nd, full = onC && nc === m;
-      const wc = `<span class="wc${full ? " full" : ""}" aria-label="${onC ? T().countC(nc, m) : T().countD(nd, m)}">${full ? "✓ " : onC ? "🎯 " : ""}${n2}/${m}</span>`;
+      const m = t.words.length, nd = countIn(prog.seen, t), full = nd === m;
+      const wc = `<span class="wc${full ? " full" : ""}" aria-label="${T().countD(nd, m)}">${full ? "✓ " : ""}${nd}/${m}</span>`;
       b.innerHTML = `<span class="t-ko ko">${t.ko}</span><span class="t-fr">${t[LANG]}</span>${wc}
-        <span class="bar${onC ? " c" : ""}" style="width:${Math.round(n2 / m * 100)}%"></span>
+        <span class="bar" style="width:${Math.round(nd / m * 100)}%"></span>
         <span class="stars" aria-label="${T().starsLabel(n)}"><span class="${s.d?"on":""}">★</span><span class="${s.c?"on":""}">★</span></span>`;
       b.disabled = !open;
       b.onclick = () => startGame(t.id, s.d && !s.c ? "c" : "d");
@@ -561,25 +559,27 @@ function generate(words, size, dirs) {
 /* État de partie */
 let S = null;
 const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
-/* 8 mots par partie : Découverte privilégie les mots jamais trouvés, Défi ceux déjà découverts */
+/* 8 mots par partie. Découverte : 8 nouveaux à la première partie, ensuite 2 nouveaux au plus et des mots à réviser.
+   Défi : 8 mots au hasard parmi les 16. */
+const NEW_PER_GAME = 2;
 function pickWords(t, mode) {
-  const seen = new Set(prog.seen[t.id] || []), seenC = new Set(prog.seenC[t.id] || []);
-  if (mode === "c") {
-    /* Défi : d'abord les mots découverts pas encore réussis en défi, puis les autres pas encore réussis, puis le reste */
-    const a = t.words.filter(w => seen.has(w.ko) && !seenC.has(w.ko)), b = t.words.filter(w => !seen.has(w.ko) && !seenC.has(w.ko));
-    return shuffle(a).concat(shuffle(b), shuffle(t.words.filter(w => seenC.has(w.ko)))).slice(0, 8);
-  }
-  return shuffle(t.words.filter(w => !seen.has(w.ko))).concat(shuffle(t.words.filter(w => seen.has(w.ko)))).slice(0, 8);
+  if (mode === "c") return shuffle(t.words).slice(0, 8);
+  const seen = new Set(prog.seen[t.id] || []);
+  const fresh = shuffle(t.words.filter(w => !seen.has(w.ko))), old = shuffle(t.words.filter(w => seen.has(w.ko)));
+  if (!old.length) return fresh.slice(0, 8);
+  const pick = fresh.slice(0, NEW_PER_GAME).concat(old.slice(0, 8 - Math.min(NEW_PER_GAME, fresh.length)));
+  /* s'il n'y a pas assez de mots à réviser, on complète avec des nouveaux */
+  return pick.concat(fresh.slice(NEW_PER_GAME, NEW_PER_GAME + 8 - pick.length)).slice(0, 8);
 }
-/* Enregistre un mot trouvé ; renvoie vrai s'il est nouveau pour le compteur du mode en cours */
-function markSeen(ko, challenge) {
+/* Enregistre un mot trouvé ; renvoie vrai s'il vient d'être découvert */
+function markSeen(ko) {
   const t = WT[ko]; if (!t) return false;
-  const add = store => { const a = store[t.id] || (store[t.id] = []); if (a.includes(ko)) return false; a.push(ko); return true; };
-  const newD = add(prog.seen), newC = challenge ? add(prog.seenC) : false;
-  updateStars(t); save();
-  return challenge ? newC : newD;
+  const a = prog.seen[t.id] || (prog.seen[t.id] = []);
+  if (a.includes(ko)) return false;
+  a.push(ko); updateStars(t); save();
+  return true;
 }
-const isNew = (ko, challenge) => { const t = WT[ko]; return !!t && !((challenge ? prog.seenC : prog.seen)[t.id] || []).includes(ko); };
+const isNew = ko => { const t = WT[ko]; return !!t && !(prog.seen[t.id] || []).includes(ko); };
 function startExam(li, e) {
   const l = LEVELS[li];
   begin({ id:`exam-${l.id}-${e}`, ko:T().examKo, level:l }, "c", examWords(l, e), { li, e });
@@ -605,6 +605,11 @@ function begin(t, mode, words, exam) {
 function renderGame() {
   const { size, g } = S;
   document.querySelectorAll(".modes button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === S.mode));
+  const cBtn = document.querySelector('[data-mode="c"]'), cLocked = !S.exam && !starsOf(S.t.id).d;
+  cBtn.disabled = cLocked;
+  cBtn.textContent = (cLocked ? "🔒 " : "") + T().challenge;
+  cBtn.title = cLocked ? T().challengeLocked : "";
+  cBtn.setAttribute("aria-label", cLocked ? T().challengeLocked : T().challenge);
   $("sound").textContent = prog.sound ? "🔊" : "🔇";
   updateHint();
   const cells = $("cells");
@@ -637,7 +642,7 @@ function renderWords(justFound) {
     b.className = "word" + (f ? " found" : "") + (i === justFound ? " pop" : "");
     if (f) b.style.setProperty("--c", f);
     const showKo = S.mode === "d" || f;
-    const dot = !f && isNew(w.ko, S.mode === "c" && !S.exam) ? `<span class="dot" aria-label="${T().newWord}"></span>` : "";
+    const dot = !f && isNew(w.ko) ? `<span class="dot" aria-label="${T().newWord}"></span>` : "";
     b.innerHTML = `${dot}<span class="w-ko ko">${showKo ? w.ko : `<span class="hidden-ko">${"○".repeat([...w.ko].length)}</span>`}</span><span class="w-fr">${w[LANG]}</span>`;
     b.onclick = () => { if (S.mode === "d" || f) speak(w.ko); };
     box.appendChild(b);
@@ -708,7 +713,7 @@ function check(path) {
     const color = COLORS[S.found.size % COLORS.length], ko = S.words[i].ko;
     S.found.set(i, color);
     S.lines.push({ a:path[0], b:path[path.length - 1], color });
-    if (markSeen(ko, S.mode === "c" && !S.exam)) S.newCount++;
+    if (markSeen(ko)) S.newCount++;
     sfx("ok"); setTimeout(() => speak(ko), 280);
     $("preview").textContent = "";
     drawSvg(); drawFound(true); renderWords(i);
@@ -745,7 +750,10 @@ $("hint").onclick = () => {
 $("regen").onclick = () => startGame(S.t.id, S.mode);
 $("back").onclick = () => { S = null; updateHint(); $("game").hidden = true; $("home").hidden = false; $("sheet").hidden = true; renderHome(); window.scrollTo(0, 0); };
 $("sound").onclick = () => setSound(!prog.sound);
-document.querySelectorAll(".modes button").forEach(b => b.onclick = () => { if (b.dataset.mode !== S.mode) startGame(S.t.id, b.dataset.mode, S.words); });
+document.querySelectorAll(".modes button").forEach(b => b.onclick = () => {
+  if (b.dataset.mode === S.mode || b.disabled) return;
+  startGame(S.t.id, b.dataset.mode, b.dataset.mode === "c" ? null : undefined);
+});
 window.addEventListener("resize", () => { if (S && !$("game").hidden) { const px = $("board").clientWidth / S.size; $("cells").style.fontSize = Math.max(14, px * .5) + "px"; } });
 
 /* Fin de thème */
@@ -774,7 +782,9 @@ function finish() {
   $("s-stars").hidden = false;
   const t = S.t, L = T(), words = S.words;
   const wasOpen = LEVELS.map((_, li) => isUnlocked(li));
-  const before = S.starsBefore, after = { ...starsOf(t.id) }, m = S.mode;
+  const before = S.starsBefore, m = S.mode;
+  if (m === "c") { prog.themes[t.id] = { ...starsOf(t.id), c:true }; save(); }
+  const after = { ...starsOf(t.id) };
   ["d", "c"].forEach((m, k) => {
     const sp = $("s-stars").children[k];
     sp.className = after[m] ? (before[m] ? "on" : "new") : "";
@@ -783,21 +793,19 @@ function finish() {
   $("s-stars").setAttribute("aria-label", L.starsLabel((after.d ? 1 : 0) + (after.c ? 1 : 0)));
   const gained = ["d", "c"].filter(k => after[k] && !before[k]);
   if (gained.length) setTimeout(() => sfx("star"), gained[0] === "d" ? 250 : 600);
-  const left = t.words.length - countIn(m === "c" ? prog.seenC : prog.seen, t);
-  const starNow = after[m];
-  const msg = starNow ? (before[m] ? (m === "d" ? L.doneD : L.doneC) : (m === "d" ? L.doneD : L.doneC))
-    : (m === "d" ? L.progD(S.newCount, left) : L.progC(S.newCount, left));
-  $("s-sub").textContent = msg;
+  const left = t.words.length - countIn(prog.seen, t);
+  $("s-sub").textContent = m === "c" ? (before.c ? L.againC : L.doneC)
+    : after.d ? (before.d ? L.reviewD : L.doneD) : L.progD(S.newCount, left);
   const idx = THEMES.findIndex(x => x.id === t.id);
   const next = THEMES[idx + 1] && isUnlocked(LEVELS.indexOf(THEMES[idx + 1].level)) ? THEMES[idx + 1] : null;
   $("recap").innerHTML = words.map(w => `<li><span class="ko">${w.ko}</span><span>${w[LANG]}</span></li>`).join("");
   $("recap").querySelectorAll("li").forEach((li, i) => li.onclick = () => speak(words[i].ko));
   const acts = $("s-actions"); acts.innerHTML = "";
   const add = (label, primary, fn) => { const b = document.createElement("button"); b.className = "btn" + (primary ? " primary" : ""); b.textContent = label; b.onclick = fn; acts.appendChild(b); };
-  if (!starNow) add(m === "d" ? L.keepD : L.keepC, true, () => startGame(t.id, m));
-  if (m === "d") add(L.playChallenge, starNow, () => startGame(t.id, "c"));
-  if (next) add(L.next(next[LANG]), starNow && m === "c", () => startGame(next.id, "d"));
-  if (starNow) add(L.replay, false, () => startGame(t.id, m));
+  if (m === "d" && !after.d) add(L.keepD, true, () => startGame(t.id, "d"));
+  if (m === "d" && after.d) add(L.playChallenge, !after.c, () => startGame(t.id, "c"));
+  if (next) add(L.next(next[LANG]), m === "c" || (after.d && after.c), () => startGame(next.id, "d"));
+  if (m === "c" || (after.d && after.c)) add(L.replay, false, () => startGame(t.id, m));
   add(L.toThemes, false, () => $("back").onclick());
   $("sheet").hidden = false;
 }
