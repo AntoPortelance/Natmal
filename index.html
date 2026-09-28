@@ -192,7 +192,8 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .card.pop{animation:bounce .38s ease-out}
 .card.deal{animation:deal .35s ease-out both}
 @keyframes deal{from{transform:scale(.55) rotate(-6deg);opacity:0}}
-.mlist{margin-top:14px}
+.mbar{display:flex;justify-content:flex-end;margin:12px 0 0}
+.mlist{margin-top:12px}
 #m-time.low{color:var(--red)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}.card .in{transition:none}}
 </style>
@@ -258,6 +259,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
     </div>
     <button class="btn primary" id="m-results" hidden></button>
     <div class="mcards" id="m-cards"></div>
+    <div class="mbar"><button class="pill" id="m-new"></button></div>
     <div class="words mlist" id="m-list"></div>
     <p class="help" id="m-help"></p>
   </section>
@@ -450,7 +452,7 @@ const STR = {
     memDoneC:"Défi réussi en moins de 100 secondes : deuxième étoile !", memAgainC:"Défi réussi, bravo !",
     timeUp:"Temps écoulé !", timeUpSub:(n, m) => `${n} paire${n > 1 ? "s" : ""} sur ${m} trouvée${n > 1 ? "s" : ""}. Retente ta chance !`,
     memLockedC:"Découvre les 16 verbes pour débloquer le défi", countMD:(n, m) => `${n} verbe${n > 1 ? "s" : ""} découvert${n > 1 ? "s" : ""} sur ${m}`,
-    memChallenge:"Jouer le défi", tryAgain:"Réessayer",
+    memChallenge:"Jouer le défi", tryAgain:"Réessayer", newGame:"Nouvelle partie", peek:"👀 Mémorise !",
     star3:"Moins de 25 secondes : troisième étoile !", goal3:b => `Ton record : ${b}. Passe sous 25 s pour la troisième étoile.`,
     memReplay:"Rejouer", memReplaySame:"Rejouer avec ces mots", memWith:"🃏 Memory avec ces mots", seeCards:"Voir les cartes",
     leaveMemText:"Cette partie ne sera pas comptée.", leaveMemTextD:"Les verbes déjà trouvés restent découverts."
@@ -502,7 +504,7 @@ const STR = {
     memDoneC:"Challenge passed in under 100 seconds: second star!", memAgainC:"Challenge passed, well done!",
     timeUp:"Time's up!", timeUpSub:(n, m) => `${n} of ${m} pairs found. Give it another try!`,
     memLockedC:"Discover all 16 verbs to unlock Challenge", countMD:(n, m) => `${n} of ${m} verbs discovered`,
-    memChallenge:"Play the challenge", tryAgain:"Try again",
+    memChallenge:"Play the challenge", tryAgain:"Try again", newGame:"New game", peek:"👀 Memorize!",
     star3:"Under 25 seconds: third star!", goal3:b => `Your best: ${b}. Get under 25 s for the third star.`,
     memReplay:"Play again", memReplaySame:"Replay with these words", memWith:"🃏 Memory with these words", seeCards:"See the cards",
     leaveMemText:"This game won't count.", leaveMemTextD:"Verbs you've found stay discovered."
@@ -576,7 +578,7 @@ if (!prog.rulesV2) {
 
 /* Memory : ★ quand les 16 verbes sont découverts, ★★ quand le défi (16 paires) est fini en moins de 100 s ;
    les 8 étoiles d'une ceinture ouvrent la suivante */
-const MEM_TIME = 25000, MEM_LIMIT = 100000, MEM_PAIRS = 8, MEM_D = 4, MEM_NEW = 2, MEM_WAVE = 3;
+const MEM_TIME = 25000, MEM_LIMIT = 100000, MEM_PAIRS = 8, MEM_D = 6, MEM_NEW = 2, MEM_WAVE = 3, MEM_PEEK_D = 3000, MEM_PEEK = 2000;
 prog.mem = prog.mem || {};
 prog.mseen = prog.mseen || {};
 prog.memUnlocked = prog.memUnlocked || [];
@@ -625,6 +627,7 @@ function applyLang() {
   document.querySelector('[data-mm="d"]').textContent = t.discovery;
   document.querySelector('[data-mm="c"]').textContent = t.challenge;
   $("m-modes").setAttribute("aria-label", t.modesLabel);
+  $("m-new").textContent = t.newGame;
   document.querySelector('[data-game="ws"]').textContent = t.wsName;
   document.querySelector('[data-game="mem"]').textContent = t.memName;
 }
@@ -1130,8 +1133,8 @@ function renderSheetStars(list) {
 let M = null;
 const fmtTime = ms => (Math.max(0, ms) / 1000).toFixed(1).replace(".", LANG === "fr" ? "," : ".") + " s";
 const fmtGoal = ms => "/ " + fmtTime(ms).replace(/[,.]0 s$/, " s");
-function stopMemory() { if (M) { clearInterval(M.timer); clearTimeout(M.pending); clearTimeout(M.waveT); } }
-/* Découverte : 4 verbes, 4 nouveaux à la première partie puis 2 nouveaux au plus */
+function stopMemory() { if (M) { clearInterval(M.timer); clearTimeout(M.pending); clearTimeout(M.waveT); clearTimeout(M.peekT); } }
+/* Découverte : 6 verbes, 6 nouveaux à la première partie puis 2 nouveaux au plus */
 function pickMemWords(t) {
   const seen = new Set(prog.mseen[t.id] || []);
   const fresh = shuffle(t.words.filter(w => !seen.has(w.ko))), old = shuffle(t.words.filter(w => seen.has(w.ko)));
@@ -1176,6 +1179,20 @@ function startMemory(kind, t, opt) {
   window.scrollTo(0, 0);
   renderMemory(false);
   renderMemList();
+  peek();
+}
+/* Au départ, toutes les cartes se montrent quelques secondes puis se retournent */
+function peek() {
+  const game = M;
+  M.busy = true;
+  $("m-moves").textContent = T().peek;
+  requestAnimationFrame(() => { if (M === game) M.cards.forEach((_, k) => setUp(k, true)); });
+  M.peekT = setTimeout(() => {
+    if (M !== game) return;
+    M.cards.forEach((_, k) => setUp(k, false));
+    M.busy = false;
+    updateMemStats();
+  }, 300 + (M.mode === "d" ? MEM_PEEK_D : MEM_PEEK));
 }
 document.querySelectorAll("#m-modes button").forEach(b => b.onclick = () => {
   if (!M || b.disabled || b.dataset.mm === M.mode) return;
@@ -1354,6 +1371,8 @@ function finishMemory() {
   showResults();
 }
 $("m-back").onclick = () => confirmLeave(goHome);
+/* Nouvelle partie : mêmes réglages, nouvelles cartes (les mots mêlés gardent leurs 8 mots) */
+$("m-new").onclick = () => { if (M) { const { kind, t, mode, words } = M; confirmLeave(() => startMemory(kind, t, kind === "ws" ? words : mode)); } };
 $("m-sound").onclick = () => setSound(!prog.sound);
 
 applyLang();
