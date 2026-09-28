@@ -161,7 +161,40 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 #confirm .inner p{margin:6px 0 18px}
 .belt-ko{font-size:15px;font-weight:400;color:var(--muted);margin-left:4px}
 .badge svg{width:34px;height:34px;display:block}
-@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+/* Choix du jeu */
+.toprow{justify-content:space-between;align-items:center;gap:10px}
+.games{display:grid;grid-template-columns:1fr 1fr;flex:1;max-width:280px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:3px}
+.games button{border:0;background:none;padding:8px 6px;border-radius:8px;font-weight:500;color:var(--muted);font-size:14px}
+.games button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.theme .best{display:block;font-size:12px;color:var(--muted)}
+.theme .best.full{color:var(--celadon);font-weight:600}
+/* Memory */
+.mstats{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px;font-weight:500;font-variant-numeric:tabular-nums}
+.mtime{font-size:22px;font-weight:600}
+.mtime small{font-size:13px;color:var(--muted);font-weight:500}
+#m-time.over{color:var(--red)}
+.mstats .sub{font-size:14px;color:var(--muted)}
+#m-results{width:100%;margin:0 0 12px}
+.mcards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;touch-action:manipulation}
+.card{aspect-ratio:4/5;perspective:700px;border:0;background:none;padding:0;min-width:0}
+.card .in{position:relative;display:block;width:100%;height:100%;transition:transform .22s ease-out;transform-style:preserve-3d}
+.card.up .in,.card.done .in{transform:rotateY(180deg)}
+.card .b,.card .f{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;align-items:center;justify-content:center;padding:4px;text-align:center;overflow:hidden;line-height:1.2}
+.card .b{background:var(--celadon);color:var(--paper);font-size:22px;border:1px solid transparent}
+.card .b::after{content:"";position:absolute;inset:5px;border:1px solid color-mix(in srgb,var(--paper) 35%,transparent);border-radius:7px}
+.card .f{transform:rotateY(180deg);background:var(--paper);border:1px solid var(--ink);word-break:keep-all;overflow-wrap:anywhere}
+.card.tr-card .f{hyphens:auto;-webkit-hyphens:auto;color:var(--ink);font-weight:500}
+.card.ko-card.sz-l .f{font-size:22px}.card.ko-card.sz-m .f{font-size:17px}.card.ko-card.sz-s .f{font-size:14px}
+.card.tr-card.sz-l .f{font-size:14px}.card.tr-card.sz-m .f{font-size:12px}.card.tr-card.sz-s .f{font-size:10.5px}
+.card.done .f{border-color:transparent;background:color-mix(in srgb,var(--c) 22%,var(--paper))}
+.card.miss{animation:shake .3s .15s}
+.card.pop{animation:bounce .38s ease-out}
+.card.deal{animation:deal .35s ease-out both}
+@keyframes deal{from{transform:scale(.55) rotate(-6deg);opacity:0}}
+.mlist{margin-top:14px}
+#m-time.low{color:var(--red)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}.card .in{transition:none}}
 </style>
 </head>
 <body>
@@ -172,8 +205,11 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
       <button id="install-x">×</button>
     </div>
     <div class="hero">
-      <div class="toprow"><button class="icon" id="settings-btn">⚙️</button></div>
-      <h1 class="ko">낱말 찾기</h1>
+      <div class="toprow">
+        <div class="games" role="group" id="games"><button data-game="ws"></button><button data-game="mem"></button></div>
+        <button class="icon" id="settings-btn">⚙️</button>
+      </div>
+      <h1 class="ko" id="h1">낱말 찾기</h1>
       <p id="intro"></p>
       <div class="total" id="total"></div>
     </div>
@@ -203,6 +239,27 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
     <button class="btn primary" id="results" hidden></button>
     <div class="words" id="words"></div>
     <p class="help" id="help"></p>
+  </section>
+
+  <section id="mgame" hidden>
+    <div class="topbar">
+      <button class="back" id="m-back"></button>
+      <div class="title"><span class="ko" id="m-ko"></span><small id="m-fr"></small></div>
+      <button class="icon" id="m-sound"></button>
+    </div>
+    <div class="modes" role="group" id="m-modes">
+      <button data-mm="d"></button>
+      <button data-mm="c"></button>
+    </div>
+    <div class="mstats">
+      <span class="mtime"><span id="m-time"></span> <small id="m-goal"></small></span>
+      <span class="sub" id="m-moves"></span>
+      <span class="sub" id="m-pairs"></span>
+    </div>
+    <button class="btn primary" id="m-results" hidden></button>
+    <div class="mcards" id="m-cards"></div>
+    <div class="words mlist" id="m-list"></div>
+    <p class="help" id="m-help"></p>
   </section>
 </main>
 
@@ -240,7 +297,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 
 <div class="sheet" id="sheet" hidden>
   <div class="inner">
-    <h3 class="ko">잘했어요!</h3>
+    <h3 class="ko" id="s-title">잘했어요!</h3>
     <div class="s-stars" id="s-stars"><span>★</span><span>★</span></div>
     <p id="s-sub"></p>
     <ul class="recap" id="recap"></ul>
@@ -301,6 +358,46 @@ const LEVELS = [
     ]}
 ];
 const THEMES = LEVELS.flatMap(l => l.themes.map(t => ({ ...t, level:l })));
+
+/* Memory : des verbes, une forme par ceinture (infinitif, présent, passé, futur) */
+const MLEVELS = [
+  { note:{ fr:"L'infinitif des verbes d'action : 씻다 = se laver.", en:"Action verbs in the dictionary form: 씻다 = to wash." },
+    themes:[
+      { id:"m1-quotidien", ko:"일상", fr:"Quotidien", en:"Daily life", words:W("씻다=se laver=to wash;입다=mettre (un vêtement)=to put on (clothes);벗다=enlever=to take off;신다=mettre (des chaussures)=to put on (shoes);닦다=brosser, essuyer=to brush, to wipe;요리하다=cuisiner=to cook;청소하다=faire le ménage=to clean;빨래하다=faire la lessive=to do laundry;쉬다=se reposer=to rest;일하다=travailler=to work;공부하다=étudier=to study;운동하다=faire du sport=to exercise;샤워하다=se doucher=to shower;눕다=s'allonger=to lie down;깨다=se réveiller=to wake up;끓이다=faire bouillir=to boil") },
+      { id:"m1-bouger", ko:"움직임", fr:"Bouger", en:"Moving", words:W("걷다=marcher=to walk;뛰다=sauter=to jump;달리다=courir=to run;서다=se tenir debout=to stand;들어가다=entrer=to go in;나가다=sortir=to go out;올라가다=monter=to go up;내려가다=descendre=to go down;돌아가다=retourner=to go back;건너다=traverser=to cross;타다=monter (dans un véhicule)=to get on, to ride;내리다=descendre (d'un véhicule)=to get off;멈추다=s'arrêter=to stop;돌다=tourner=to turn;떠나다=partir=to leave;따라가다=suivre=to follow") },
+      { id:"m1-parler", ko:"말하기", fr:"Parler", en:"Speaking", words:W("말하다=parler, dire=to speak, to say;묻다=demander (une question)=to ask;대답하다=répondre=to answer;부르다=appeler=to call;전화하다=téléphoner=to phone;웃다=rire=to laugh;울다=pleurer=to cry;노래하다=chanter=to sing;이야기하다=raconter=to tell;설명하다=expliquer=to explain;인사하다=saluer=to greet;소개하다=présenter=to introduce;가르치다=enseigner=to teach;부탁하다=demander un service=to ask a favor;약속하다=promettre=to promise;거짓말하다=mentir=to lie") },
+      { id:"m1-donner", ko:"주고받기", fr:"Donner et prendre", en:"Giving and taking", words:W("주다=donner=to give;받다=recevoir=to receive;가지다=posséder=to have, to own;팔다=vendre=to sell;빌리다=emprunter=to borrow;갚다=rembourser=to pay back;보내다=envoyer=to send;찾다=chercher=to look for;잃어버리다=perdre=to lose;놓다=poser=to put down;들다=porter, soulever=to lift, to carry;열다=ouvrir=to open;닫다=fermer=to close;넣다=mettre dedans=to put in;빼다=retirer=to take out;바꾸다=échanger=to exchange") }
+    ]},
+  { note:{ fr:"L'infinitif des verbes d'état : en coréen, les adjectifs sont des verbes. 크다 = être grand.", en:"Descriptive verbs in the dictionary form: in Korean, adjectives are verbs. 크다 = to be big." },
+    themes:[
+      { id:"m2-tailles", ko:"크기", fr:"Tailles et distances", en:"Size and distance", words:W("크다=être grand=to be big;작다=être petit=to be small;길다=être long=to be long;짧다=être court=to be short;높다=être haut=to be high;낮다=être bas=to be low;넓다=être large=to be wide;좁다=être étroit=to be narrow;무겁다=être lourd=to be heavy;가볍다=être léger=to be light;많다=être nombreux=to be many;적다=être peu nombreux=to be few;멀다=être loin=to be far;가깝다=être proche=to be close;두껍다=être épais=to be thick;얇다=être fin=to be thin") },
+      { id:"m2-qualites", ko:"성질", fr:"Qualités", en:"Qualities", words:W("좋다=être bon=to be good;나쁘다=être mauvais=to be bad;예쁘다=être joli=to be pretty;맛있다=être délicieux=to be delicious;맛없다=ne pas être bon (goût)=to taste bad;비싸다=être cher=to be expensive;싸다=être bon marché=to be cheap;쉽다=être facile=to be easy;어렵다=être difficile=to be difficult;재미있다=être amusant=to be fun;바쁘다=être occupé=to be busy;조용하다=être calme=to be quiet;시끄럽다=être bruyant=to be noisy;깨끗하다=être propre=to be clean;더럽다=être sale=to be dirty;새롭다=être nouveau=to be new") },
+      { id:"m2-sensations", ko:"감각", fr:"Sensations", en:"Sensations", words:W("덥다=faire chaud=to be hot (weather);춥다=faire froid=to be cold (weather);따뜻하다=être tiède, doux=to be warm;시원하다=être frais=to be cool;뜨겁다=être brûlant=to be hot (to the touch);차갑다=être froid (au toucher)=to be cold (to the touch);맵다=être épicé=to be spicy;달다=être sucré=to be sweet;짜다=être salé=to be salty;시다=être acide=to be sour;배고프다=avoir faim=to be hungry;배부르다=être rassasié=to be full;목마르다=avoir soif=to be thirsty;아프다=avoir mal=to hurt;피곤하다=être fatigué=to be tired;졸리다=avoir sommeil=to be sleepy") },
+      { id:"m2-maison", ko:"집안일", fr:"À la maison", en:"Around the house", words:W("켜다=allumer=to turn on;끄다=éteindre=to turn off;정리하다=ranger=to tidy up;버리다=jeter=to throw away;고치다=réparer=to fix;만들다=fabriquer=to make;굽다=griller, cuire=to grill, to bake;자르다=couper=to cut;섞다=mélanger=to mix;붓다=verser=to pour;채우다=remplir=to fill;걸다=accrocher=to hang;심다=planter=to plant;키우다=élever, faire pousser=to raise, to grow;쌓다=empiler=to stack;옮기다=déplacer=to move (something)") }
+    ]},
+  { note:{ fr:"Le présent poli en -아요 / -어요 : 놀아요 = je m'amuse.", en:"Polite present in -아요 / -어요: 놀아요 = I have fun." },
+    themes:[
+      { id:"m3-loisirs", ko:"여가", fr:"Loisirs", en:"Leisure", words:W("놀아요=je m'amuse=I have fun;춤춰요=je danse=I dance;그려요=je dessine=I draw;찍어요=je prends en photo=I take a photo;쳐요=je joue (d'un instrument, au tennis)=I play (an instrument, tennis);수영해요=je nage=I swim;등산해요=je fais de la randonnée=I go hiking;낚시해요=je pêche=I go fishing;모아요=je collectionne=I collect;즐겨요=j'apprécie=I enjoy;구경해요=je visite, je regarde=I look around;산책해요=je me promène=I take a walk;쇼핑해요=je fais du shopping=I go shopping;연습해요=je m'entraîne=I practice;참가해요=je participe=I take part;이겨요=je gagne=I win") },
+      { id:"m3-sentiments", ko:"마음", fr:"Sentiments", en:"Feelings", words:W("좋아해요=j'aime bien=I like;싫어해요=je déteste=I dislike;사랑해요=j'aime=I love;믿어요=je crois, j'ai confiance=I believe, I trust;원해요=je veux=I want;바라요=je souhaite=I hope;놀라요=je suis surpris=I'm surprised;참아요=je me retiens=I hold back;미워해요=je hais=I hate;고민해요=je me tracasse=I'm worried about it;느껴요=je ressens=I feel;반해요=je craque (pour qqn)=I fall for (someone);감사해요=je remercie=I'm grateful;미안해요=je suis désolé=I'm sorry;궁금해요=je suis curieux=I'm curious;귀찮아요=j'ai la flemme=I can't be bothered") },
+      { id:"m3-pratique", ko:"생활", fr:"Vie pratique", en:"Everyday errands", words:W("주문해요=je commande=I order;계산해요=je règle l'addition=I pay the bill;내요=je paie=I pay;골라요=je choisis=I pick;배달해요=je livre=I deliver;안내해요=je guide=I guide;이사해요=je déménage=I move (house);저축해요=j'épargne=I save money;모자라요=ça manque=there isn't enough;남아요=il en reste=there's some left;세워요=je me gare=I park;막혀요=ça bouchonne=traffic is jammed;늦어요=je suis en retard=I'm late;서둘러요=je me dépêche=I hurry;확인해요=je vérifie=I check;사용해요=j'utilise=I use") },
+      { id:"m3-relations", ko:"관계", fr:"Relations", en:"Relationships", words:W("사귀어요=je sors avec (qqn)=I'm dating (someone);헤어져요=on se sépare=we break up;결혼해요=je me marie=I get married;싸워요=on se dispute=we argue;화해해요=on se réconcilie=we make up;도와요=j'aide=I help;초대해요=j'invite=I invite;방문해요=je rends visite=I visit;축하해요=je félicite=I congratulate;사과해요=je m'excuse=I apologize;칭찬해요=je complimente=I praise;용서해요=je pardonne=I forgive;연락해요=je contacte=I get in touch;챙겨요=je prends soin de=I look after;기억해요=je me souviens=I remember;닮아요=je ressemble à=I look like") }
+    ]},
+  { note:{ fr:"Le passé en -았어요 / -었어요 : 끝냈어요 = j'ai fini.", en:"Past tense in -았어요 / -었어요: 끝냈어요 = I finished." },
+    themes:[
+      { id:"m4-travail", ko:"일", fr:"Au travail", en:"At work", words:W("시작했어요=j'ai commencé=I started;끝냈어요=j'ai fini=I finished;준비했어요=j'ai préparé=I prepared;보고했어요=j'ai fait un rapport=I reported;발표했어요=j'ai présenté=I gave a presentation;제출했어요=j'ai remis=I submitted;맡았어요=je m'en suis chargé=I took charge;지원했어요=j'ai postulé=I applied;합격했어요=j'ai été reçu=I passed;그만뒀어요=j'ai démissionné=I quit;늘었어요=ça a augmenté=it increased;줄었어요=ça a diminué=it decreased;성공했어요=j'ai réussi=I succeeded;실패했어요=j'ai échoué=I failed;결정했어요=j'ai décidé=I decided;뽑았어요=j'ai recruté=I hired") },
+      { id:"m4-evenements", ko:"사건", fr:"Événements", en:"Events", words:W("생겼어요=c'est arrivé=it happened;바뀌었어요=ça a changé=it changed;사라졌어요=ça a disparu=it disappeared;나타났어요=c'est apparu=it appeared;깨졌어요=ça s'est cassé=it broke;다쳤어요=je me suis blessé=I got hurt;죽었어요=il est mort=he died;태어났어요=il est né=he was born;넘어졌어요=je suis tombé=I fell over;끝났어요=c'est terminé=it's over;놓쳤어요=je l'ai raté=I missed it;부딪쳤어요=je me suis cogné=I bumped into it;터졌어요=ça a éclaté=it burst;녹았어요=ça a fondu=it melted;얼었어요=ça a gelé=it froze;자랐어요=il a grandi=he grew up") },
+      { id:"m4-apprendre", ko:"공부", fr:"Apprendre", en:"Learning", words:W("외웠어요=j'ai mémorisé=I memorized;익혔어요=j'ai maîtrisé=I mastered;이해했어요=j'ai compris=I understood;틀렸어요=je me suis trompé=I got it wrong;맞았어요=c'était juste=it was right;풀었어요=j'ai résolu=I solved;복습했어요=j'ai révisé=I reviewed;예습했어요=j'ai préparé le cours=I prepared the lesson;질문했어요=j'ai posé une question=I asked a question;졸업했어요=j'ai eu mon diplôme=I graduated;입학했어요=je suis entré à l'école=I started school;번역했어요=j'ai traduit=I translated;발음했어요=j'ai prononcé=I pronounced;받아썼어요=j'ai fait une dictée=I took dictation;조사했어요=j'ai fait des recherches=I researched;몰랐어요=je ne savais pas=I didn't know") },
+      { id:"m4-gestes", ko:"몸짓", fr:"Gestes", en:"Gestures", words:W("흔들었어요=j'ai secoué=I shook;끄덕였어요=j'ai hoché la tête=I nodded;안았어요=j'ai serré dans mes bras=I hugged;잡았어요=j'ai attrapé=I caught;밀었어요=j'ai poussé=I pushed;당겼어요=j'ai tiré=I pulled;던졌어요=j'ai lancé=I threw;찼어요=j'ai donné un coup de pied=I kicked;때렸어요=j'ai frappé=I hit;만졌어요=j'ai touché=I touched;숨었어요=je me suis caché=I hid;굴렀어요=j'ai roulé=I rolled;기댔어요=je me suis appuyé=I leaned;눌렀어요=j'ai appuyé (sur un bouton)=I pressed (a button);폈어요=j'ai déplié=I unfolded;접었어요=j'ai plié=I folded") }
+    ]},
+  { note:{ fr:"Le futur en -(으)ㄹ 거예요 : 노력할 거예요 = je vais faire des efforts.", en:"Future in -(으)ㄹ 거예요: 노력할 거예요 = I'll make an effort." },
+    themes:[
+      { id:"m5-projets", ko:"계획", fr:"Projets", en:"Plans", words:W("노력할 거예요=je vais faire des efforts=I'll make an effort;도전할 거예요=je vais relever le défi=I'll take on the challenge;포기할 거예요=je vais abandonner=I'll give up;극복할 거예요=je vais surmonter=I'll overcome it;달성할 거예요=je vais atteindre (un objectif)=I'll reach (a goal);유지할 거예요=je vais maintenir=I'll keep it up;개선할 거예요=je vais améliorer=I'll improve it;발전할 거예요=je vais progresser=I'll make progress;실천할 거예요=je vais mettre en pratique=I'll put it into practice;선택할 거예요=je vais choisir=I'll choose;집중할 거예요=je vais me concentrer=I'll focus;기록할 거예요=je vais consigner=I'll record it;미룰 거예요=je vais remettre à plus tard=I'll put it off;이룰 거예요=je vais réaliser (un rêve)=I'll achieve (a dream);견딜 거예요=je vais endurer=I'll endure;성장할 거예요=je vais me développer=I'll grow") },
+      { id:"m5-penser", ko:"생각", fr:"Penser", en:"Thinking", words:W("생각할 거예요=je vais réfléchir=I'll think about it;판단할 거예요=je vais juger=I'll judge;예상할 거예요=je vais prévoir=I'll anticipate;추측할 거예요=je vais supposer=I'll guess;의심할 거예요=je vais douter=I'll doubt it;인정할 거예요=je vais admettre=I'll admit it;부정할 거예요=je vais nier=I'll deny it;깨달을 거예요=je vais m'en rendre compte=I'll realize;고려할 거예요=je vais prendre en compte=I'll take it into account;비교할 거예요=je vais comparer=I'll compare;상상할 거예요=je vais imaginer=I'll imagine;결심할 거예요=je vais me décider=I'll make up my mind;동의할 거예요=je vais être d'accord=I'll agree;반대할 거예요=je vais m'opposer=I'll oppose it;망설일 거예요=je vais hésiter=I'll hesitate;존중할 거예요=je vais respecter=I'll respect it") },
+      { id:"m5-societe", ko:"사회", fr:"Agir en société", en:"Acting in society", words:W("보호할 거예요=je vais protéger=I'll protect;지킬 거예요=je vais respecter (une règle)=I'll follow (a rule);줄일 거예요=je vais réduire=I'll reduce;해결할 거예요=je vais régler (un problème)=I'll solve (a problem);투표할 거예요=je vais voter=I'll vote;지지할 거예요=je vais soutenir=I'll support;비난할 거예요=je vais blâmer=I'll blame;요구할 거예요=je vais exiger=I'll demand;제안할 거예요=je vais proposer=I'll propose;협상할 거예요=je vais négocier=I'll negotiate;설립할 거예요=je vais fonder=I'll found;기부할 거예요=je vais faire un don=I'll donate;봉사할 거예요=je vais faire du bénévolat=I'll volunteer;알릴 거예요=je vais faire savoir=I'll let people know;막을 거예요=je vais empêcher=I'll prevent it;구할 거예요=je vais sauver=I'll save") },
+      { id:"m5-exprimer", ko:"표현", fr:"S'exprimer", en:"Expressing yourself", words:W("강조할 거예요=je vais souligner=I'll emphasize;언급할 거예요=je vais mentionner=I'll mention;표현할 거예요=je vais exprimer=I'll express;전할 거예요=je vais transmettre=I'll pass it on;밝힐 거예요=je vais révéler=I'll reveal;숨길 거예요=je vais cacher=I'll hide it;속일 거예요=je vais tromper=I'll deceive;권할 거예요=je vais recommander=I'll recommend;경고할 거예요=je vais avertir=I'll warn;고백할 거예요=je vais avouer=I'll confess;변명할 거예요=je vais me justifier=I'll make excuses;토론할 거예요=je vais débattre=I'll debate;대화할 거예요=je vais discuter=I'll talk it over;통역할 거예요=je vais interpréter=I'll interpret;요청할 거예요=je vais demander (officiellement)=I'll request;상의할 거예요=je vais me concerter=I'll consult") }
+    ]}
+].map((m, li) => ({ ...m, id:"M" + (li + 1), name:LEVELS[li].name, belt:LEVELS[li].belt }));
+const MTHEMES = MLEVELS.flatMap(l => l.themes.map(t => Object.assign(t, { level:l })));
 const COLORS = ["var(--celadon)","var(--red)","var(--yellow)","var(--blue)"];
 const $ = id => document.getElementById(id);
 
@@ -308,9 +405,9 @@ const $ = id => document.getElementById(id);
 const STR = {
   fr: {
     title:"낱말 찾기 – mots mêlés coréens",
-    intro:"Des mots mêlés en coréen, de la ceinture blanche à la ceinture noire. Chaque thème se joue deux fois : d'abord en découverte, puis en défi.",
+    intro:"Des mots mêlés en coréen, de la ceinture blanche à la ceinture noire. Chaque thème se joue en découverte, puis en défi, puis au memory en moins de 25 secondes.",
     total:(n, m) => `${n} étoile${n > 1 ? "s" : ""} sur ${m}`,
-    starsLabel:n => `${n} étoile(s) sur 2`,
+    starsLabel:(n, m) => `${n} étoile(s) sur ${m}`,
     install:"Pour installer le jeu comme une app : touche <strong>Partager</strong> dans Safari, puis <strong>Sur l'écran d'accueil</strong>.",
     hide:"Masquer", langLabel:"Langue", settings:"Réglages", soundOn:"Activé", soundOff:"Désactivé", close:"Fermer", back:"‹ Thèmes", sound:"Son", modesLabel:"Mode de jeu",
     discovery:"Découverte", challenge:"Défi", hint:"Indice", regen:"Nouvelle grille",
@@ -337,13 +434,32 @@ const STR = {
     countD:(n, m) => `${n} mot${n > 1 ? "s" : ""} découvert${n > 1 ? "s" : ""} sur ${m}`,
     progD:(n, left) => `${n > 0 ? "+" + n + " nouveau" + (n > 1 ? "x" : "") + " mot" + (n > 1 ? "s" : "") + ". " : ""}Encore ${left} mot${left > 1 ? "s" : ""} à découvrir pour l'étoile.`,
     keepD:"Continuer la découverte", challengeLocked:"Découvre les 16 mots pour débloquer le défi",
-    unlocked:name => `🔓 ${name} débloquée !`
+    unlocked:name => `🔓 ${name} débloquée !`,
+    wsName:"Mots mêlés", memName:"Memory",
+    introMem:"Un memory de verbes coréens, de l'infinitif au futur. Découvre les 16 verbes de chaque thème, puis relève le défi : les 16 paires en moins de 100 secondes.",
+    memLocked:(name, n, m) => `🔒 Gagne les ${m} étoiles de la ${name.toLowerCase()} pour débloquer (${n} / ${m})`,
+    bestLabel:"Record",
+    memHelp:"Retourne deux cartes : un verbe coréen et sa traduction. La liste t'aide ; touche un verbe pour l'entendre.",
+    memHelpC:"Les 16 verbes du thème en 100 secondes. Toutes les 3 paires, de nouvelles cartes arrivent et les cartes cachées se mélangent.",
+    memHelpWs:"Retourne deux cartes : un mot coréen et sa traduction. Termine en moins de 25 secondes pour la troisième étoile.",
+    moves:n => `${n} coup${n > 1 ? "s" : ""}`, pairs:(n, m) => `${n}/${m} paires`, cardHidden:"Carte cachée",
+    memTime:(t, n) => `${t} en ${n} coup${n > 1 ? "s" : ""}.`, record:"Nouveau record !",
+    memDoneD:"Les 16 verbes sont découverts ! Le défi est débloqué : 16 paires en 100 secondes.",
+    memReviewD:"Révision terminée : tous les verbes de ce thème sont découverts.",
+    memProgD:(n, left) => `${n > 0 ? "+" + n + " nouveau" + (n > 1 ? "x" : "") + " verbe" + (n > 1 ? "s" : "") + ". " : ""}Encore ${left} verbe${left > 1 ? "s" : ""} à découvrir pour l'étoile.`,
+    memDoneC:"Défi réussi en moins de 100 secondes : deuxième étoile !", memAgainC:"Défi réussi, bravo !",
+    timeUp:"Temps écoulé !", timeUpSub:(n, m) => `${n} paire${n > 1 ? "s" : ""} sur ${m} trouvée${n > 1 ? "s" : ""}. Retente ta chance !`,
+    memLockedC:"Découvre les 16 verbes pour débloquer le défi", countMD:(n, m) => `${n} verbe${n > 1 ? "s" : ""} découvert${n > 1 ? "s" : ""} sur ${m}`,
+    memChallenge:"Jouer le défi", tryAgain:"Réessayer",
+    star3:"Moins de 25 secondes : troisième étoile !", goal3:b => `Ton record : ${b}. Passe sous 25 s pour la troisième étoile.`,
+    memReplay:"Rejouer", memReplaySame:"Rejouer avec ces mots", memWith:"🃏 Memory avec ces mots", seeCards:"Voir les cartes",
+    leaveMemText:"Cette partie ne sera pas comptée.", leaveMemTextD:"Les verbes déjà trouvés restent découverts."
   },
   en: {
     title:"낱말 찾기 – Korean word search",
-    intro:"Korean word search, from white belt to black belt. Each theme is played twice: first in Discovery, then in Challenge.",
+    intro:"Korean word search, from white belt to black belt. Each theme is played in Discovery, then in Challenge, then as a memory game in under 25 seconds.",
     total:(n, m) => `${n} star${n === 1 ? "" : "s"} out of ${m}`,
-    starsLabel:n => `${n} of 2 stars`,
+    starsLabel:(n, m) => `${n} of ${m} stars`,
     install:"To install the game as an app: tap <strong>Share</strong> in Safari, then <strong>Add to Home Screen</strong>.",
     hide:"Hide", langLabel:"Language", settings:"Settings", soundOn:"On", soundOff:"Off", close:"Close", back:"‹ Themes", sound:"Sound", modesLabel:"Game mode",
     discovery:"Discovery", challenge:"Challenge", hint:"Hint", regen:"New grid",
@@ -370,7 +486,26 @@ const STR = {
     countD:(n, m) => `${n} of ${m} words discovered`,
     progD:(n, left) => `${n > 0 ? "+" + n + " new word" + (n > 1 ? "s" : "") + ". " : ""}${left} more word${left > 1 ? "s" : ""} to discover for the star.`,
     keepD:"Keep discovering", challengeLocked:"Discover all 16 words to unlock Challenge",
-    unlocked:name => `🔓 ${name} unlocked!`
+    unlocked:name => `🔓 ${name} unlocked!`,
+    wsName:"Word search", memName:"Memory",
+    introMem:"A memory game of Korean verbs, from the dictionary form to the future tense. Discover the 16 verbs of each theme, then take the challenge: all 16 pairs in under 100 seconds.",
+    memLocked:(name, n, m) => `🔒 Earn all ${m} ${name.toLowerCase()} stars to unlock (${n} / ${m})`,
+    bestLabel:"Best",
+    memHelp:"Flip two cards: a Korean verb and its translation. The list helps you; tap a verb to hear it.",
+    memHelpC:"All 16 verbs of the theme in 100 seconds. Every 3 pairs, new cards come in and the hidden cards get shuffled.",
+    memHelpWs:"Flip two cards: a Korean word and its translation. Finish in under 25 seconds for the third star.",
+    moves:n => `${n} move${n === 1 ? "" : "s"}`, pairs:(n, m) => `${n}/${m} pairs`, cardHidden:"Hidden card",
+    memTime:(t, n) => `${t} in ${n} move${n === 1 ? "" : "s"}.`, record:"New record!",
+    memDoneD:"All 16 verbs discovered! Challenge unlocked: 16 pairs in 100 seconds.",
+    memReviewD:"Review done: every verb in this theme is discovered.",
+    memProgD:(n, left) => `${n > 0 ? "+" + n + " new verb" + (n > 1 ? "s" : "") + ". " : ""}${left} more verb${left > 1 ? "s" : ""} to discover for the star.`,
+    memDoneC:"Challenge passed in under 100 seconds: second star!", memAgainC:"Challenge passed, well done!",
+    timeUp:"Time's up!", timeUpSub:(n, m) => `${n} of ${m} pairs found. Give it another try!`,
+    memLockedC:"Discover all 16 verbs to unlock Challenge", countMD:(n, m) => `${n} of ${m} verbs discovered`,
+    memChallenge:"Play the challenge", tryAgain:"Try again",
+    star3:"Under 25 seconds: third star!", goal3:b => `Your best: ${b}. Get under 25 s for the third star.`,
+    memReplay:"Play again", memReplaySame:"Replay with these words", memWith:"🃏 Memory with these words", seeCards:"See the cards",
+    leaveMemText:"This game won't count.", leaveMemTextD:"Verbs you've found stay discovered."
   }
 };
 
@@ -439,6 +574,25 @@ if (!prog.rulesV2) {
   prog.rulesV2 = true; save();
 }
 
+/* Memory : ★ quand les 16 verbes sont découverts, ★★ quand le défi (16 paires) est fini en moins de 100 s ;
+   les 8 étoiles d'une ceinture ouvrent la suivante */
+const MEM_TIME = 25000, MEM_LIMIT = 100000, MEM_PAIRS = 8, MEM_D = 4, MEM_NEW = 2, MEM_WAVE = 3;
+prog.mem = prog.mem || {};
+prog.mseen = prog.mseen || {};
+prog.memUnlocked = prog.memUnlocked || [];
+if (prog.game !== "mem") prog.game = "ws";
+const memOf = id => prog.mem[id] || {};
+const MTH = {};
+MTHEMES.forEach(t => { MTH[t.id] = t; });
+const memStars = id => ({ a:countIn(prog.mseen, MTH[id]) === MTH[id].words.length, b:!!memOf(id).c });
+const memStarCount = l => l.themes.reduce((n, t) => { const s = memStars(t.id); return n + (s.a ? 1 : 0) + (s.b ? 1 : 0); }, 0);
+function memUnlocked(li) {
+  const l = MLEVELS[li];
+  if (li === 0 || prog.memUnlocked.includes(l.id) || l.themes.some(t => (prog.mseen[t.id] || []).length > 0)) return true;
+  const p = MLEVELS[li - 1];
+  return memStarCount(p) === p.themes.length * 2;
+}
+
 /* Langue : celle choisie, sinon celle du téléphone */
 let LANG = prog.lang === "fr" || prog.lang === "en" ? prog.lang
   : ((navigator.language || "").toLowerCase().startsWith("fr") ? "fr" : "en");
@@ -466,6 +620,13 @@ function applyLang() {
   $("hint").textContent = t.hint;
   $("regen").textContent = t.regen;
   $("help").textContent = t.help;
+  $("m-back").textContent = t.back;
+  $("m-sound").setAttribute("aria-label", t.sound);
+  document.querySelector('[data-mm="d"]').textContent = t.discovery;
+  document.querySelector('[data-mm="c"]').textContent = t.challenge;
+  $("m-modes").setAttribute("aria-label", t.modesLabel);
+  document.querySelector('[data-game="ws"]').textContent = t.wsName;
+  document.querySelector('[data-game="mem"]').textContent = t.memName;
 }
 /* Panneau Réglages */
 function renderSettings() {
@@ -474,7 +635,7 @@ function renderSettings() {
 }
 function setSound(on) {
   prog.sound = on; save(); renderSettings();
-  $("sound").textContent = prog.sound ? "🔊" : "🔇";
+  $("sound").textContent = $("m-sound").textContent = prog.sound ? "🔊" : "🔇";
 }
 document.querySelectorAll("#settings [data-lang]").forEach(b => b.onclick = () => {
   LANG = b.dataset.lang; prog.lang = LANG; save(); applyLang(); renderHome();
@@ -541,8 +702,17 @@ function beltKnot(c) {
     + `<rect x="13.5" y="11" width="9" height="11" rx="2" fill="${c}" ${e}/></svg>`;
 }
 
-/* Accueil */
+/* Accueil : deux jeux, un seul parcours de ceintures chacun */
+document.querySelectorAll("#games button").forEach(b => b.onclick = () => {
+  if (prog.game === b.dataset.game) return;
+  prog.game = b.dataset.game; save(); renderHome();
+});
 function renderHome() {
+  const mem = prog.game === "mem";
+  document.querySelectorAll("#games button").forEach(b => b.setAttribute("aria-pressed", b.dataset.game === prog.game));
+  $("h1").textContent = mem ? "짝 맞추기" : "낱말 찾기";
+  $("intro").textContent = mem ? T().introMem : T().intro;
+  if (mem) return renderMemHome();
   let got = 0;
   $("ladder").innerHTML = "";
   LEVELS.forEach((l, li) => {
@@ -556,14 +726,14 @@ function renderHome() {
     el.innerHTML = `<div class="badge" aria-hidden="true">${beltKnot(l.belt.bg)}</div><div><h2>${l.name[LANG]} <span class="ko belt-ko">${l.belt.ko}</span></h2>${note}${total}<div class="themes"></div></div>`;
     const box = el.querySelector(".themes");
     l.themes.forEach(t => {
-      const s = starsOf(t.id), n = (s.d ? 1 : 0) + (s.c ? 1 : 0); got += n;
+      const s = starsOf(t.id), n = (s.d ? 1 : 0) + (s.c ? 1 : 0) + (s.m ? 1 : 0); got += n;
       const b = document.createElement("button");
       b.className = "theme";
       const m = t.words.length, nd = countIn(prog.seen, t), full = nd === m;
       const wc = `<span class="wc${full ? " full" : ""}" aria-label="${T().countD(nd, m)}">${full ? "✓ " : ""}${nd}/${m}</span>`;
       b.innerHTML = `<span class="t-ko ko">${t.ko}</span><span class="t-fr">${t[LANG]}</span>${wc}
         <span class="bar" style="width:${Math.round(nd / m * 100)}%"></span>
-        <span class="stars" aria-label="${T().starsLabel(n)}"><span class="${s.d?"on":""}">★</span><span class="${s.c?"on":""}">★</span></span>`;
+        <span class="stars" aria-label="${T().starsLabel(n, 3)}"><span class="${s.d?"on":""}">★</span><span class="${s.c?"on":""}">★</span><span class="${s.m?"on":""}">★</span></span>`;
       b.disabled = !open;
       b.onclick = () => startGame(t.id, s.d && !s.c ? "c" : "d");
       box.appendChild(b);
@@ -582,7 +752,36 @@ function renderHome() {
     el.querySelector(".themes").after(ex);
     $("ladder").appendChild(el);
   });
-  $("total").textContent = T().total(got, THEMES.length * 2);
+  $("total").textContent = T().total(got, THEMES.length * 3);
+}
+function renderMemHome() {
+  let got = 0;
+  $("ladder").innerHTML = "";
+  MLEVELS.forEach((l, li) => {
+    const open = memUnlocked(li), prev = MLEVELS[li - 1];
+    const el = document.createElement("div");
+    el.className = "level" + (open ? "" : " locked");
+    const note = open ? `<p class="note">${l.note[LANG]}</p>`
+      : `<p class="lock">${T().memLocked(prev.name[LANG], memStarCount(prev), prev.themes.length * 2)}</p>`;
+    el.innerHTML = `<div class="badge" aria-hidden="true">${beltKnot(l.belt.bg)}</div><div><h2>${l.name[LANG]} <span class="ko belt-ko">${l.belt.ko}</span></h2>${note}<div class="themes"></div></div>`;
+    const box = el.querySelector(".themes");
+    l.themes.forEach(t => {
+      const p = memOf(t.id), s = memStars(t.id), n = (s.a ? 1 : 0) + (s.b ? 1 : 0); got += n;
+      const m = t.words.length, nd = countIn(prog.mseen, t);
+      const best = p.best != null ? `<small class="best full">⏱ ${T().bestLabel} ${fmtTime(p.best)}</small>` : "";
+      const b = document.createElement("button");
+      b.className = "theme";
+      b.innerHTML = `<span class="t-ko ko">${t.ko}</span><span class="t-fr">${t[LANG]}${best}</span>
+        <span class="wc${s.a ? " full" : ""}" aria-label="${T().countMD(nd, m)}">${s.a ? "✓ " : ""}${nd}/${m}</span>
+        <span class="bar" style="width:${Math.round(nd / m * 100)}%"></span>
+        <span class="stars" aria-label="${T().starsLabel(n, 2)}"><span class="${s.a?"on":""}">★</span><span class="${s.b?"on":""}">★</span></span>`;
+      b.disabled = !open;
+      b.onclick = () => startMemory("mem", t, s.a && !s.b ? "c" : "d");
+      box.appendChild(b);
+    });
+    $("ladder").appendChild(el);
+  });
+  $("total").textContent = T().total(got, MTHEMES.length * 2);
 }
 
 /* Génération de la grille */
@@ -812,17 +1011,23 @@ $("hint").onclick = () => {
   el.classList.remove("hint", "pop"); el.style.animationDelay = ""; void el.offsetWidth; el.classList.add("hint");
 };
 function goHome() {
-  S = null; updateHint();
-  $("game").hidden = true; $("home").hidden = false; $("sheet").hidden = true; $("results").hidden = true;
+  S = null; stopMemory(); M = null; updateHint();
+  $("game").hidden = true; $("mgame").hidden = true; $("home").hidden = false; $("sheet").hidden = true; $("results").hidden = true;
   renderHome(); window.scrollTo(0, 0);
 }
 /* Demande confirmation si une partie est en cours (au moins un mot trouvé, grille pas finie) */
 let onLeave = null;
 function confirmLeave(action) {
-  if (!S || S.finished || S.found.size === 0) return action();
   const L = T();
-  $("c-title").textContent = S.exam ? L.leaveExamTitle : L.leaveTitle;
-  $("c-text").textContent = S.exam ? L.leaveExamText : L.leaveText;
+  if (M) {
+    if (M.finished || !M.found) return action();
+    $("c-title").textContent = L.leaveTitle;
+    $("c-text").textContent = M.kind === "mem" && M.mode === "d" ? L.leaveMemTextD : L.leaveMemText;
+  } else {
+    if (!S || S.finished || S.found.size === 0) return action();
+    $("c-title").textContent = S.exam ? L.leaveExamTitle : L.leaveTitle;
+    $("c-text").textContent = S.exam ? L.leaveExamText : L.leaveText;
+  }
   $("c-stay").textContent = L.stay; $("c-leave").textContent = L.leave;
   onLeave = action;
   openSheet("confirm"); $("c-stay").focus();
@@ -839,9 +1044,14 @@ function closeSheet(id, then) {
   setTimeout(() => { el.hidden = true; el.classList.remove("closing"); if (then) then(); }, 250);
 }
 /* Écran de fin : on peut le fermer pour revoir sa grille, puis le rouvrir */
-function showResults() { $("results").hidden = true; openSheet("sheet"); }
-function hideResults() { closeSheet("sheet", () => { if (S && S.finished) { $("results").textContent = T().seeResults; $("results").hidden = false; } }); }
-$("results").onclick = showResults;
+function showResults() { $("results").hidden = true; $("m-results").hidden = true; openSheet("sheet"); }
+function hideResults() {
+  closeSheet("sheet", () => {
+    const b = M && M.finished ? $("m-results") : S && S.finished ? $("results") : null;
+    if (b) { b.textContent = T().seeResults; b.hidden = false; }
+  });
+}
+$("results").onclick = $("m-results").onclick = showResults;
 $("sheet").addEventListener("click", e => { if (e.target === $("sheet")) hideResults(); });
 
 $("regen").onclick = () => confirmLeave(() => startGame(S.t.id, S.mode));
@@ -855,6 +1065,7 @@ window.addEventListener("resize", () => { if (S && !$("game").hidden) { const px
 
 /* Fin de thème */
 function finishExam() {
+  $("s-title").textContent = "잘했어요!";
   const L = T(), { li } = S.exam, l = LEVELS[li], nextL = LEVELS[li + 1], words = S.words;
   const wasOpen = nextL ? isUnlocked(li + 1) : true, wasDone = examPassed(l), before = validCount(l);
   const a = prog.examWords[l.id] || (prog.examWords[l.id] = []);
@@ -879,18 +1090,14 @@ function finishExam() {
 }
 function finish() {
   if (S.exam) return finishExam();
+  $("s-title").textContent = "잘했어요!";
   $("s-stars").hidden = false;
   const t = S.t, L = T(), words = S.words;
   const wasOpen = LEVELS.map((_, li) => isUnlocked(li));
   const before = S.starsBefore, m = S.mode;
   if (m === "c") { prog.themes[t.id] = { ...starsOf(t.id), c:true }; save(); }
   const after = { ...starsOf(t.id) };
-  ["d", "c"].forEach((m, k) => {
-    const sp = $("s-stars").children[k];
-    sp.className = after[m] ? (before[m] ? "on" : "new") : "";
-    sp.style.animationDelay = (250 + k * 350) + "ms";
-  });
-  $("s-stars").setAttribute("aria-label", L.starsLabel((after.d ? 1 : 0) + (after.c ? 1 : 0)));
+  renderSheetStars(["d", "c", "m"].map(k => [!!before[k], !!after[k]]));
   const gained = ["d", "c"].filter(k => after[k] && !before[k]);
   if (gained.length) setTimeout(() => sfx("star"), gained[0] === "d" ? 250 : 600);
   const left = t.words.length - countIn(prog.seen, t);
@@ -906,10 +1113,248 @@ function finish() {
   if (m === "d" && after.d) add(L.playChallenge, !after.c, () => startGame(t.id, "c"));
   if (next) add(L.next(next[LANG]), m === "c" || (after.d && after.c), () => startGame(next.id, "d"));
   if (m === "c" || (after.d && after.c)) add(L.replay, false, () => startGame(t.id, m));
+  add(L.memWith, false, () => startMemory("ws", t, words));
   add(L.toThemes, false, goHome);
   add(L.seeGrid, false, hideResults);
   showResults();
 }
+/* Étoiles de l'écran de fin : [avant, après] pour chacune */
+function renderSheetStars(list) {
+  const el = $("s-stars");
+  el.hidden = false;
+  el.innerHTML = list.map(([b, a], k) => `<span class="${a ? (b ? "on" : "new") : ""}" style="animation-delay:${250 + k * 350}ms">★</span>`).join("");
+  el.setAttribute("aria-label", T().starsLabel(list.filter(x => x[1]).length, list.length));
+}
+
+/* ===== Memory ===== */
+let M = null;
+const fmtTime = ms => (Math.max(0, ms) / 1000).toFixed(1).replace(".", LANG === "fr" ? "," : ".") + " s";
+const fmtGoal = ms => "/ " + fmtTime(ms).replace(/[,.]0 s$/, " s");
+function stopMemory() { if (M) { clearInterval(M.timer); clearTimeout(M.pending); clearTimeout(M.waveT); } }
+/* Découverte : 4 verbes, 4 nouveaux à la première partie puis 2 nouveaux au plus */
+function pickMemWords(t) {
+  const seen = new Set(prog.mseen[t.id] || []);
+  const fresh = shuffle(t.words.filter(w => !seen.has(w.ko))), old = shuffle(t.words.filter(w => seen.has(w.ko)));
+  if (!old.length) return fresh.slice(0, MEM_D);
+  const pick = fresh.slice(0, MEM_NEW).concat(old.slice(0, MEM_D - Math.min(MEM_NEW, fresh.length)));
+  return shuffle(pick.concat(fresh.slice(MEM_NEW, MEM_NEW + MEM_D - pick.length)).slice(0, MEM_D));
+}
+const memIsNew = (t, ko) => !(prog.mseen[t.id] || []).includes(ko);
+function markMemSeen(t, ko) {
+  const a = prog.mseen[t.id] || (prog.mseen[t.id] = []);
+  if (a.includes(ko)) return false;
+  a.push(ko); save();
+  return true;
+}
+const deal = idx => idx.flatMap(i => [{ i, ko:true }, { i, ko:false }]);
+/* kind "mem" (mode "d" ou "c") : un thème de verbes ; kind "ws" : les 8 mots d'une grille de mots mêlés */
+function startMemory(kind, t, opt) {
+  stopMemory();
+  S = null;
+  const mode = kind === "mem" ? (opt === "c" && memStars(t.id).a ? "c" : "d") : "ws";
+  const words = kind === "ws" ? opt : mode === "c" ? shuffle(t.words) : pickMemWords(t);
+  const first = mode === "c" ? MEM_PAIRS : words.length;
+  M = { kind, mode, t, words, queue:words.map((_, i) => i).slice(first),
+        cards:shuffle(deal(words.map((_, i) => i).slice(0, first))), foundI:new Set(), found:0, sinceWave:0,
+        up:[], moves:0, t0:0, elapsed:0, timer:null, pending:null, waveT:null, busy:false, finished:false, lost:false,
+        newCount:0, starsBefore:kind === "mem" ? memStars(t.id) : null,
+        limit:mode === "c" ? MEM_LIMIT : 0, goal:mode === "ws" ? MEM_TIME : 0 };
+  $("home").hidden = true; $("game").hidden = true; $("mgame").hidden = false;
+  $("sheet").hidden = true; $("results").hidden = true; $("m-results").hidden = true;
+  $("m-ko").textContent = t.ko;
+  $("m-fr").textContent = `${t.level.name[LANG]}, ${t[LANG]}`;
+  $("m-goal").textContent = M.goal ? fmtGoal(M.goal) : "";
+  $("m-sound").textContent = prog.sound ? "🔊" : "🔇";
+  $("m-help").textContent = mode === "c" ? T().memHelpC : mode === "ws" ? T().memHelpWs : T().memHelp;
+  $("m-modes").hidden = kind !== "mem";
+  document.querySelectorAll("#m-modes button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mm === mode));
+  const cBtn = document.querySelector('[data-mm="c"]'), cLocked = kind === "mem" && !memStars(t.id).a;
+  cBtn.disabled = cLocked;
+  cBtn.textContent = (cLocked ? "🔒 " : "") + T().challenge;
+  cBtn.title = cLocked ? T().memLockedC : "";
+  cBtn.setAttribute("aria-label", cLocked ? T().memLockedC : T().challenge);
+  window.scrollTo(0, 0);
+  renderMemory(false);
+  renderMemList();
+}
+document.querySelectorAll("#m-modes button").forEach(b => b.onclick = () => {
+  if (!M || b.disabled || b.dataset.mm === M.mode) return;
+  confirmLeave(() => startMemory("mem", M.t, b.dataset.mm));
+});
+function renderMemory(dealt) {
+  const box = $("m-cards"); box.innerHTML = "";
+  M.cards.forEach((c, k) => {
+    const w = M.words[c.i], txt = c.ko ? w.ko : w[LANG], n = [...txt].length;
+    const size = c.ko ? (n <= 3 ? "l" : n <= 5 ? "m" : "s") : (n <= 12 ? "l" : n <= 24 ? "m" : "s");
+    const b = document.createElement("button");
+    b.className = `card ${c.ko ? "ko-card" : "tr-card"} sz-${size}` + (c.done ? " done" : "") + (dealt && !c.done ? " deal" : "");
+    if (c.done) b.style.setProperty("--c", c.color);
+    if (dealt) b.style.animationDelay = (k * 15) + "ms";
+    b.setAttribute("aria-label", c.done ? txt : T().cardHidden);
+    b.innerHTML = `<span class="in"><span class="b ko" aria-hidden="true">짝</span><span class="f${c.ko ? " ko" : ""}" lang="${c.ko ? "ko" : LANG}">${txt}</span></span>`;
+    b.onclick = () => flip(k);
+    box.appendChild(b);
+  });
+  updateMemStats();
+}
+/* Découverte : la liste des verbes en jeu, avec leur traduction */
+function renderMemList(justFound) {
+  const box = $("m-list"); box.innerHTML = "";
+  box.hidden = M.mode !== "d";
+  if (box.hidden) return;
+  M.words.forEach((w, i) => {
+    const f = M.foundI.has(i), c = f ? M.cards.find(x => x.i === i).color : "";
+    const b = document.createElement("button");
+    b.className = "word" + (f ? " found" : "") + (i === justFound ? " pop" : "");
+    if (f) b.style.setProperty("--c", c);
+    const dot = !f && memIsNew(M.t, w.ko) ? `<span class="dot" aria-label="${T().newWord}"></span>` : "";
+    b.innerHTML = `${dot}<span class="w-ko ko">${w.ko}</span><span class="w-fr">${w[LANG]}</span>`;
+    b.onclick = () => speak(w.ko);
+    box.appendChild(b);
+  });
+}
+const cardEl = k => $("m-cards").children[k];
+function setUp(k, up) {
+  const el = cardEl(k), c = M.cards[k], w = M.words[c.i];
+  el.classList.toggle("up", up);
+  el.setAttribute("aria-label", up ? (c.ko ? w.ko : w[LANG]) : T().cardHidden);
+}
+/* Les deux cartes fausses se retournent, ou tout de suite si on touche une troisième carte */
+function flipBack() {
+  if (!M || !M.pending) return;
+  clearTimeout(M.pending); M.pending = null;
+  M.up.forEach(k => setUp(k, false)); M.up = [];
+}
+/* Défi : toutes les 3 paires, de nouvelles paires arrivent et les cartes cachées se mélangent */
+function wave() {
+  if (!M || M.finished) return;
+  const add = M.queue.splice(0, MEM_WAVE);
+  M.cards = shuffle(M.cards.filter(c => !c.done).concat(deal(add)));
+  M.sinceWave = 0; M.up = []; M.busy = false;
+  renderMemory(true);
+}
+function flip(k) {
+  if (!M || M.busy) return;
+  const c = M.cards[k];
+  if (c.done) return speak(M.words[c.i].ko);
+  if (M.finished || M.up.includes(k)) return;
+  if (M.pending) flipBack();
+  if (!M.t0) { M.t0 = performance.now(); M.timer = setInterval(updateMemStats, 100); }
+  setUp(k, true); M.up.push(k);
+  if (M.up.length < 2) return;
+  M.moves++;
+  const [a, b] = M.up;
+  if (M.cards[a].i === M.cards[b].i) {
+    const color = COLORS[M.found % COLORS.length], wi = M.cards[a].i, w = M.words[wi];
+    M.up = []; M.found++; M.sinceWave++; M.foundI.add(wi);
+    [a, b].forEach(x => {
+      const cc = M.cards[x], el = cardEl(x);
+      cc.done = true; cc.color = color;
+      el.style.setProperty("--c", color);
+      el.classList.remove("up", "pop", "miss"); el.classList.add("done"); void el.offsetWidth; el.classList.add("pop");
+    });
+    if (M.kind === "mem" && markMemSeen(M.t, w.ko)) M.newCount++;
+    renderMemList(wi);
+    const last = M.found === M.words.length, game = M;
+    if (last) { M.elapsed = performance.now() - M.t0; M.finished = true; clearInterval(M.timer); }
+    updateMemStats();
+    sfx("ok");
+    if (last) {
+      let shown = false;
+      const end = () => { if (shown) return; shown = true; if (M === game) finishMemory(); };
+      setTimeout(end, 5000);
+      setTimeout(() => speak(w.ko, () => setTimeout(end, prog.sound ? 400 : 700)), 250);
+    } else {
+      setTimeout(() => { if (M === game) speak(w.ko); }, 150);
+      if (M.mode === "c" && M.sinceWave >= MEM_WAVE && M.queue.length) { M.busy = true; M.waveT = setTimeout(wave, 650); }
+    }
+  } else {
+    [a, b].forEach(x => { const el = cardEl(x); el.classList.remove("miss"); void el.offsetWidth; el.classList.add("miss"); });
+    M.pending = setTimeout(flipBack, 700);
+    updateMemStats();
+  }
+}
+/* Défi : le compte à rebours arrive à zéro */
+function timeUp() {
+  if (!M || M.finished) return;
+  M.finished = true; M.lost = true; M.elapsed = M.limit;
+  clearInterval(M.timer); clearTimeout(M.waveT); M.busy = false; flipBack();
+  sfx("bad");
+  const game = M;
+  setTimeout(() => { if (M === game) finishMemory(); }, 700);
+}
+function updateMemStats() {
+  if (!M) return;
+  const ms = M.finished ? M.elapsed : M.t0 ? performance.now() - M.t0 : 0;
+  if (M.limit && !M.finished && ms >= M.limit) { timeUp(); return updateMemStats(); }
+  const el = $("m-time");
+  el.textContent = fmtTime(M.limit ? M.limit - ms : ms);
+  el.classList.toggle("over", !!M.goal && ms >= M.goal);
+  el.classList.toggle("low", !!M.limit && M.limit - ms <= 10000);
+  $("m-moves").textContent = T().moves(M.moves);
+  $("m-pairs").textContent = T().pairs(M.found, M.words.length);
+}
+function finishMemory() {
+  const L = T(), { kind, mode, t, words } = M, time = M.elapsed, moves = M.moves, lost = M.lost;
+  const lines = [];
+  let stars;
+  $("s-title").textContent = lost ? "아쉬워요!" : "잘했어요!";
+  if (kind === "mem") {
+    const li = MLEVELS.indexOf(t.level), nextL = MLEVELS[li + 1];
+    const wasOpen = nextL ? memUnlocked(li + 1) : true, before = M.starsBefore;
+    const p = { ...memOf(t.id) }, prevBest = p.best;
+    if (mode === "c" && !lost) {
+      p.c = true;
+      if (prevBest == null || time < prevBest) p.best = time;
+    }
+    prog.mem[t.id] = p;
+    const after = memStars(t.id);
+    const opened = nextL && !wasOpen && memUnlocked(li + 1);
+    if (opened) prog.memUnlocked.push(nextL.id);
+    save();
+    stars = [[before.a, after.a], [before.b, after.b]];
+    if (lost) lines.push(L.timeUp, L.timeUpSub(M.found, words.length));
+    else if (mode === "c") {
+      lines.push(L.memTime(fmtTime(time), moves) + (prevBest != null && time < prevBest ? " " + L.record : ""));
+      lines.push(before.b ? L.memAgainC : L.memDoneC);
+    } else {
+      lines.push(L.memTime(fmtTime(time), moves));
+      const left = t.words.length - countIn(prog.mseen, t);
+      lines.push(after.a ? (before.a ? L.memReviewD : L.memDoneD) : L.memProgD(M.newCount, left));
+    }
+    if (opened) lines.push(L.unlocked(nextL.name[LANG]));
+  } else {
+    const s = { ...starsOf(t.id) }, had = !!s.m, prevBest = s.mb;
+    if (prevBest == null || time < prevBest) s.mb = time;
+    if (time < MEM_TIME) s.m = true;
+    prog.themes[t.id] = s; save();
+    stars = [[!!s.d, !!s.d], [!!s.c, !!s.c], [had, !!s.m]];
+    lines.push(L.memTime(fmtTime(time), moves) + (prevBest != null && time < prevBest ? " " + L.record : ""));
+    if (s.m && !had) lines.push(L.star3); else if (!s.m) lines.push(L.goal3(fmtTime(s.mb)));
+  }
+  renderSheetStars(stars);
+  if (stars.some(([b, a]) => a && !b)) setTimeout(() => sfx("star"), 250);
+  $("s-sub").textContent = lines.join(" ");
+  const shown = lost ? words.filter((_, i) => M.foundI.has(i) || M.cards.some(c => c.i === i)) : words;
+  $("recap").innerHTML = shown.map(w => `<li><span class="ko">${w.ko}</span><span>${w[LANG]}</span></li>`).join("");
+  $("recap").querySelectorAll("li").forEach((li, i) => li.onclick = () => speak(shown[i].ko));
+  const acts = $("s-actions"); acts.innerHTML = "";
+  const add = (label, primary, fn) => { const b = document.createElement("button"); b.className = "btn" + (primary ? " primary" : ""); b.textContent = label; b.onclick = fn; acts.appendChild(b); };
+  if (kind === "mem") {
+    const st = memStars(t.id);
+    if (mode === "c") add(lost ? L.tryAgain : L.memReplay, lost || !st.b, () => startMemory("mem", t, "c"));
+    else if (!st.a) add(L.keepD, true, () => startMemory("mem", t, "d"));
+    else add(L.memChallenge, !st.b, () => startMemory("mem", t, "c"));
+    const next = MTHEMES[MTHEMES.indexOf(t) + 1];
+    if (next && memUnlocked(MLEVELS.indexOf(next.level))) add(L.next(next[LANG]), st.a && st.b, () => startMemory("mem", next, "d"));
+    if (mode === "d" && st.a) add(L.memReplay, false, () => startMemory("mem", t, "d"));
+  } else add(L.memReplaySame, true, () => startMemory("ws", t, words));
+  add(L.toThemes, false, goHome);
+  add(L.seeCards, false, hideResults);
+  showResults();
+}
+$("m-back").onclick = () => confirmLeave(goHome);
+$("m-sound").onclick = () => setSound(!prog.sound);
 
 applyLang();
 renderHome();
