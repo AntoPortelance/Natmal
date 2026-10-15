@@ -386,6 +386,39 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .fmlist button.del.sure{background:var(--red);border-color:var(--red);color:#fff}
 .fm h4{margin:16px 0 0;font-size:14px;font-weight:500;color:var(--muted)}
 #fc-mine .inner{max-height:92%}
+.fm select{display:block;width:100%;margin-top:4px;font:inherit;font-size:17px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.fm details .fmsg{margin:8px 0!important}
+.ct{flex:none;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--line);color:var(--ink);font-variant-numeric:tabular-nums}
+.fcatlist{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:2px}
+.fcatlist li{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
+.fcatlist .nm{flex:1;min-width:0;font-weight:500}
+.fcatlist input.ren{flex:1;min-width:0;margin:0;font-size:16px;padding:7px 10px;background:var(--bg)}
+.fcatlist button,.fmlist button{flex:none;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:14px}
+.fcatlist button.del.sure,.fmlist button.del.sure{background:var(--red);border-color:var(--red);color:#fff}
+.fnew{display:flex;gap:8px}
+.fnew input{flex:1;min-width:0;margin:0;background:var(--bg)}
+.fnew .btn{flex:none;padding:10px 16px}
+.fm details.fgrp{margin:8px 0}
+.fgrp summary{display:flex;align-items:center;gap:8px}
+.fgrp summary .nm{flex:1;min-width:0}
+.fgrp summary::after{content:"›";font-size:20px;line-height:1;color:var(--muted);transition:transform .2s}
+.fgrp[open] summary::after{transform:rotate(90deg)}
+.fgrp summary::-webkit-details-marker{display:none}
+.fgrp summary{list-style:none}
+.fgrp .fmlist{margin:6px 0 0}
+.fmlist li{flex-wrap:wrap;row-gap:6px}
+.fmlist .tag{flex:none;font-size:11px;font-weight:700;color:var(--celadon);border:1px solid currentColor;border-radius:999px;padding:0 7px}
+.fmlist .acts{display:flex;gap:6px;width:100%}
+.fm .fmlist select.mv{flex:1;min-width:0;width:auto;margin:0;font-size:14px;padding:5px 8px;background:var(--bg)}
+.fcats{display:flex;flex-wrap:wrap;gap:8px}
+.fcat{display:flex;align-items:center;gap:6px;padding:7px 10px 7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);
+  font-size:14px;font-weight:500;color:var(--muted);transition:background .2s,color .2s,border-color .2s}
+.fcat b{font-size:12px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--line);color:var(--ink);font-variant-numeric:tabular-nums}
+.fcat[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.fcat[aria-pressed="true"] b{background:color-mix(in srgb,var(--bg) 22%,transparent);color:var(--bg)}
+.fcat[aria-pressed="true"]::before{content:"✓";font-weight:700}
+.fcat.no{animation:shake .3s}
+.test-go:disabled{opacity:.5;cursor:not-allowed}
 @media (prefers-reduced-motion:reduce){.fin,.fcard,.ghost,.mini .in{transition-duration:.01s!important}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}.card .in{transition:none}}
 </style>
@@ -512,16 +545,26 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
     <p id="fm-note"></p>
     <label><span id="fm-ko-l"></span><input id="fm-ko" lang="ko" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
     <label><span id="fm-en-l"></span><input id="fm-en" lang="en" autocomplete="off" spellcheck="false"></label>
+    <label><span id="fm-cat-l"></span><select id="fm-cat"></select></label>
+    <label id="fm-newcat-w" hidden><span id="fm-newcat-l"></span><input id="fm-newcat" maxlength="30" autocomplete="off"></label>
     <p class="fmsg" id="fm-msg" aria-live="polite"></p>
     <div class="actions"><button class="btn primary" id="fm-add"></button><button class="btn" id="fm-cancel" hidden></button></div>
     <details id="fm-details"><summary id="fm-imp-t"></summary>
       <p id="fm-imp-n"></p>
-      <textarea id="fm-text" spellcheck="false" placeholder="Friend — 친구&#10;Today — 오늘&#10;To eat — 먹다"></textarea>
-      <div class="actions" style="margin-top:10px"><button class="btn" id="fm-import"></button></div>
+      <label><span id="fm-icat-l"></span><select id="fm-icat"></select></label>
+      <label id="fm-inewcat-w" hidden><span id="fm-inewcat-l"></span><input id="fm-inewcat" maxlength="30" autocomplete="off"></label>
+      <textarea id="fm-text" spellcheck="false" placeholder="# Cuisine&#10;Bread — 빵&#10;Rice — 밥&#10;To eat — 먹다"></textarea>
+      <p class="fmsg" id="fm-imsg" aria-live="polite"></p>
+      <div class="actions"><button class="btn" id="fm-import"></button></div>
+    </details>
+    <details id="fm-cats-d"><summary id="fm-cats-t"></summary>
+      <ul class="fcatlist" id="fm-cats"></ul>
+      <div class="fnew"><input id="fm-catname" maxlength="30" autocomplete="off"><button class="btn" id="fm-catadd">＋</button></div>
+      <p class="fmsg" id="fm-cmsg" aria-live="polite"></p>
     </details>
     <h4 id="fm-count"></h4>
-    <ul class="fmlist" id="fm-list"></ul>
-    <div class="actions"><button class="btn" id="fm-copy"></button><button class="btn primary" id="fm-close"></button></div>
+    <div id="fm-list"></div>
+    <div class="actions" style="margin-top:16px"><button class="btn" id="fm-copy"></button><button class="btn primary" id="fm-close"></button></div>
   </div>
 </div>
 
@@ -714,14 +757,22 @@ const STR = {
     promoted:n => `${n} carte${n > 1 ? "s ont" : " a"} monté de ceinture.`, freeDone:"Les ceintures n'ont pas bougé.",
     moreSession:"Encore une session", toFcHome:"Retour aux cartes",
     leaveFcTitle:"Quitter la session ?", leaveFcText:"Les cartes déjà jouées gardent leur nouvelle ceinture.", leaveFcFree:"Rien n'est perdu : l'entraînement libre ne change pas les ceintures.",
-    fmNote:"Ajoute ton propre vocabulaire. Les cartes rejoignent le paquet en ceinture blanche.",
+    fmNote:"Ajoute ton vocabulaire et range toutes les cartes par catégorie. Une carte sans catégorie va dans Mon paquet ; une nouvelle carte commence en ceinture blanche.",
+    myDeck:"📦 Mon paquet", whatTitle:"Que réviser ?", whatNote:"Touche une catégorie pour l'inclure ou l'exclure de la session du jour et de l'entraînement.",
+    noCards:"Aucune carte dans les catégories choisies.",
+    catLabel:"Catégorie", newCatOpt:"＋ Nouvelle catégorie…", newCatLabel:"Nom de la nouvelle catégorie",
+    icatLabel:"Catégorie de la liste (une ligne « # Nom » la change pour les lignes suivantes)",
+    catsTitle:"Gérer les catégories", catPh:"Nouvelle catégorie", catAdded:"Catégorie créée ✓", catRenamed:"Catégorie renommée ✓",
+    catDeleted:n => `Catégorie supprimée${n ? ` : ${n} carte${n > 1 ? "s retournent" : " retourne"} dans Mon paquet` : ""}.`,
+    errCatEmpty:"Donne un nom à la catégorie.", errCatDup:"Cette catégorie existe déjà.",
+    allCards:(n, m) => `Toutes les cartes : ${n}, dont ${m} perso`, mineTag:"perso", moveLabel:"Ranger dans",
     koLabel:"Coréen", enLabel:"Traduction (en anglais)", addCard:"Ajouter la carte", saveEdit:"Enregistrer", cancelEdit:"Annuler",
-    impTitle:"Importer une liste", impNote:"Une carte par ligne, au format « English — 한국어 ». Plusieurs réponses : sépare-les par « / ».", impBtn:"Importer",
+    impTitle:"Importer une liste", impNote:"Une carte par ligne, au format « English — 한국어 ». Plusieurs réponses : sépare-les par « / ». Une ligne « # Cuisine » range les cartes qui suivent dans la catégorie Cuisine (créée si besoin).", impBtn:"Importer",
     copyBtn:"Copier ma liste", copied:"Liste copiée ✓ Garde-la dans une note.", copiedFallback:"Ta liste est dans la zone d'import : copie-la.",
     myCount:n => `${n} carte${n > 1 ? "s" : ""} perso`, noMine:"Aucune carte perso pour l'instant.",
     errKo:"Écris le mot en coréen (en syllabes coréennes).", errEn:"Écris la traduction en anglais.",
     dup:c => `Cette carte existe déjà : ${c.en} — ${c.ko}`, added:"Carte ajoutée ✓", saved:"Carte modifiée ✓",
-    imported:(a, d, s) => `${a} carte${a > 1 ? "s" : ""} ajoutée${a > 1 ? "s" : ""}` + (d ? `, ${d} déjà présente${d > 1 ? "s" : ""}` : "") + (s ? `, ${s} ligne${s > 1 ? "s" : ""} ignorée${s > 1 ? "s" : ""}` : "") + ".",
+    imported:(a, d, s, k) => `${a} carte${a > 1 ? "s" : ""} ajoutée${a > 1 ? "s" : ""}` + (d ? `, ${d} déjà présente${d > 1 ? "s" : ""}` : "") + (s ? `, ${s} ligne${s > 1 ? "s" : ""} ignorée${s > 1 ? "s" : ""}` : "") + (k ? `, ${k} catégorie${k > 1 ? "s" : ""} créée${k > 1 ? "s" : ""}` : "") + ".",
     edit:"Modifier", del:"Supprimer", sure:"Sûr ?"
   },
   en: {
@@ -802,14 +853,22 @@ const STR = {
     promoted:n => `${n} card${n === 1 ? "" : "s"} moved up a belt.`, freeDone:"Belts stayed the same.",
     moreSession:"Another session", toFcHome:"Back to cards",
     leaveFcTitle:"Leave this session?", leaveFcText:"Cards you've played keep their new belt.", leaveFcFree:"Nothing is lost: free practice doesn't change belts.",
-    fmNote:"Add your own vocabulary. New cards join the deck at white belt.",
+    fmNote:"Add your vocabulary and sort every card into categories. A card without a category goes to My deck; a new card starts at white belt.",
+    myDeck:"📦 My deck", whatTitle:"What to review?", whatNote:"Tap a category to include it in or leave it out of today's session and practice.",
+    noCards:"No cards in the chosen categories.",
+    catLabel:"Category", newCatOpt:"＋ New category…", newCatLabel:"New category name",
+    icatLabel:"Category for the list (a “# Name” line switches it for the lines below)",
+    catsTitle:"Manage categories", catPh:"New category", catAdded:"Category created ✓", catRenamed:"Category renamed ✓",
+    catDeleted:n => `Category deleted${n ? `: ${n} card${n === 1 ? " goes" : "s go"} back to My deck` : ""}.`,
+    errCatEmpty:"Give the category a name.", errCatDup:"This category already exists.",
+    allCards:(n, m) => `All cards: ${n}, ${m} of them custom`, mineTag:"custom", moveLabel:"Move to",
     koLabel:"Korean", enLabel:"Translation (English)", addCard:"Add card", saveEdit:"Save", cancelEdit:"Cancel",
-    impTitle:"Import a list", impNote:"One card per line, as “English — 한국어”. Several answers: separate them with “/”.", impBtn:"Import",
+    impTitle:"Import a list", impNote:"One card per line, as “English — 한국어”. Several answers: separate them with “/”. A “# Cooking” line puts the cards below it in the Cooking category (created if needed).", impBtn:"Import",
     copyBtn:"Copy my list", copied:"List copied ✓ Keep it in a note.", copiedFallback:"Your list is in the import box: copy it.",
     myCount:n => `${n} custom card${n === 1 ? "" : "s"}`, noMine:"No custom cards yet.",
     errKo:"Write the word in Korean (Hangul syllables).", errEn:"Write the English translation.",
     dup:c => `This card already exists: ${c.en} — ${c.ko}`, added:"Card added ✓", saved:"Card updated ✓",
-    imported:(a, d, s) => `${a} card${a === 1 ? "" : "s"} added` + (d ? `, ${d} already in the deck` : "") + (s ? `, ${s} line${s === 1 ? "" : "s"} skipped` : "") + ".",
+    imported:(a, d, s, k) => `${a} card${a === 1 ? "" : "s"} added` + (d ? `, ${d} already in the deck` : "") + (s ? `, ${s} line${s === 1 ? "" : "s"} skipped` : "") + (k ? `, ${k} new categor${k === 1 ? "y" : "ies"}` : "") + ".",
     edit:"Edit", del:"Delete", sure:"Sure?"
   }
 };
@@ -938,6 +997,9 @@ function applyLang() {
   $("f-sound").setAttribute("aria-label", t.sound);
   $("fm-title").textContent = t.mine; $("fm-note").textContent = t.fmNote;
   $("fm-ko-l").textContent = t.koLabel; $("fm-en-l").textContent = t.enLabel;
+  $("fm-cat-l").textContent = t.catLabel; $("fm-icat-l").textContent = t.icatLabel;
+  $("fm-newcat-l").textContent = $("fm-inewcat-l").textContent = t.newCatLabel;
+  $("fm-cats-t").textContent = t.catsTitle; $("fm-catname").placeholder = t.catPh; $("fm-catadd").setAttribute("aria-label", t.catPh);
   $("fm-cancel").textContent = t.cancelEdit; $("fm-imp-t").textContent = t.impTitle; $("fm-imp-n").textContent = t.impNote;
   $("fm-import").textContent = t.impBtn; $("fm-copy").textContent = t.copyBtn; $("fm-close").textContent = t.close;
 }
@@ -1786,13 +1848,35 @@ prog.fc.cards = prog.fc.cards || {};
 prog.fc.mine = prog.fc.mine || [];
 prog.fc.streak = prog.fc.streak || { day:"", n:0 };
 const fcDeck = () => FC_BASE.concat(prog.fc.mine.map(c => ({ ...c, mine:true })));
+/* Catégories : chaque carte (de base ou perso) est rangée dans une catégorie ; sans catégorie, elle va dans Mon paquet.
+   Les cartes de base partent d'un rangement proposé, qu'on peut modifier (prog.fc.where). */
+const MINE = "mine";
+const BASE_CATS = [
+  { id:"c-food", fr:"🍚 Manger et boire", en:"🍚 Food and drinks", cards:["Bread", "Riz / Rice", "Chicken", "Juice", "Milk", "Coffee", "Drinks", "To eat", "To drink", "To cook"] },
+  { id:"c-people", fr:"👥 Personnes et sentiments", en:"👥 People and feelings", cards:["Friend", "Teacher", "Boyfriend (romantic)", "Girlfriend (romantic)", "Boy friend (platonic, informal)", "Girl friend (platonic, informal)", "Love", "To love", "Like / To like"] },
+  { id:"c-things", fr:"📷 Choses et animaux", en:"📷 Things and animals", cards:["Photo", "Camera", "Computer", "Télévision", "A dog"] },
+  { id:"c-school", fr:"📚 École et travail", en:"📚 School and work", cards:["To teach", "To learn", "To study", "Homework", "To do homework", "To work", "Read / To read", "To use a computer"] },
+  { id:"c-verbs", fr:"🔤 Verbes de base", en:"🔤 Basic verbs", cards:["Today", "To sit", "It's OK", "Not to exist / Not to have", "To meet", "To go", "To come", "To sleep", "To buy", "To watch / To see / To look", "To wait", "To do"] },
+  { id:"c-acts", fr:"🎯 Activités", en:"🎯 Activities", cards:["To take a picture", "To exercise / To work out", "To talk", "To go shopping", "To clean", "To do laundry", "To call (by phone)", "To sing", "To take a shower"] }
+];
+const BASE_CAT = {};
+BASE_CATS.forEach(k => k.cards.forEach(en => { BASE_CAT[en] = k.id; }));
+if (!prog.fc.cats) prog.fc.cats = BASE_CATS.map(k => ({ id:k.id, name:k[LANG] || k.fr }));
+prog.fc.where = prog.fc.where || {};
+prog.fc.off = prog.fc.off || [];
+const catList = () => [{ id:MINE, name:T().myDeck }].concat(prog.fc.cats);
+const catExists = id => id === MINE || prog.fc.cats.some(k => k.id === id);
+function catOf(c) { const id = c.mine ? c.cat : (prog.fc.where[c.id] || BASE_CAT[c.en]); return id && catExists(id) ? id : MINE; }
+const isOn = id => !prog.fc.off.includes(id);
+/* Les cartes des catégories cochées : c'est là que piochent la session et l'entraînement */
+const fcActive = () => fcDeck().filter(c => isOn(catOf(c)));
 const fcById = id => fcDeck().find(c => c.id === id);
 const fcSt = id => prog.fc.cards[id];
 const fcBelt = id => (prog.fc.cards[id] || {}).b || 0;
 const dayAt = k => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate() + k).getTime(); };
 const dayKey = t => { const d = new Date(t); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
 function fcPlan() {
-  const now = Date.now(), deck = fcDeck();
+  const now = Date.now(), deck = fcActive();
   const due = deck.filter(c => fcSt(c.id) && fcSt(c.id).due <= now).sort((a, b) => fcSt(a.id).due - fcSt(b.id).due).slice(0, FC_SESSION);
   const unseen = deck.filter(c => !fcSt(c.id)), fresh = unseen.filter(c => c.mine).concat(unseen.filter(c => !c.mine));
   return { due, fresh:fresh.slice(0, Math.max(0, Math.min(FC_NEW, FC_SESSION - due.length))) };
@@ -1872,7 +1956,7 @@ function startFc(mode) {
   stopFc(); stopMemory(); M = null; S = null;
   let cards;
   if (mode === "day") { const p = fcPlan(); cards = p.due.concat(p.fresh); }
-  else { const deck = fcDeck(), seen = deck.filter(c => fcSt(c.id)); cards = shuffle(seen.length >= 6 ? seen : deck).slice(0, FC_FREE); }
+  else { const deck = fcActive(), seen = deck.filter(c => fcSt(c.id)); cards = shuffle(seen.length >= 6 ? seen : deck).slice(0, FC_FREE); }
   if (!cards.length) return;
   const steps = cards.map(c => fcSt(c.id) ? { id:c.id, kind:"test", dir:dirFor(c.id) } : { id:c.id, kind:"learn" });
   const queue = spreadAll([steps.filter(s => s.kind === "learn"), steps.filter(s => s.dir === "ke"), steps.filter(s => s.dir === "ek")]);
@@ -2238,7 +2322,9 @@ function endFc() {
 
 /* Accueil des flashcards */
 function renderFcHome() {
-  const L = T(), deck = fcDeck(), p = fcPlan(), n = p.due.length + p.fresh.length, st = fcStreak();
+  const L = T(), deck = fcActive(), all = fcDeck(), p = fcPlan(), n = p.due.length + p.fresh.length, st = fcStreak();
+  const cats = catList().map(k => ({ ...k, n:all.filter(c => catOf(c) === k.id).length })).filter(k => k.n);
+  const chips = cats.map(k => `<button class="fcat" data-cat="${k.id}" aria-pressed="${isOn(k.id)}"><span>${esc(k.name)}</span><b>${k.n}</b></button>`).join("");
   const doneToday = prog.fc.streak.day === dayKey(dayAt(0));
   const counts = [0, 0, 0, 0, 0]; let fresh = 0;
   deck.forEach(c => { if (fcSt(c.id)) counts[fcBelt(c.id)]++; else fresh++; });
@@ -2253,44 +2339,149 @@ function renderFcHome() {
   const tip = prog.fc.kbTip ? "" : `<div class="fbox ftip"><h2>⌨️ ${L.kbTipT}</h2><p>${L.kbTip}</p><button class="btn" id="fc-tip-ok">${L.tipOk}</button></div>`;
   $("ladder").innerHTML = `<div class="fhome">${tip}
     <div class="fbox fstreak"><span class="big${st ? " lit" : ""}" style="--fg:${st ? 0 : 1}">🔥</span><div><b>${L.streakN(st)}</b><span>${doneToday ? L.streakDone : st ? L.streakKeep : L.streakStart}</span></div></div>
-    <div class="fbox ftoday"><h2>${L.today}</h2><p>${n ? L.todayMix(p.due.length, p.fresh.length) : L.upToDate + (next ? " " + next : "")}</p>
-      <button class="test-go${n ? "" : " practice"}" id="fc-go">${n ? L.start(n) : "🎯 " + L.free}</button></div>
+    <div class="fbox"><h2>${L.whatTitle}</h2><p>${L.whatNote}</p><div class="fcats" id="fc-cats">${chips}</div></div>
+    <div class="fbox ftoday"><h2>${L.today}</h2><p>${!deck.length ? L.noCards : n ? L.todayMix(p.due.length, p.fresh.length) : L.upToDate + (next ? " " + next : "")}</p>
+      <button class="test-go${n ? "" : " practice"}" id="fc-go"${deck.length ? "" : " disabled"}>${n ? L.start(n) : "🎯 " + L.free}</button></div>
     <div class="fbox"><h2>${L.yourCards}</h2><p>${L.beltsNote}</p><div class="fbelts">${belts}</div></div>
     <div class="frow">${n ? `<button class="btn" id="fc-free">🎯 ${L.free}</button>` : ""}<button class="btn" id="fc-mine-btn"${n ? "" : ' style="grid-column:1/-1"'}>＋ ${L.mine} (${prog.fc.mine.length})</button></div>
   </div>`;
   $("fc-go").onclick = () => startFc(n ? "day" : "free");
   if (n) $("fc-free").onclick = () => startFc("free");
   $("fc-mine-btn").onclick = openMine;
+  $("fc-cats").querySelectorAll(".fcat").forEach(b => b.onclick = () => {
+    const id = b.dataset.cat;
+    if (isOn(id)) {
+      /* Au moins une catégorie reste cochée */
+      if (cats.filter(k => isOn(k.id)).length <= 1) { b.classList.remove("no"); void b.offsetWidth; b.classList.add("no"); sfx("bad"); return; }
+      prog.fc.off.push(id);
+    } else prog.fc.off = prog.fc.off.filter(x => x !== id);
+    save(); sfx("tick"); renderFcHome();
+  });
   if (!prog.fc.kbTip) $("fc-tip-ok").onclick = () => { prog.fc.kbTip = true; save(); renderFcHome(); };
   $("total").textContent = L.fcTotal(counts[4], deck.length);
 }
 $("f-back").onclick = () => confirmLeave(goHome);
 $("f-sound").onclick = () => setSound(!prog.sound);
 
-/* Mes cartes : ajout, import en bloc, modification, suppression, copie */
-let editId = null;
-function mineMsg(text, kind) { const m = $("fm-msg"); m.textContent = text || ""; m.className = "fmsg" + (kind ? " " + kind : ""); }
+/* Mes cartes : ajout, import en bloc, modification, suppression, copie, et rangement de toutes les cartes par catégorie */
+let editId = null, renaming = null;
+const openGroups = new Set();
+function mineMsg(text, kind, id) { const m = $(id || "fm-msg"); m.textContent = text || ""; m.className = "fmsg" + (kind ? " " + kind : ""); }
+/* Doublon : une réponse coréenne commune, sans tenir compte des espaces (사진을찍다 = 사진을 찍다) */
+const nos = a => a.replace(/ /g, "");
 function dupOf(card, skipId) {
-  const mine = new Set(answersOf(card.ko));
-  return fcDeck().find(c => c.id !== skipId && answersOf(c.ko).some(a => mine.has(a)));
+  const mine = new Set(answersOf(card.ko).map(nos));
+  return fcDeck().find(c => c.id !== skipId && answersOf(c.ko).some(a => mine.has(nos(a))));
 }
+const NEW_CAT = "__new";
+const catByName = name => catList().find(k => k.name.trim().toLowerCase() === name.trim().toLowerCase());
+function catNameError(name, skipId) {
+  if (!name.trim()) return T().errCatEmpty;
+  const k = catByName(name);
+  return k && k.id !== skipId ? T().errCatDup : "";
+}
+/* Catégorie trouvée par son nom, sinon créée */
+function catFor(name) {
+  const k = catByName(name);
+  if (k) return k.id;
+  const id = "k" + newId();
+  prog.fc.cats.push({ id, name:name.trim().slice(0, 30) });
+  return id;
+}
+function catOptions(sel, withNew) {
+  return catList().map(k => `<option value="${k.id}"${k.id === sel ? " selected" : ""}>${esc(k.name)}</option>`).join("")
+    + (withNew ? `<option value="${NEW_CAT}"${sel === NEW_CAT ? " selected" : ""}>${T().newCatOpt}</option>` : "");
+}
+/* Lit un menu de catégorie (et son champ « nouvelle catégorie ») ; renvoie l'id ou une erreur */
+function readCat(selId, nameId) {
+  const v = $(selId).value;
+  if (v !== NEW_CAT) return { id:catExists(v) ? v : MINE };
+  const name = $(nameId).value;
+  if (!name.trim()) return { err:T().errCatEmpty };
+  return { id:catFor(name) };
+}
+function syncNewCat(selId, wrapId) { $(wrapId).hidden = $(selId).value !== NEW_CAT; }
+$("fm-cat").onchange = () => { syncNewCat("fm-cat", "fm-newcat-w"); if ($("fm-cat").value === NEW_CAT) $("fm-newcat").focus(); };
+$("fm-icat").onchange = () => { syncNewCat("fm-icat", "fm-inewcat-w"); if ($("fm-icat").value === NEW_CAT) $("fm-inewcat").focus(); };
 function openMine() {
-  editId = null;
-  $("fm-ko").value = ""; $("fm-en").value = ""; $("fm-text").value = "";
-  mineMsg(""); renderMine();
+  editId = null; renaming = null;
+  ["fm-ko", "fm-en", "fm-text", "fm-newcat", "fm-inewcat", "fm-catname"].forEach(id => { $(id).value = ""; });
+  $("fm-cat").dataset.v = MINE; $("fm-icat").dataset.v = MINE;
+  mineMsg(""); mineMsg("", "", "fm-imsg"); mineMsg("", "", "fm-cmsg");
+  renderMine();
   openSheet("fc-mine");
 }
 function renderMine() {
-  const L = T();
+  const L = T(), deck = fcDeck(), cats = catList();
+  const count = id => deck.filter(c => catOf(c) === id).length;
   $("fm-add").textContent = editId ? L.saveEdit : L.addCard;
   $("fm-cancel").hidden = !editId;
-  $("fm-count").textContent = L.myCount(prog.fc.mine.length);
-  $("fm-list").innerHTML = prog.fc.mine.length ? prog.fc.mine.map(c => `<li data-id="${esc(c.id)}"><span class="ko">${paren(c.ko)}</span><span class="en">${paren(c.en)}</span>
-      <button class="edit" aria-label="${L.edit}">✎</button><button class="del" aria-label="${L.del}">✕</button></li>`).join("")
-    : `<li class="en">${L.noMine}</li>`;
+  /* Menus de catégorie : on garde le choix en cours */
+  [["fm-cat", "fm-newcat-w"], ["fm-icat", "fm-inewcat-w"]].forEach(([s, w]) => {
+    const cur = $(s).options.length ? $(s).value : ($(s).dataset.v || MINE);
+    $(s).innerHTML = catOptions(cur === NEW_CAT || catExists(cur) ? cur : MINE, true);
+    syncNewCat(s, w);
+  });
+  /* Gestion des catégories */
+  $("fm-cats").innerHTML = cats.map(k => renaming === k.id
+    ? `<li data-cat="${k.id}"><input class="ren" maxlength="30" value="${esc(k.name)}" aria-label="${L.catsTitle}"><button class="ok" aria-label="${L.saveEdit}">✓</button></li>`
+    : `<li data-cat="${k.id}"><span class="nm">${esc(k.name)}</span><span class="ct">${count(k.id)}</span>`
+      + (k.id === MINE ? "" : `<button class="edit" aria-label="${L.edit}">✎</button><button class="del" aria-label="${L.del}">✕</button>`) + `</li>`).join("");
+  $("fm-cats").querySelectorAll("li").forEach(li => {
+    const id = li.dataset.cat, k = prog.fc.cats.find(x => x.id === id);
+    if (!k) return;
+    if (renaming === id) {
+      const inp = li.querySelector(".ren");
+      const ok = () => {
+        const err = catNameError(inp.value, id);
+        if (err) return mineMsg(err, "err", "fm-cmsg");
+        k.name = inp.value.trim().slice(0, 30); renaming = null; save();
+        mineMsg(L.catRenamed, "ok", "fm-cmsg"); renderMine();
+      };
+      li.querySelector(".ok").onclick = ok;
+      inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); ok(); } if (e.key === "Escape") { renaming = null; renderMine(); } });
+      setTimeout(() => { inp.focus(); inp.select(); }, 0);
+      return;
+    }
+    li.querySelector(".edit").onclick = () => { renaming = id; mineMsg("", "", "fm-cmsg"); renderMine(); };
+    const del = li.querySelector(".del");
+    del.onclick = () => {
+      if (!del.classList.contains("sure")) { del.classList.add("sure"); del.textContent = L.sure; return; }
+      const n = count(id);
+      prog.fc.cats = prog.fc.cats.filter(x => x.id !== id);
+      prog.fc.mine.forEach(c => { if (c.cat === id) delete c.cat; });
+      Object.keys(prog.fc.where).forEach(cid => { if (prog.fc.where[cid] === id) delete prog.fc.where[cid]; });
+      prog.fc.off = prog.fc.off.filter(x => x !== id);
+      save(); mineMsg(L.catDeleted(n), "ok", "fm-cmsg"); renderMine();
+    };
+  });
+  /* Toutes les cartes, rangées par catégorie */
+  const mineCount = prog.fc.mine.length;
+  $("fm-count").textContent = L.allCards(deck.length, mineCount);
+  $("fm-list").innerHTML = cats.map(k => {
+    const cs = deck.filter(c => catOf(c) === k.id);
+    if (!cs.length) return "";
+    return `<details class="fgrp" data-cat="${k.id}"${openGroups.has(k.id) ? " open" : ""}><summary><span class="nm">${esc(k.name)}</span><span class="ct">${cs.length}</span></summary>
+      <ul class="fmlist">${cs.map(c => `<li data-id="${esc(c.id)}"><span class="ko">${paren(c.ko)}</span><span class="en">${paren(c.en)}</span>${c.mine ? `<span class="tag">${L.mineTag}</span>` : ""}
+        <span class="acts"><select class="mv" aria-label="${L.moveLabel}">${catOptions(k.id, false)}</select>`
+        + (c.mine ? `<button class="edit" aria-label="${L.edit}">✎</button><button class="del" aria-label="${L.del}">✕</button>` : "") + `</span></li>`).join("")}</ul></details>`;
+  }).join("");
+  $("fm-list").querySelectorAll(".fgrp").forEach(d => d.addEventListener("toggle", () => { if (d.open) openGroups.add(d.dataset.cat); else openGroups.delete(d.dataset.cat); }));
   $("fm-list").querySelectorAll("li[data-id]").forEach(li => {
     const id = li.dataset.id, c = prog.fc.mine.find(x => x.id === id);
-    li.querySelector(".edit").onclick = () => { editId = id; $("fm-ko").value = c.ko; $("fm-en").value = c.en; mineMsg(""); renderMine(); $("fm-ko").focus(); };
+    li.querySelector(".mv").onchange = e => {
+      const v = e.target.value;
+      if (c) { if (v === MINE) delete c.cat; else c.cat = v; }
+      else prog.fc.where[id] = v;
+      openGroups.add(v);
+      save(); renderMine();
+    };
+    if (!c) return;
+    li.querySelector(".edit").onclick = () => {
+      editId = id; $("fm-ko").value = c.ko; $("fm-en").value = c.en;
+      $("fm-cat").innerHTML = catOptions(catOf({ ...c, mine:true }), true); syncNewCat("fm-cat", "fm-newcat-w");
+      mineMsg(""); renderMine(); $("fm-title").scrollIntoView({ block:"start", behavior:"smooth" }); $("fm-ko").focus({ preventScroll:true });
+    };
     const del = li.querySelector(".del");
     del.onclick = () => {
       if (!del.classList.contains("sure")) { del.classList.add("sure"); del.textContent = L.sure; return; }
@@ -2307,26 +2498,54 @@ $("fm-add").onclick = () => {
   if (!en) return mineMsg(L.errEn, "err");
   const d = dupOf({ ko }, editId);
   if (d) return mineMsg(L.dup(d), "err");
-  if (editId) { const c = prog.fc.mine.find(x => x.id === editId); c.ko = ko; c.en = en; editId = null; mineMsg(L.saved, "ok"); }
-  else { prog.fc.mine.push({ id:newId(), en, ko }); mineMsg(L.added, "ok"); }
-  save(); $("fm-ko").value = ""; $("fm-en").value = ""; renderMine();
+  const k = readCat("fm-cat", "fm-newcat");
+  if (k.err) return mineMsg(k.err, "err");
+  const set = c => { if (k.id === MINE) delete c.cat; else c.cat = k.id; };
+  if (editId) { const c = prog.fc.mine.find(x => x.id === editId); c.ko = ko; c.en = en; set(c); editId = null; mineMsg(L.saved, "ok"); }
+  else { const c = { id:newId(), en, ko }; set(c); prog.fc.mine.push(c); mineMsg(L.added, "ok"); }
+  openGroups.add(k.id);
+  save(); $("fm-ko").value = ""; $("fm-en").value = ""; $("fm-newcat").value = "";
+  $("fm-cat").innerHTML = catOptions(k.id, true); syncNewCat("fm-cat", "fm-newcat-w");
+  renderMine();
 };
 $("fm-cancel").onclick = () => { editId = null; $("fm-ko").value = ""; $("fm-en").value = ""; mineMsg(""); renderMine(); };
+/* Import : la catégorie choisie, puis chaque ligne « # Nom » change la catégorie des lignes suivantes */
 $("fm-import").onclick = () => {
-  const lines = $("fm-text").value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-  let a = 0, d = 0, s = 0;
+  const L = T(), lines = $("fm-text").value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  const k = readCat("fm-icat", "fm-inewcat");
+  if (k.err) return mineMsg(k.err, "err", "fm-imsg");
+  const before = prog.fc.cats.length;
+  let cat = k.id, a = 0, d = 0, s = 0;
   lines.forEach(line => {
+    const h = line.match(/^#+\s*(.+)$/);
+    if (h) { cat = catFor(h[1]); return; }
     const c = splitLine(line);
     if (!c) return s++;
     if (dupOf(c)) return d++;
-    prog.fc.mine.push({ id:newId(), en:c.en, ko:c.ko }); a++;
+    const card = { id:newId(), en:c.en, ko:c.ko };
+    if (cat !== MINE) card.cat = cat;
+    prog.fc.mine.push(card); openGroups.add(cat); a++;
   });
-  save(); renderMine();
-  mineMsg(T().imported(a, d, s), a ? "ok" : "err");
-  if (a) $("fm-text").value = "";
+  save();
+  mineMsg(L.imported(a, d, s, prog.fc.cats.length - before), a ? "ok" : "err", "fm-imsg");
+  if (a) { $("fm-text").value = ""; $("fm-inewcat").value = ""; $("fm-icat").innerHTML = catOptions(k.id, true); }
+  renderMine();
 };
+$("fm-catadd").onclick = () => {
+  const L = T(), name = $("fm-catname").value, err = catNameError(name);
+  if (err) return mineMsg(err, "err", "fm-cmsg");
+  catFor(name); save(); $("fm-catname").value = "";
+  mineMsg(L.catAdded, "ok", "fm-cmsg"); renderMine();
+};
+$("fm-catname").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("fm-catadd").onclick(); } });
+/* Copie : les cartes perso, avec un titre « # Nom » par catégorie (celles de Mon paquet d'abord, sans titre) */
 $("fm-copy").onclick = () => {
-  const L = T(), text = prog.fc.mine.map(c => `${c.en} — ${c.ko}`).join("\n");
+  const L = T(), deck = fcDeck().filter(c => c.mine);
+  const text = catList().map(k => {
+    const cs = deck.filter(c => catOf(c) === k.id);
+    if (!cs.length) return "";
+    return (k.id === MINE ? "" : `# ${k.name}\n`) + cs.map(c => `${c.en} — ${c.ko}`).join("\n");
+  }).filter(Boolean).join("\n\n");
   if (!text) return mineMsg(L.noMine, "err");
   const fallback = () => { const t = $("fm-text"); t.value = text; $("fm-details").open = true; t.focus(); t.select(); try { document.execCommand("copy"); } catch (e) {} mineMsg(L.copiedFallback, "ok"); };
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => mineMsg(L.copied, "ok"), fallback);
