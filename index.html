@@ -195,6 +195,198 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .mbar{display:flex;justify-content:flex-end;margin:12px 0 0}
 .mlist{margin-top:12px}
 #m-time.low{color:var(--red)}
+/* ===== Flashcards ===== */
+.games{grid-template-columns:repeat(3,1fr);max-width:330px}
+.games button{padding:8px 4px;font-size:13.5px}
+#fgame{position:relative;min-height:calc(100vh - 70px);min-height:calc(100dvh - 70px)}
+.fheat{position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:var(--heat,0);transition:opacity .7s ease-out;
+  background:radial-gradient(120% 70% at 50% 100%,color-mix(in srgb,#FF7A1A 40%,transparent),transparent 70%),
+             radial-gradient(90% 50% at 50% 0%,color-mix(in srgb,#FFB020 22%,transparent),transparent 70%)}
+.fstats{display:flex;align-items:center;gap:14px;margin:0 0 14px}
+.fprog{flex:1;min-width:0;font-size:14px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.fprog .xbar{margin:5px 0 0}
+.fprog .xbar span{transition:width .45s cubic-bezier(.2,.8,.2,1)}
+.combo{display:flex;align-items:center;gap:3px;font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;
+  padding:4px 10px 4px 6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);transition:background .4s,border-color .4s}
+.combo .flame{display:inline-block;font-size:20px;transform:scale(var(--fs,.7));filter:grayscale(var(--fg,1));transition:transform .35s cubic-bezier(.3,1.6,.5,1),filter .4s}
+.combo.hot{background:color-mix(in srgb,#FF7A1A 16%,var(--paper));border-color:color-mix(in srgb,#FF7A1A 55%,var(--line))}
+.combo.hot .flame{animation:flicker .9s ease-in-out infinite alternate}
+@keyframes flicker{from{rotate:-6deg}to{rotate:6deg}}
+.combo.bump{animation:bump .4s ease-out}
+@keyframes bump{40%{transform:scale(1.25)}}
+.combo.out .flame{animation:fizzle .6s ease-out}
+@keyframes fizzle{30%{transform:scale(.4) translateY(4px);opacity:.4}}
+
+.stage{position:relative;height:clamp(250px,46vh,380px);margin:0 auto 16px;max-width:360px;perspective:1100px;touch-action:none}
+.ghost{position:absolute;inset:0;border-radius:20px;background:var(--paper);border:1px solid var(--line);
+  box-shadow:0 6px 18px color-mix(in srgb,var(--ink) 10%,transparent);transition:transform .4s ease-out,opacity .4s}
+.ghost.g1{transform:translateY(12px) scale(.94);opacity:.85}
+.ghost.g2{transform:translateY(23px) scale(.88);opacity:.6}
+.fcard{position:absolute;inset:0;z-index:2;--belt:#F7F7F2;transform-style:preserve-3d;will-change:transform;user-select:none;-webkit-user-select:none;cursor:pointer}
+.fcard.float .fin{animation:float 3.2s ease-in-out infinite}
+@keyframes float{50%{translate:0 -5px}}
+.fcard.enter{animation:enter .45s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes enter{from{transform:translateY(12px) scale(.94);opacity:.85}}
+.fin{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.3,1.25,.5,1)}
+.fcard.flipped .fin{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:20px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;
+  background:var(--paper);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:46px 18px 22px;text-align:center;box-shadow:0 10px 28px color-mix(in srgb,var(--ink) 16%,transparent)}
+.face::before{content:"";position:absolute;left:0;right:0;top:0;height:9px;background:var(--belt);box-shadow:inset 0 -1px 0 color-mix(in srgb,var(--ink) 18%,transparent)}
+.face.back{transform:rotateY(180deg);background:color-mix(in srgb,var(--belt) 9%,var(--paper))}
+.face .sheen{position:absolute;inset:-40%;pointer-events:none;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.45) 50%,transparent 60%);
+  transform:translateX(-70%);animation:sheen 4.5s ease-in-out infinite}
+@keyframes sheen{0%,62%{transform:translateX(-70%)}100%{transform:translateX(70%)}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .face .sheen{opacity:.35}}
+:root[data-theme="dark"] .face .sheen{opacity:.35}
+.fcard.flipping .face .sheen{animation:sweep .6s ease-out}
+@keyframes sweep{from{transform:translateX(-70%)}to{transform:translateX(70%)}}
+.btag{position:absolute;top:16px;left:14px;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--muted)}
+.btag svg{width:24px;height:24px}
+.ntag{position:absolute;top:16px;right:14px;font-size:12px;font-weight:600;color:var(--red);background:color-mix(in srgb,var(--red) 12%,var(--paper));
+  padding:2px 8px;border-radius:999px}
+.dtag{position:absolute;top:16px;right:14px;font-size:12px;font-weight:600;color:var(--muted)}
+.fmain{font-size:var(--sz,40px);transition:font-size .25s;line-height:1.15;font-weight:700;word-break:keep-all;overflow-wrap:anywhere}
+.fmain small,.fsub small{font-size:.5em;font-weight:500;color:var(--muted);display:inline-block}
+.fsub{margin-top:10px;font-size:20px;color:var(--muted)}
+.stamp{position:absolute;top:44px;z-index:3;padding:4px 12px;border:4px solid;border-radius:10px;font-size:28px;font-weight:700;
+  opacity:0;pointer-events:none;font-family:"Gowun Batang",serif;background:color-mix(in srgb,var(--paper) 70%,transparent)}
+.stamp.ok{left:18px;color:#2F9E5B;transform:rotate(-14deg)}
+.stamp.no{right:18px;color:var(--red);transform:rotate(14deg)}
+.fcard.swiping{transition:none!important}
+.fcard.glow .face{box-shadow:0 0 0 3px var(--belt),0 0 38px 6px color-mix(in srgb,var(--belt) 70%,transparent)}
+.fcard.glow.b0 .face{box-shadow:0 0 0 3px var(--line),0 0 38px 6px rgba(255,255,255,.8)}
+.fcard.glow.b4 .face{box-shadow:0 0 0 3px #D4A72C,0 0 46px 10px rgba(232,186,60,.75)}
+.fcard.b4 .face::before{background:linear-gradient(90deg,#18191B 0 78%,#D4A72C 78% 86%,#18191B 86%)}
+.fcard.shake{animation:fshake .45s}
+@keyframes fshake{15%{translate:-10px 0}30%{translate:9px 0}45%{translate:-7px 0}60%{translate:5px 0}75%{translate:-3px 0}}
+.fcard.sink{transition:transform .55s cubic-bezier(.5,0,.8,.4),opacity .55s!important;transform:translateY(46px) scale(.82)!important;opacity:0;z-index:0}
+.crack{position:absolute;inset:0;z-index:4;pointer-events:none;width:100%;height:100%}
+.crack path{fill:none;stroke:color-mix(in srgb,var(--ink) 70%,transparent);stroke-width:3px;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:1;stroke-dashoffset:1;animation:crack .35s ease-out forwards}
+.crack path:nth-child(2){animation-delay:.12s}.crack path:nth-child(3){animation-delay:.2s}
+@keyframes crack{to{stroke-dashoffset:0}}
+.promo{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;
+  border-radius:20px;background:color-mix(in srgb,var(--paper) 78%,transparent);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:pfade .3s ease-out both}
+@keyframes pfade{from{opacity:0}}
+.promo svg{width:44%;height:auto;filter:drop-shadow(0 6px 14px rgba(0,0,0,.25));animation:knot .8s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes knot{0%{transform:scale(0) rotate(-200deg);opacity:0}60%{opacity:1}100%{transform:none}}
+.promo b{margin-top:6px;font-size:30px;font-family:"Gowun Batang",serif;padding:2px 14px;border-radius:12px;
+  background:var(--belt);color:var(--bfg);box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 20%,transparent);animation:ptxt .5s .35s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes ptxt{from{transform:scale(.3);opacity:0}}
+.promo.black b{background:linear-gradient(135deg,#18191B,#3A3B3F);color:#F2CF6B;box-shadow:0 0 0 2px #D4A72C}
+.promo.black::before{content:"";position:absolute;width:70%;aspect-ratio:1;border-radius:50%;border:3px solid #E8BA3C;animation:ring 1.4s ease-out infinite}
+@keyframes ring{from{transform:scale(.3);opacity:1}to{transform:scale(1.5);opacity:0}}
+.promo small{margin-top:6px;font-size:14px;font-weight:600;color:var(--ink);animation:ptxt .5s .5s both}
+
+/* Zone sous la carte */
+.fzone{display:flex;flex-direction:column;align-items:center;gap:10px}
+.fans{margin-top:18px;min-width:62%;max-width:100%;min-height:52px;padding:6px 14px;border:2px dashed var(--line);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;line-height:1.2;word-break:keep-all;overflow-wrap:anywhere;transition:border-color .2s,background .2s}
+.fans.ko{font-family:"Gowun Batang",serif}
+.fans .caret{display:inline-block;width:2px;height:1.1em;margin-left:2px;background:var(--celadon);animation:caret 1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+#fgame.kb .fans{border-color:var(--celadon)}
+.fans.win{border-style:solid;border-color:#2F9E5B;background:color-mix(in srgb,#2F9E5B 16%,var(--paper));animation:win .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes win{40%{transform:translateY(-8px) scale(1.12)}}
+.fans.win .caret,.fans.lose .caret{display:none}
+.fans.lose{border-style:solid;border-color:var(--red)}
+.fwrong{min-height:1.3em;margin-top:6px;font-size:17px;color:var(--red);text-decoration:line-through;text-decoration-thickness:2px}
+.fwrong.pop{animation:tbad .45s}
+@keyframes tbad{20%{transform:translateX(-7px) rotate(-4deg)}40%{transform:translateX(7px) rotate(4deg)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.fline{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;max-width:360px}
+.fskip{background:none;border:0;color:var(--muted);font-size:14px;font-weight:500;text-decoration:underline;text-underline-offset:3px;padding:4px 0}
+.fform{display:flex;gap:8px;width:100%;max-width:360px}
+.fform input{flex:1;min-width:0;font:inherit;font-size:20px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink)}
+.fform input:focus{outline:2px solid var(--celadon);outline-offset:1px}
+.fgo{width:54px;flex:none;border-radius:12px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);font-size:22px;font-weight:700}
+.fgo:disabled,.fskip:disabled{opacity:.45;cursor:default}
+.kbd{display:grid;place-items:center;flex:none;padding:0 10px;border-radius:12px;background:var(--paper);border:1px solid var(--line);font-weight:700;font-size:15px;white-space:nowrap}
+.kbd.ko{color:var(--celadon);font-family:"Gowun Batang",serif}.kbd.en{color:var(--blue)}
+.kbd.swap{animation:kbdswap .7s cubic-bezier(.2,1.6,.4,1)}
+@keyframes kbdswap{0%{transform:scale(.6) rotate(-12deg)}60%{transform:scale(1.25)}}
+.fzone .fmsg{margin:0;text-align:center;min-height:1.4em;font-size:14px;color:var(--muted)}
+.fzone .fmsg.err{color:var(--red)}.fzone .fmsg.ok{color:var(--celadon);font-weight:600}
+/* Clavier ouvert : tout tient au-dessus du clavier */
+#fgame.kb{min-height:0}
+#fgame.kb .topbar{margin-bottom:8px}
+#fgame.kb .fstats{margin-bottom:10px}
+#fgame.kb .stage{height:clamp(150px,calc(var(--vvh,100vh) - 262px),380px);margin-bottom:12px}
+#fgame.kb .face{padding:38px 14px 12px}
+#fgame.kb .fmain{font-size:calc(var(--sz,40px) * .82)}
+#fgame.kb .fsub{margin-top:4px;font-size:17px}
+#fgame.kb .fans{margin-top:10px;min-height:44px;font-size:22px}
+#fgame.kb .help{display:none}
+.ftip h2{font-size:17px}
+.lives{font-size:14px;font-weight:600;color:var(--muted);display:flex;gap:6px;align-items:center}
+.heart{display:inline-block;color:var(--red);font-size:18px}
+.heart.broke{animation:broke .6s ease-out forwards}
+@keyframes broke{30%{transform:scale(1.4)}100%{transform:scale(.9);filter:grayscale(1);opacity:.45}}
+.fpop{position:fixed;z-index:21;pointer-events:none;font-weight:800;font-size:30px;color:#FF7A1A;text-shadow:0 2px 0 var(--paper),0 0 18px rgba(255,122,26,.5);
+  animation:fpop 1.1s ease-out forwards;transform:translate(-50%,-50%)}
+@keyframes fpop{0%{opacity:0;transform:translate(-50%,-30%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-160%) scale(1)}}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:30}
+
+/* Accueil des flashcards */
+.fhome{display:grid;gap:14px}
+.fbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px}
+.fbox h2{margin:0;font-size:19px;line-height:1.2}
+.fbox p{margin:4px 0 12px;color:var(--muted);font-size:14px}
+.ftoday{position:relative;overflow:hidden}
+.ftoday .test-go{font-size:16px;padding:12px}
+.fstreak{display:flex;align-items:center;gap:12px}
+.fstreak .big{font-size:38px;line-height:1;filter:grayscale(var(--fg,1))}
+.fstreak .big.lit{animation:flicker .9s ease-in-out infinite alternate}
+.fstreak b{font-size:22px}
+.fstreak span{color:var(--muted);font-size:14px;display:block}
+.fbelts{display:grid;gap:8px}
+.fbelt{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:10px;font-size:14px}
+.fbelt svg{width:30px;height:30px}
+.fbelt .xbar{margin:0}
+.fbelt .n{font-weight:600;font-variant-numeric:tabular-nums;min-width:2ch;text-align:right}
+.fbelt.new .xbar span{background:var(--muted)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* Fin de session : éventail de cartes */
+.sfan{position:relative;height:150px;margin:10px 0 8px;overflow:visible}
+.mini{position:absolute;left:50%;bottom:44px;width:58px;height:80px;margin-left:-29px;transform-origin:50% 160%;perspective:500px}
+.mini .in{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.mini.on .in{transform:rotateY(180deg)}
+.mini .a,.mini .z{position:absolute;inset:0;border-radius:8px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:grid;place-items:center;
+  border:1px solid var(--line);background:var(--paper);font-size:12px;font-weight:700;overflow:hidden;padding:2px;text-align:center;line-height:1.15;box-shadow:0 3px 8px rgba(0,0,0,.12)}
+.mini .a{background:var(--celadon);color:var(--paper);font-family:"Gowun Batang",serif;font-size:18px}
+.mini .z{transform:rotateY(180deg);border-top:7px solid var(--belt)}
+.mini .z svg{width:26px;height:26px;display:block;margin:0 auto}
+.mini.up .z{box-shadow:0 0 0 2px var(--belt),0 0 14px color-mix(in srgb,var(--belt) 70%,transparent)}
+.mini.b4.up .z{box-shadow:0 0 0 2px #D4A72C,0 0 16px rgba(232,186,60,.8)}
+.sstreak{display:flex;align-items:center;gap:10px;font-weight:600;margin:0 0 12px}
+.sstreak .big{font-size:34px;filter:grayscale(1);transition:filter .5s}
+.sstreak.lit .big{filter:none;animation:ignite .7s cubic-bezier(.2,1.6,.4,1)}
+@keyframes ignite{0%{transform:scale(.4)}60%{transform:scale(1.4)}}
+.recap small{font-size:.65em;color:var(--muted)}
+.recap .bk svg{width:20px;height:20px;vertical-align:-4px}
+.recap li{cursor:pointer}
+
+/* Mes cartes */
+.fm label{display:block;font-size:14px;font-weight:500;color:var(--muted);margin:0 0 10px}
+.fm input,.fm textarea{display:block;width:100%;margin-top:4px;font:inherit;font-size:17px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+.fm textarea{font-size:15px;resize:vertical;min-height:120px}
+.fm input:focus,.fm textarea:focus{outline:2px solid var(--celadon);outline-offset:1px}
+.fmsg{min-height:1.4em;font-size:14px;margin:0 0 8px!important;color:var(--muted)}
+.fmsg.err{color:var(--red)}.fmsg.ok{color:var(--celadon)}
+.fm details{margin:14px 0;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--paper)}
+.fm summary{font-weight:600;cursor:pointer}
+.fm details[open] summary{margin-bottom:10px}
+.fm details textarea{background:var(--bg)}
+.fmlist{list-style:none;margin:8px 0 16px;padding:0;display:grid;gap:6px}
+.fmlist li{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding:6px 0}
+.fmlist .ko{font-size:19px}
+.fmlist .en{flex:1;color:var(--muted);font-size:14px;min-width:0}
+.fmlist button{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:14px}
+.fmlist button.del.sure{background:var(--red);border-color:var(--red);color:#fff}
+.fm h4{margin:16px 0 0;font-size:14px;font-weight:500;color:var(--muted)}
+#fc-mine .inner{max-height:92%}
+@media (prefers-reduced-motion:reduce){.fin,.fcard,.ghost,.mini .in{transition-duration:.01s!important}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}.card .in{transition:none}}
 </style>
 </head>
@@ -207,7 +399,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
     </div>
     <div class="hero">
       <div class="toprow">
-        <div class="games" role="group" id="games"><button data-game="ws"></button><button data-game="mem"></button></div>
+        <div class="games" role="group" id="games"><button data-game="ws"></button><button data-game="mem"></button><button data-game="fc"></button></div>
         <button class="icon" id="settings-btn">⚙️</button>
       </div>
       <h1 class="ko" id="h1">낱말 찾기</h1>
@@ -263,6 +455,23 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
     <div class="words mlist" id="m-list"></div>
     <p class="help" id="m-help"></p>
   </section>
+
+  <section id="fgame" hidden>
+    <div class="fheat" id="f-heat" aria-hidden="true"></div>
+    <div class="topbar">
+      <button class="back" id="f-back"></button>
+      <div class="title"><span class="ko">낱말 카드</span><small id="f-sub"></small></div>
+      <button class="icon" id="f-sound"></button>
+    </div>
+    <div class="fstats">
+      <div class="fprog"><span id="f-left"></span><div class="xbar"><span id="f-bar"></span></div></div>
+      <div class="combo" id="f-combo" aria-live="polite"><span class="flame">🔥</span><span id="f-combo-n"></span></div>
+    </div>
+    <button class="btn primary" id="f-results" hidden></button>
+    <div class="stage" id="f-stage"></div>
+    <div class="fzone" id="f-zone"></div>
+    <p class="help" id="f-help"></p>
+  </section>
 </main>
 
 <div class="sheet" id="settings" hidden role="dialog" aria-modal="true" aria-labelledby="set-title">
@@ -297,10 +506,32 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
   </div>
 </div>
 
+<div class="sheet" id="fc-mine" hidden role="dialog" aria-modal="true" aria-labelledby="fm-title">
+  <div class="inner fm">
+    <h3 id="fm-title"></h3>
+    <p id="fm-note"></p>
+    <label><span id="fm-ko-l"></span><input id="fm-ko" lang="ko" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+    <label><span id="fm-en-l"></span><input id="fm-en" lang="en" autocomplete="off" spellcheck="false"></label>
+    <p class="fmsg" id="fm-msg" aria-live="polite"></p>
+    <div class="actions"><button class="btn primary" id="fm-add"></button><button class="btn" id="fm-cancel" hidden></button></div>
+    <details id="fm-details"><summary id="fm-imp-t"></summary>
+      <p id="fm-imp-n"></p>
+      <textarea id="fm-text" spellcheck="false" placeholder="Friend — 친구&#10;Today — 오늘&#10;To eat — 먹다"></textarea>
+      <div class="actions" style="margin-top:10px"><button class="btn" id="fm-import"></button></div>
+    </details>
+    <h4 id="fm-count"></h4>
+    <ul class="fmlist" id="fm-list"></ul>
+    <div class="actions"><button class="btn" id="fm-copy"></button><button class="btn primary" id="fm-close"></button></div>
+  </div>
+</div>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+
 <div class="sheet" id="sheet" hidden>
   <div class="inner">
     <h3 class="ko" id="s-title">잘했어요!</h3>
     <div class="s-stars" id="s-stars"><span>★</span><span>★</span></div>
+    <div id="s-fan" hidden></div>
     <p id="s-sub"></p>
     <ul class="recap" id="recap"></ul>
     <div class="actions" id="s-actions"></div>
@@ -455,7 +686,43 @@ const STR = {
     memChallenge:"Jouer le défi", tryAgain:"Réessayer", newGame:"Nouvelle partie", peek:"👀 Mémorise !",
     star3:"Moins de 25 secondes : troisième étoile !", goal3:b => `Ton record : ${b}. Passe sous 25 s pour la troisième étoile.`,
     memReplay:"Rejouer", memReplaySame:"Rejouer avec ces mots", memWith:"🃏 Memory avec ces mots", seeCards:"Voir les cartes",
-    leaveMemText:"Cette partie ne sera pas comptée.", leaveMemTextD:"Les verbes déjà trouvés restent découverts."
+    leaveMemText:"Cette partie ne sera pas comptée.", leaveMemTextD:"Les verbes déjà trouvés restent découverts.",
+    fcName:"Flashcards",
+    introFc:"Des flashcards de ton vocabulaire, où tu écris chaque réponse : une fois en anglais, la fois suivante en coréen. Chaque carte gagne sa propre ceinture : plus tu la connais, plus elle revient tard.",
+    fcTotal:(n, m) => `${n} carte${n > 1 ? "s" : ""} en ceinture noire sur ${m}`,
+    streakN:n => n ? `${n} jour${n > 1 ? "s" : ""} de suite` : "Pas encore de série",
+    streakKeep:"Fais la session du jour pour prolonger ta série.", streakStart:"Termine une session pour allumer la flamme.", streakDone:"Session du jour faite. Reviens demain !",
+    today:"Session du jour",
+    todayMix:(d, n) => [d ? `${d} à revoir` : "", n ? `${n} nouvelle${n > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · "),
+    start:n => `Commencer (${n} carte${n > 1 ? "s" : ""})`,
+    upToDate:"✓ Tout est à jour.", nextIn:d => d <= 1 ? "Prochaine révision demain." : `Prochaine révision dans ${d} jours.`,
+    yourCards:"Tes cartes", beltsNote:"Une bonne réponse fait monter la carte d'une ceinture, une erreur la renvoie en blanche.", newCards:"Nouvelles",
+    free:"Entraînement libre", mine:"Mes cartes",
+    daySub:"Session du jour", freeSub:"Entraînement libre : les ceintures ne changent pas",
+    fcLeft:(n, m) => `${n} / ${m} cartes`, comboPop:c => `콤보 ×${c}!`,
+    newTag:"✨ Nouveau mot",
+    fcHelpLearn:"Nouveau mot : écoute-le et recopie-le en coréen. Il reviendra un peu plus loin pour un vrai test.",
+    fcHelpKe:"Écris le sens en anglais, puis valide avec ↵.",
+    fcHelpEk:"Écris le mot en coréen avec le clavier coréen (touche 🌐), puis valide avec ↵.",
+    copyIt:"Recopie le mot", dunno:"Je ne sais pas", skip:"Passer", phEn:"En anglais…", phKo:"한국어로…",
+    kbKo:"🌐 Passe au clavier coréen.", kbEn:"🌐 Passe au clavier anglais.", incomplete:"Syllabe incomplète : termine le mot.",
+    near:x => `Presque ! Ça s'écrit : ${x}`, copyAgain:"Pas tout à fait : recopie le mot affiché.",
+    answerWas:(en, ko) => `Réponse : ${en} — ${ko}`,
+    kbTipT:"Ajoute le clavier coréen", kbTip:"Pour écrire en coréen sur iPhone : Réglages › Général › Clavier › Claviers › Ajouter un clavier › Coréen › Standard. Pendant le jeu, change de clavier avec la touche 🌐.", tipOk:"Compris",
+    oneError:"1 erreur permise", noError:"Plus d'erreur permise",
+    fcDone:(n, f) => `${n} carte${n > 1 ? "s" : ""}, dont ${f} du premier coup.`, bestCombo:c => `Meilleur combo : ×${c}.`,
+    promoted:n => `${n} carte${n > 1 ? "s ont" : " a"} monté de ceinture.`, freeDone:"Les ceintures n'ont pas bougé.",
+    moreSession:"Encore une session", toFcHome:"Retour aux cartes",
+    leaveFcTitle:"Quitter la session ?", leaveFcText:"Les cartes déjà jouées gardent leur nouvelle ceinture.", leaveFcFree:"Rien n'est perdu : l'entraînement libre ne change pas les ceintures.",
+    fmNote:"Ajoute ton propre vocabulaire. Les cartes rejoignent le paquet en ceinture blanche.",
+    koLabel:"Coréen", enLabel:"Traduction (en anglais)", addCard:"Ajouter la carte", saveEdit:"Enregistrer", cancelEdit:"Annuler",
+    impTitle:"Importer une liste", impNote:"Une carte par ligne, au format « English — 한국어 ». Plusieurs réponses : sépare-les par « / ».", impBtn:"Importer",
+    copyBtn:"Copier ma liste", copied:"Liste copiée ✓ Garde-la dans une note.", copiedFallback:"Ta liste est dans la zone d'import : copie-la.",
+    myCount:n => `${n} carte${n > 1 ? "s" : ""} perso`, noMine:"Aucune carte perso pour l'instant.",
+    errKo:"Écris le mot en coréen (en syllabes coréennes).", errEn:"Écris la traduction en anglais.",
+    dup:c => `Cette carte existe déjà : ${c.en} — ${c.ko}`, added:"Carte ajoutée ✓", saved:"Carte modifiée ✓",
+    imported:(a, d, s) => `${a} carte${a > 1 ? "s" : ""} ajoutée${a > 1 ? "s" : ""}` + (d ? `, ${d} déjà présente${d > 1 ? "s" : ""}` : "") + (s ? `, ${s} ligne${s > 1 ? "s" : ""} ignorée${s > 1 ? "s" : ""}` : "") + ".",
+    edit:"Modifier", del:"Supprimer", sure:"Sûr ?"
   },
   en: {
     title:"낱말 찾기 – Korean word search",
@@ -507,7 +774,43 @@ const STR = {
     memChallenge:"Play the challenge", tryAgain:"Try again", newGame:"New game", peek:"👀 Memorize!",
     star3:"Under 25 seconds: third star!", goal3:b => `Your best: ${b}. Get under 25 s for the third star.`,
     memReplay:"Play again", memReplaySame:"Replay with these words", memWith:"🃏 Memory with these words", seeCards:"See the cards",
-    leaveMemText:"This game won't count.", leaveMemTextD:"Verbs you've found stay discovered."
+    leaveMemText:"This game won't count.", leaveMemTextD:"Verbs you've found stay discovered.",
+    fcName:"Flashcards",
+    introFc:"Flashcards of your own vocabulary where you write every answer: once in English, the next time in Korean. Each card earns its own belt: the better you know it, the later it comes back.",
+    fcTotal:(n, m) => `${n} of ${m} cards at black belt`,
+    streakN:n => n ? `${n}-day streak` : "No streak yet",
+    streakKeep:"Do today's session to keep your streak.", streakStart:"Finish a session to light the flame.", streakDone:"Today's session is done. Come back tomorrow!",
+    today:"Today's session",
+    todayMix:(d, n) => [d ? `${d} to review` : "", n ? `${n} new` : ""].filter(Boolean).join(" · "),
+    start:n => `Start (${n} card${n === 1 ? "" : "s"})`,
+    upToDate:"✓ All caught up.", nextIn:d => d <= 1 ? "Next review tomorrow." : `Next review in ${d} days.`,
+    yourCards:"Your cards", beltsNote:"A right answer moves a card up one belt; a mistake sends it back to white.", newCards:"New",
+    free:"Free practice", mine:"My cards",
+    daySub:"Today's session", freeSub:"Free practice: belts don't change",
+    fcLeft:(n, m) => `${n} / ${m} cards`, comboPop:c => `콤보 ×${c}!`,
+    newTag:"✨ New word",
+    fcHelpLearn:"New word: listen and copy it in Korean. It will come back a bit later for a real test.",
+    fcHelpKe:"Write the meaning in English, then press ↵.",
+    fcHelpEk:"Write the word with the Korean keyboard (🌐 key), then press ↵.",
+    copyIt:"Copy the word", dunno:"I don't know", skip:"Skip", phEn:"In English…", phKo:"한국어로…",
+    kbKo:"🌐 Switch to the Korean keyboard.", kbEn:"🌐 Switch to the English keyboard.", incomplete:"Unfinished syllable: complete the word.",
+    near:x => `Almost! It's spelled: ${x}`, copyAgain:"Not quite: copy the word shown.",
+    answerWas:(en, ko) => `Answer: ${en} — ${ko}`,
+    kbTipT:"Add the Korean keyboard", kbTip:"To write Korean on iPhone: Settings › General › Keyboard › Keyboards › Add New Keyboard › Korean › Standard. While playing, switch keyboards with the 🌐 key.", tipOk:"Got it",
+    oneError:"1 mistake allowed", noError:"No more mistakes allowed",
+    fcDone:(n, f) => `${n} card${n === 1 ? "" : "s"}, ${f} right on the first try.`, bestCombo:c => `Best combo: ×${c}.`,
+    promoted:n => `${n} card${n === 1 ? "" : "s"} moved up a belt.`, freeDone:"Belts stayed the same.",
+    moreSession:"Another session", toFcHome:"Back to cards",
+    leaveFcTitle:"Leave this session?", leaveFcText:"Cards you've played keep their new belt.", leaveFcFree:"Nothing is lost: free practice doesn't change belts.",
+    fmNote:"Add your own vocabulary. New cards join the deck at white belt.",
+    koLabel:"Korean", enLabel:"Translation (English)", addCard:"Add card", saveEdit:"Save", cancelEdit:"Cancel",
+    impTitle:"Import a list", impNote:"One card per line, as “English — 한국어”. Several answers: separate them with “/”.", impBtn:"Import",
+    copyBtn:"Copy my list", copied:"List copied ✓ Keep it in a note.", copiedFallback:"Your list is in the import box: copy it.",
+    myCount:n => `${n} custom card${n === 1 ? "" : "s"}`, noMine:"No custom cards yet.",
+    errKo:"Write the word in Korean (Hangul syllables).", errEn:"Write the English translation.",
+    dup:c => `This card already exists: ${c.en} — ${c.ko}`, added:"Card added ✓", saved:"Card updated ✓",
+    imported:(a, d, s) => `${a} card${a === 1 ? "" : "s"} added` + (d ? `, ${d} already in the deck` : "") + (s ? `, ${s} line${s === 1 ? "" : "s"} skipped` : "") + ".",
+    edit:"Edit", del:"Delete", sure:"Sure?"
   }
 };
 
@@ -578,11 +881,11 @@ if (!prog.rulesV2) {
 
 /* Memory : ★ quand les 16 verbes sont découverts, ★★ quand le défi (16 paires) est fini en moins de 100 s ;
    les 8 étoiles d'une ceinture ouvrent la suivante */
-const MEM_TIME = 25000, MEM_LIMIT = 100000, MEM_PAIRS = 8, MEM_D = 6, MEM_NEW = 2, MEM_WAVE = 3, MEM_PEEK_D = 3000, MEM_PEEK = 2000;
+const MEM_TIME = 25000, MEM_LIMIT = 100000, MEM_PAIRS = 8, MEM_D = 6, MEM_NEW = 2, MEM_WAVE = 3, MEM_PEEK_D = 3000, MEM_PEEK = 2000, MEM_PEEK_WS = 3000;
 prog.mem = prog.mem || {};
 prog.mseen = prog.mseen || {};
 prog.memUnlocked = prog.memUnlocked || [];
-if (prog.game !== "mem") prog.game = "ws";
+if (prog.game !== "mem" && prog.game !== "fc") prog.game = "ws";
 const memOf = id => prog.mem[id] || {};
 const MTH = {};
 MTHEMES.forEach(t => { MTH[t.id] = t; });
@@ -630,6 +933,13 @@ function applyLang() {
   $("m-new").textContent = t.newGame;
   document.querySelector('[data-game="ws"]').textContent = t.wsName;
   document.querySelector('[data-game="mem"]').textContent = t.memName;
+  document.querySelector('[data-game="fc"]').textContent = t.fcName;
+  $("f-back").textContent = t.back.replace(/Thèmes|Themes/, t.fcName);
+  $("f-sound").setAttribute("aria-label", t.sound);
+  $("fm-title").textContent = t.mine; $("fm-note").textContent = t.fmNote;
+  $("fm-ko-l").textContent = t.koLabel; $("fm-en-l").textContent = t.enLabel;
+  $("fm-cancel").textContent = t.cancelEdit; $("fm-imp-t").textContent = t.impTitle; $("fm-imp-n").textContent = t.impNote;
+  $("fm-import").textContent = t.impBtn; $("fm-copy").textContent = t.copyBtn; $("fm-close").textContent = t.close;
 }
 /* Panneau Réglages */
 function renderSettings() {
@@ -638,7 +948,7 @@ function renderSettings() {
 }
 function setSound(on) {
   prog.sound = on; save(); renderSettings();
-  $("sound").textContent = $("m-sound").textContent = prog.sound ? "🔊" : "🔇";
+  $("sound").textContent = $("m-sound").textContent = $("f-sound").textContent = prog.sound ? "🔊" : "🔇";
 }
 document.querySelectorAll("#settings [data-lang]").forEach(b => b.onclick = () => {
   LANG = b.dataset.lang; prog.lang = LANG; save(); applyLang(); renderHome();
@@ -693,6 +1003,12 @@ function sfx(kind) {
     if (kind === "ok") { tone(880, t, .18, "sine", .18); tone(1320, t + .09, .22, "sine", .15); }
     else if (kind === "bad") tone(190, t, .16, "triangle", .12);
     else if (kind === "star") { tone(1046, t, .25, "sine", .14); tone(1568, t + .1, .35, "sine", .11); }
+    else if (kind === "flip") { tone(520, t, .07, "triangle", .07); tone(780, t + .04, .08, "triangle", .05); }
+    else if (kind === "tick") tone(1180, t, .07, "sine", .1);
+    else if (kind === "combo") { tone(988, t, .1, "square", .05); tone(1318, t + .07, .14, "square", .05); }
+    else if (kind === "belt") [523, 659, 784, 1046].forEach((f, i) => tone(f, t + i * .08, .28, "sine", .13));
+    else if (kind === "black") { [392, 523, 659, 784, 1046, 1318].forEach((f, i) => tone(f, t + i * .09, .4, "sine", .12)); [523, 659, 784].forEach(f => tone(f, t + .6, .9, "triangle", .06)); }
+    else if (kind === "crack") { tone(140, t, .12, "sawtooth", .07); tone(95, t + .06, .18, "square", .05); }
   } catch (e) {}
 }
 ["touchend", "click"].forEach(ev => document.addEventListener(ev, () => { if (prog.sound) audio(); }, { once:true, passive:true }));
@@ -711,11 +1027,12 @@ document.querySelectorAll("#games button").forEach(b => b.onclick = () => {
   prog.game = b.dataset.game; save(); renderHome();
 });
 function renderHome() {
-  const mem = prog.game === "mem";
+  const mem = prog.game === "mem", fc = prog.game === "fc";
   document.querySelectorAll("#games button").forEach(b => b.setAttribute("aria-pressed", b.dataset.game === prog.game));
-  $("h1").textContent = mem ? "짝 맞추기" : "낱말 찾기";
-  $("intro").textContent = mem ? T().introMem : T().intro;
+  $("h1").textContent = mem ? "짝 맞추기" : fc ? "낱말 카드" : "낱말 찾기";
+  $("intro").textContent = mem ? T().introMem : fc ? T().introFc : T().intro;
   if (mem) return renderMemHome();
+  if (fc) return renderFcHome();
   let got = 0;
   $("ladder").innerHTML = "";
   LEVELS.forEach((l, li) => {
@@ -1014,15 +1331,19 @@ $("hint").onclick = () => {
   el.classList.remove("hint", "pop"); el.style.animationDelay = ""; void el.offsetWidth; el.classList.add("hint");
 };
 function goHome() {
-  S = null; stopMemory(); M = null; updateHint();
-  $("game").hidden = true; $("mgame").hidden = true; $("home").hidden = false; $("sheet").hidden = true; $("results").hidden = true;
+  S = null; stopMemory(); M = null; stopFc(); F = null; updateHint();
+  $("game").hidden = true; $("mgame").hidden = true; $("fgame").hidden = true; $("home").hidden = false; $("sheet").hidden = true; $("results").hidden = true;
   renderHome(); window.scrollTo(0, 0);
 }
 /* Demande confirmation si une partie est en cours (au moins un mot trouvé, grille pas finie) */
 let onLeave = null;
 function confirmLeave(action) {
   const L = T();
-  if (M) {
+  if (F) {
+    if (F.finished || !F.played) return action();
+    $("c-title").textContent = L.leaveFcTitle;
+    $("c-text").textContent = F.mode === "day" ? L.leaveFcText : L.leaveFcFree;
+  } else if (M) {
     if (M.finished || !M.found) return action();
     $("c-title").textContent = L.leaveTitle;
     $("c-text").textContent = M.kind === "mem" && M.mode === "d" ? L.leaveMemTextD : L.leaveMemText;
@@ -1047,14 +1368,14 @@ function closeSheet(id, then) {
   setTimeout(() => { el.hidden = true; el.classList.remove("closing"); if (then) then(); }, 250);
 }
 /* Écran de fin : on peut le fermer pour revoir sa grille, puis le rouvrir */
-function showResults() { $("results").hidden = true; $("m-results").hidden = true; openSheet("sheet"); }
+function showResults() { $("results").hidden = true; $("m-results").hidden = true; $("f-results").hidden = true; openSheet("sheet"); }
 function hideResults() {
   closeSheet("sheet", () => {
-    const b = M && M.finished ? $("m-results") : S && S.finished ? $("results") : null;
+    const b = F && F.finished ? $("f-results") : M && M.finished ? $("m-results") : S && S.finished ? $("results") : null;
     if (b) { b.textContent = T().seeResults; b.hidden = false; }
   });
 }
-$("results").onclick = $("m-results").onclick = showResults;
+$("results").onclick = $("m-results").onclick = $("f-results").onclick = showResults;
 $("sheet").addEventListener("click", e => { if (e.target === $("sheet")) hideResults(); });
 
 $("regen").onclick = () => confirmLeave(() => startGame(S.t.id, S.mode));
@@ -1068,6 +1389,7 @@ window.addEventListener("resize", () => { if (S && !$("game").hidden) { const px
 
 /* Fin de thème */
 function finishExam() {
+  $("s-fan").hidden = true;
   $("s-title").textContent = "잘했어요!";
   const L = T(), { li } = S.exam, l = LEVELS[li], nextL = LEVELS[li + 1], words = S.words;
   const wasOpen = nextL ? isUnlocked(li + 1) : true, wasDone = examPassed(l), before = validCount(l);
@@ -1093,6 +1415,7 @@ function finishExam() {
 }
 function finish() {
   if (S.exam) return finishExam();
+  $("s-fan").hidden = true;
   $("s-title").textContent = "잘했어요!";
   $("s-stars").hidden = false;
   const t = S.t, L = T(), words = S.words;
@@ -1116,7 +1439,7 @@ function finish() {
   if (m === "d" && after.d) add(L.playChallenge, !after.c, () => startGame(t.id, "c"));
   if (next) add(L.next(next[LANG]), m === "c" || (after.d && after.c), () => startGame(next.id, "d"));
   if (m === "c" || (after.d && after.c)) add(L.replay, false, () => startGame(t.id, m));
-  add(L.memWith, false, () => startMemory("ws", t, words));
+  add(L.memWith, false, () => startMemory("ws", t, words, m));
   add(L.toThemes, false, goHome);
   add(L.seeGrid, false, hideResults);
   showResults();
@@ -1151,7 +1474,7 @@ function markMemSeen(t, ko) {
 }
 const deal = idx => idx.flatMap(i => [{ i, ko:true }, { i, ko:false }]);
 /* kind "mem" (mode "d" ou "c") : un thème de verbes ; kind "ws" : les 8 mots d'une grille de mots mêlés */
-function startMemory(kind, t, opt) {
+function startMemory(kind, t, opt, wsMode) {
   stopMemory();
   S = null;
   const mode = kind === "mem" ? (opt === "c" && memStars(t.id).a ? "c" : "d") : "ws";
@@ -1161,7 +1484,7 @@ function startMemory(kind, t, opt) {
         cards:shuffle(deal(words.map((_, i) => i).slice(0, first))), foundI:new Set(), found:0, sinceWave:0,
         up:[], moves:0, t0:0, elapsed:0, timer:null, pending:null, waveT:null, busy:false, finished:false, lost:false,
         newCount:0, starsBefore:kind === "mem" ? memStars(t.id) : null,
-        limit:mode === "c" ? MEM_LIMIT : 0, goal:mode === "ws" ? MEM_TIME : 0 };
+        limit:mode === "c" ? MEM_LIMIT : 0, goal:mode === "ws" ? MEM_TIME : 0, wsMode:wsMode || "d" };
   $("home").hidden = true; $("game").hidden = true; $("mgame").hidden = false;
   $("sheet").hidden = true; $("results").hidden = true; $("m-results").hidden = true;
   $("m-ko").textContent = t.ko;
@@ -1170,6 +1493,7 @@ function startMemory(kind, t, opt) {
   $("m-sound").textContent = prog.sound ? "🔊" : "🔇";
   $("m-help").textContent = mode === "c" ? T().memHelpC : mode === "ws" ? T().memHelpWs : T().memHelp;
   $("m-modes").hidden = kind !== "mem";
+  $("m-new").hidden = kind !== "mem";
   document.querySelectorAll("#m-modes button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mm === mode));
   const cBtn = document.querySelector('[data-mm="c"]'), cLocked = kind === "mem" && !memStars(t.id).a;
   cBtn.disabled = cLocked;
@@ -1192,7 +1516,7 @@ function peek() {
     M.cards.forEach((_, k) => setUp(k, false));
     M.busy = false;
     updateMemStats();
-  }, 300 + (M.mode === "d" ? MEM_PEEK_D : MEM_PEEK));
+  }, 300 + (M.mode === "d" ? MEM_PEEK_D : M.mode === "ws" ? MEM_PEEK_WS : MEM_PEEK));
 }
 document.querySelectorAll("#m-modes button").forEach(b => b.onclick = () => {
   if (!M || b.disabled || b.dataset.mm === M.mode) return;
@@ -1312,6 +1636,7 @@ function updateMemStats() {
   $("m-pairs").textContent = T().pairs(M.found, M.words.length);
 }
 function finishMemory() {
+  $("s-fan").hidden = true;
   const L = T(), { kind, mode, t, words } = M, time = M.elapsed, moves = M.moves, lost = M.lost;
   const lines = [];
   let stars;
@@ -1365,15 +1690,650 @@ function finishMemory() {
     const next = MTHEMES[MTHEMES.indexOf(t) + 1];
     if (next && memUnlocked(MLEVELS.indexOf(next.level))) add(L.next(next[LANG]), st.a && st.b, () => startMemory("mem", next, "d"));
     if (mode === "d" && st.a) add(L.memReplay, false, () => startMemory("mem", t, "d"));
-  } else add(L.memReplaySame, true, () => startMemory("ws", t, words));
+  } else { const wm = M.wsMode; add(L.replay, true, () => startGame(t.id, wm)); }
   add(L.toThemes, false, goHome);
   add(L.seeCards, false, hideResults);
   showResults();
 }
 $("m-back").onclick = () => confirmLeave(goHome);
 /* Nouvelle partie : mêmes réglages, nouvelles cartes (les mots mêlés gardent leurs 8 mots) */
-$("m-new").onclick = () => { if (M) { const { kind, t, mode, words } = M; confirmLeave(() => startMemory(kind, t, kind === "ws" ? words : mode)); } };
+$("m-new").onclick = () => { if (M && M.kind === "mem") { const { t, mode } = M; confirmLeave(() => startMemory("mem", t, mode)); } };
 $("m-sound").onclick = () => setSound(!prog.sound);
+
+/* ===== Flashcards ===== */
+/* Le paquet, tel quel : « English — 한국어 », une carte par ligne */
+const FC_LIST = `Photo — 사진
+Camera — 카메라
+Computer — 컴퓨터
+Bread — 빵
+Riz / Rice — 밥 (riz cuit), 쌀 (riz cru)
+Friend — 친구
+Today — 오늘
+Juice — 주스
+Milk — 우유
+Coffee — 커피
+Drinks — 음료
+To sit — 앉다
+It's OK — 괜찮다
+Not to exist / Not to have — 없다
+Read / To read — 읽다
+Chicken — 치킨 (poulet frit), 닭고기 (viande de poulet)
+To meet — 만나다
+To go — 가다
+To sleep — 자다
+To buy — 사다
+To come — 오다
+To watch / To see / To look — 보다
+To drink — 마시다
+To teach — 가르치다
+Teacher — 선생님
+To wait — 기다리다
+To learn — 배우다
+To eat — 먹다
+To take a picture — 사진을 찍다
+To do — 하다
+To work — 일하다
+To exercise / To work out — 운동하다
+To study — 공부하다
+To do homework — 숙제하다
+Homework — 숙제
+To talk — 이야기하다
+To use a computer — 컴퓨터를 사용하다
+To cook — 요리하다
+To go shopping — 쇼핑하다
+To clean — 청소하다
+To do laundry — 빨래하다
+A dog — 개 / 강아지
+To call (by phone) — 전화하다
+To sing — 노래하다
+To take a shower — 샤워하다
+Love — 사랑
+To love — 사랑하다
+Like / To like — 좋아하다
+Boyfriend (romantic) — 남자친구
+Girlfriend (romantic) — 여자친구
+Boy friend (platonic, informal) — 남사친
+Girl friend (platonic, informal) — 여사친
+Télévision — 텔레비전 / TV`;
+
+/* Réglages : 20 cartes par session dont 8 nouvelles au plus, 10 en entraînement libre.
+   Délai avant la prochaine révision selon la ceinture atteinte : jaune 1 jour, verte 2, bleue 4, noire 8, puis 16 */
+const FC_SESSION = 20, FC_NEW = 8, FC_FREE = 10, FC_DAYS = [0, 1, 2, 4, 8], FC_MASTER = 16;
+const HANGUL = /[가-힣]/g;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[c]);
+const paren = s => esc(s).replace(/\(([^)]*)\)/g, "<small>($1)</small>");
+const hcount = s => (String(s).match(HANGUL) || []).length;
+/* Une ligne « A — B » : le côté en syllabes coréennes est le coréen, l'autre la traduction */
+function splitLine(line) {
+  const m = String(line).trim().match(/^(.+?)(?:\s*[—–=\t]\s*|\s+-\s+)(.+)$/);
+  if (!m) return null;
+  const a = m[1].trim(), b = m[2].trim(), ha = hcount(a), hb = hcount(b);
+  if (!ha && !hb) return null;
+  const [ko, en] = hb >= ha ? [b, a] : [a, b];
+  if (!en || hcount(en) > 0 && hcount(en) >= hcount(ko)) return null;
+  return answersOf(ko).length ? { en, ko } : null;
+}
+/* Réponses acceptées : les parties en coréen, sans les précisions entre parenthèses */
+const ANS = new Map();
+function answersOf(ko) {
+  if (!ANS.has(ko)) ANS.set(ko, ko.replace(/\([^)]*\)/g, " ").split(/[\/,;]/)
+    .map(s => s.trim().replace(/\s+/g, " ")).filter(s => /^[가-힣 ]+$/.test(s)));
+  return ANS.get(ko);
+}
+const FC_BASE = FC_LIST.split("\n").map(splitLine).filter(Boolean).map(c => ({ ...c, id:"b:" + c.ko }));
+prog.fc = prog.fc || {};
+prog.fc.cards = prog.fc.cards || {};
+prog.fc.mine = prog.fc.mine || [];
+prog.fc.streak = prog.fc.streak || { day:"", n:0 };
+const fcDeck = () => FC_BASE.concat(prog.fc.mine.map(c => ({ ...c, mine:true })));
+const fcById = id => fcDeck().find(c => c.id === id);
+const fcSt = id => prog.fc.cards[id];
+const fcBelt = id => (prog.fc.cards[id] || {}).b || 0;
+const dayAt = k => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate() + k).getTime(); };
+const dayKey = t => { const d = new Date(t); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
+function fcPlan() {
+  const now = Date.now(), deck = fcDeck();
+  const due = deck.filter(c => fcSt(c.id) && fcSt(c.id).due <= now).sort((a, b) => fcSt(a.id).due - fcSt(b.id).due).slice(0, FC_SESSION);
+  const unseen = deck.filter(c => !fcSt(c.id)), fresh = unseen.filter(c => c.mine).concat(unseen.filter(c => !c.mine));
+  return { due, fresh:fresh.slice(0, Math.max(0, Math.min(FC_NEW, FC_SESSION - due.length))) };
+}
+const fcStreak = () => { const s = prog.fc.streak; return s.day === dayKey(dayAt(0)) || s.day === dayKey(dayAt(-1)) ? s.n : 0; };
+const BELT_FX = [["#FFFFFF","#E9E9E1","#CFCFC6"],["#E8BE2E","#F6D96B","#FFF1B0"],["#3E8E57","#6CC28A","#B5E8C5"],
+  ["#2F62A8","#5E92D8","#A9C8F0"],["#18191B","#D4A72C","#F2CF6B","#FFF4C8"]];
+const beltOf = b => LEVELS[Math.max(0, b)];
+const RM = matchMedia("(prefers-reduced-motion: reduce)");
+
+/* Particules */
+const FX = { cv:null, ctx:null, ps:[], raf:0, dpr:1 };
+function fxSize() {
+  if (!FX.cv) return;
+  FX.dpr = Math.min(2, window.devicePixelRatio || 1);
+  FX.cv.width = innerWidth * FX.dpr; FX.cv.height = innerHeight * FX.dpr;
+}
+function burst(x, y, colors, n, power) {
+  if (RM.matches) return;
+  if (!FX.cv) { FX.cv = $("fx"); FX.ctx = FX.cv.getContext("2d"); fxSize(); }
+  power = power || 1;
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, sp = (2 + Math.random() * 6) * power;
+    FX.ps.push({ x, y, vx:Math.cos(a) * sp, vy:Math.sin(a) * sp - 3 * power, life:0, max:55 + Math.random() * 45,
+      w:5 + Math.random() * 6, h:3 + Math.random() * 5, r:Math.random() * 6, vr:(Math.random() - .5) * .35,
+      c:colors[i % colors.length], round:Math.random() < .35 });
+  }
+  if (!FX.raf) FX.raf = requestAnimationFrame(fxLoop);
+}
+function fxLoop() {
+  const { ctx, dpr } = FX;
+  ctx.clearRect(0, 0, FX.cv.width, FX.cv.height);
+  FX.ps = FX.ps.filter(p => p.life < p.max);
+  FX.ps.forEach(p => {
+    p.life++; p.vx *= .985; p.vy = p.vy * .985 + .22; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, 1 - p.life / p.max);
+    ctx.translate(p.x * dpr, p.y * dpr); ctx.rotate(p.r);
+    ctx.fillStyle = p.c; ctx.strokeStyle = "rgba(0,0,0,.22)"; ctx.lineWidth = dpr * .6;
+    ctx.beginPath();
+    if (p.round) ctx.arc(0, 0, p.h * dpr * .6, 0, Math.PI * 2);
+    else ctx.rect(-p.w * dpr / 2, -p.h * dpr / 2, p.w * dpr, p.h * dpr * Math.abs(Math.cos(p.life / 6)) + dpr);
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+  });
+  FX.raf = FX.ps.length ? requestAnimationFrame(fxLoop) : 0;
+  if (!FX.raf) ctx.clearRect(0, 0, FX.cv.width, FX.cv.height);
+}
+window.addEventListener("resize", fxSize);
+const centerOf = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+function popText(text, x, y) {
+  if (RM.matches) return;
+  const el = document.createElement("div");
+  el.className = "fpop"; el.textContent = text;
+  el.style.left = x + "px"; el.style.top = y + "px";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+/* Session : "day" (session du jour, les ceintures bougent) ou "free" (entraînement, rien ne change).
+   On écrit chaque réponse, et chaque carte change de sens à chaque passage :
+   "ke" = on voit le coréen, on écrit l'anglais ; "ek" = on voit l'anglais, on écrit le coréen.
+   Une carte jamais vue passe d'abord par la découverte ("learn") : on la recopie, puis elle revient en test. */
+let F = null;
+function fcLater(fn, ms) { const game = F; const id = setTimeout(() => { if (F === game) fn(); }, RM.matches ? Math.min(ms, 300) : ms); if (F) F.timers.push(id); return id; }
+function stopFc() {
+  if (F) F.timers.forEach(clearTimeout);
+  const i = $("f-input"); if (i && document.activeElement === i) i.blur();
+  $("fgame").classList.remove("kb");
+}
+const flipDir = d => d === "ke" ? "ek" : "ke";
+function dirFor(id) { const s = fcSt(id); return !s ? "ke" : s.d ? flipDir(s.d) : s.b >= 2 ? "ke" : "ek"; }
+/* Répartit chaque groupe régulièrement sur la session, pour alterner les sens */
+const spreadAll = groups => groups.flatMap(g => shuffle(g).map((v, i) => [(i + .25 + Math.random() * .5) / g.length, v]))
+  .sort((p, q) => p[0] - q[0]).map(p => p[1]);
+function startFc(mode) {
+  stopFc(); stopMemory(); M = null; S = null;
+  let cards;
+  if (mode === "day") { const p = fcPlan(); cards = p.due.concat(p.fresh); }
+  else { const deck = fcDeck(), seen = deck.filter(c => fcSt(c.id)); cards = shuffle(seen.length >= 6 ? seen : deck).slice(0, FC_FREE); }
+  if (!cards.length) return;
+  const steps = cards.map(c => fcSt(c.id) ? { id:c.id, kind:"test", dir:dirFor(c.id) } : { id:c.id, kind:"learn" });
+  const queue = spreadAll([steps.filter(s => s.kind === "learn"), steps.filter(s => s.dir === "ke"), steps.filter(s => s.dir === "ek")]);
+  const ids = queue.map(s => s.id);
+  F = { mode, queue, total:ids.length, order:ids, cleared:new Set(), failed:new Set(), first:{}, before:{},
+        combo:0, best:0, played:0, cur:null, busy:false, finished:false, composing:false, lastExpect:null, timers:[] };
+  ids.forEach(id => { F.before[id] = fcSt(id) ? fcBelt(id) : -1; });
+  $("home").hidden = true; $("game").hidden = true; $("mgame").hidden = true; $("fgame").hidden = false;
+  $("sheet").hidden = true; $("f-results").hidden = true;
+  $("f-sub").textContent = mode === "day" ? T().daySub : T().freeSub;
+  $("f-sound").textContent = prog.sound ? "🔊" : "🔇";
+  $("f-heat").style.setProperty("--heat", 0);
+  window.scrollTo(0, 0);
+  buildZone();
+  updateCombo(null); renderFcTop();
+  nextCard();
+}
+function renderFcTop() {
+  if (!F) return;
+  $("f-left").textContent = T().fcLeft(F.cleared.size, F.total);
+  $("f-bar").style.width = Math.round(F.cleared.size / F.total * 100) + "%";
+}
+function updateCombo(ok) {
+  const el = $("f-combo"), c = F.combo;
+  $("f-combo-n").textContent = "×" + c;
+  el.style.setProperty("--fs", Math.min(1.35, .7 + c * .07).toFixed(2));
+  el.style.setProperty("--fg", c ? 0 : 1);
+  el.classList.toggle("hot", c >= 3);
+  el.classList.remove("bump", "out"); void el.offsetWidth;
+  if (ok === true) el.classList.add("bump");
+  if (ok === false) el.classList.add("out");
+  $("f-heat").style.setProperty("--heat", Math.min(1, c / 8).toFixed(2));
+  if (ok && (c === 3 || c === 5 || c % 10 === 0)) {
+    const [x, y] = centerOf(el);
+    popText(T().comboPop(c), x - 40, y + 30);
+    burst(x, y, ["#FF7A1A", "#FFB020", "#FFE08A"], 18, .7);
+    sfx("combo");
+  }
+}
+function nextCard() {
+  if (!F) return;
+  if (!F.queue.length) return endFc();
+  const step = F.queue[0], c = fcById(step.id);
+  if (!c) { F.queue.shift(); return nextCard(); }
+  const learn = step.kind === "learn", dir = learn ? "learn" : step.dir;
+  F.cur = { id:step.id, c, b:fcBelt(step.id), dir, learn, done:false, errors:0, expect:dir === "ke" ? "en" : "ko" };
+  F.busy = false;
+  renderFcCard();
+}
+
+/* Vérification des réponses */
+const ko0 = c => answersOf(c.ko)[0];
+const STOP = new Set(["to", "a", "an", "the"]), SYN = { okay:"ok", tv:"television", telly:"television" };
+function normEn(s) {
+  return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/['’`]/g, "")
+    .replace(/\bit is\b/g, "its").replace(/[^a-z0-9]+/g, " ").trim().split(" ")
+    .map(w => SYN[w] || w).filter(w => w && !STOP.has(w)).join(" ");
+}
+/* Chaque partie séparée par « / » est acceptée, avec ou sans les précisions entre parenthèses */
+const enVariants = en => en.split("/").flatMap(p => [p.replace(/\([^)]*\)/g, " "), p.replace(/[()]/g, " ")])
+  .map(p => [normEn(p), p.replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim()]).filter(x => x[0]);
+/* Distance d'édition, une inversion de deux lettres comptant pour une seule faute */
+function lev(a, b) {
+  const d = Array.from({ length:a.length + 1 }, (_, i) => [i].concat(Array(b.length).fill(0)));
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+  }
+  return d[a.length][b.length];
+}
+function checkAnswer(cur, raw) {
+  const L = T();
+  if (cur.expect === "ko") {
+    if (/[a-z]/i.test(raw)) return { hint:L.kbKo };
+    if (/[ㄱ-ㆎ]/.test(raw)) return { hint:L.incomplete };
+    const v = raw.replace(/[^가-힣]/g, "");
+    return { ok:answersOf(cur.c.ko).some(a => a.replace(/ /g, "") === v) };
+  }
+  if (/[가-힣ㄱ-ㆎ]/.test(raw)) return { hint:L.kbEn };
+  const v = normEn(raw), exp = enVariants(cur.c.en);
+  if (!v) return { ok:false };
+  if (exp.some(x => x[0] === v)) return { ok:true };
+  /* Le sens d'une autre carte (drink pour 음료) est une confusion, pas une faute de frappe */
+  const own = new Set(exp.map(x => x[0]));
+  if (fcDeck().some(d => d.id !== cur.id && enVariants(d.en).some(x => x[0] === v && !own.has(x[0])))) return { ok:false };
+  const best = exp.map(x => [lev(v, x[0]), x]).sort((p, q) => p[0] - q[0])[0];
+  const n = best[1][0].length, tol = n >= 9 ? 2 : n >= 4 ? 1 : 0;
+  return best[0] <= tol ? { ok:true, near:best[1][1] } : { ok:false };
+}
+
+/* La carte et la zone de saisie */
+const koSize = s => { const n = s.replace(/\([^)]*\)/g, "").length; return n <= 3 ? 62 : n <= 5 ? 50 : n <= 8 ? 38 : n <= 14 ? 30 : 24; };
+const enSize = s => { const n = s.replace(/\([^)]*\)/g, "").length; return n <= 10 ? 36 : n <= 18 ? 30 : n <= 28 ? 25 : 21; };
+function beltTag(b) { const l = beltOf(b); return `<span class="btag">${beltKnot(l.belt.bg)}<span class="ko">${l.belt.ko}</span></span>`; }
+function renderFcCard() {
+  const cur = F.cur, { c, b, dir } = cur, L = T(), stage = $("f-stage");
+  const ghosts = Math.min(2, F.queue.length - 1);
+  const ko = `<div class="fmain ko" lang="ko" style="--sz:${koSize(c.ko)}px">${paren(c.ko)}</div>`;
+  const en = `<div class="fmain" lang="en" style="--sz:${enSize(c.en)}px">${paren(c.en)}</div>`;
+  const ans = `<div class="fans${cur.expect === "ko" ? " ko" : ""}" id="f-ans"><span id="f-ans-t"></span><span class="caret"></span></div><div class="fwrong" id="f-wrong"></div>`;
+  const top = dir === "learn"
+    ? `${beltTag(b)}<span class="ntag">${L.newTag}</span>${ko}<div class="fsub" lang="en">${paren(c.en)}</div>${ans}`
+    : dir === "ke" ? `${beltTag(b)}<span class="dtag">한 → EN</span>${ko}${ans}`
+    : `${beltTag(b)}<span class="dtag">EN → 한</span>${en}${ans}`;
+  const back = dir === "ke"
+    ? `${beltTag(b)}${en}<div class="fsub ko" lang="ko">${paren(c.ko)}</div>`
+    : `${beltTag(b)}${ko}<div class="fsub" lang="en">${paren(c.en)}</div>`;
+  stage.innerHTML = (ghosts > 1 ? `<div class="ghost g2"></div>` : "") + (ghosts > 0 ? `<div class="ghost g1"></div>` : "")
+    + `<div class="fcard enter float b${b}" id="f-card" style="--belt:${beltOf(b).belt.bg}">
+      <div class="fin"><div class="face front">${top}<span class="sheen"></span></div><div class="face back">${back}<span class="sheen"></span></div></div>
+      <div class="stamp ok ko">알아요!</div><div class="stamp no ko">다시!</div></div>`;
+  const el = $("f-card");
+  el.addEventListener("animationend", e => { if (e.animationName === "enter") el.classList.remove("enter"); });
+  el.onclick = () => $("f-input").focus();
+  renderZone();
+  if (dir === "learn") fcLater(() => speak(answersOf(c.ko).join(", ")), 350);
+}
+/* La zone de saisie reste la même d'une carte à l'autre : le clavier ne se referme pas */
+function buildZone() {
+  $("f-zone").innerHTML = `<div class="fline"><span class="lives"><span class="heart" id="f-heart">♥</span><span id="f-lives-t"></span></span>
+      <button class="fskip" id="f-skip" type="button"></button></div>
+    <form class="fform" id="f-form" autocomplete="off" novalidate><span class="kbd" id="f-kbd" aria-hidden="true"></span>
+      <input id="f-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+      <button class="fgo" id="f-go" type="submit">↵</button></form>
+    <p class="fmsg" id="f-msg" aria-live="polite"></p>`;
+  const inp = $("f-input");
+  inp.addEventListener("input", () => {
+    $("f-ans-t") && ($("f-ans-t").textContent = inp.value);
+    if ($("f-msg").dataset.hint) setMsg("");
+  });
+  inp.addEventListener("compositionstart", () => { if (F) F.composing = true; });
+  inp.addEventListener("compositionend", () => { if (F) F.composing = false; if ($("f-ans-t")) $("f-ans-t").textContent = inp.value; });
+  inp.addEventListener("focus", () => { $("fgame").classList.add("kb"); fitKb(); setTimeout(fitKb, 350); });
+  inp.addEventListener("blur", () => { $("fgame").classList.remove("kb"); });
+  $("f-form").addEventListener("submit", e => {
+    e.preventDefault();
+    if (F && F.composing) { F.composing = false; setTimeout(submitAnswer, 40); } else submitAnswer();
+  });
+  /* Les boutons ne prennent pas le focus : le clavier reste ouvert */
+  ["f-go", "f-skip"].forEach(id => $(id).addEventListener("pointerdown", e => { if (document.activeElement === inp) e.preventDefault(); }));
+  $("f-skip").onclick = giveUp;
+}
+function renderZone() {
+  const cur = F.cur, L = T(), inp = $("f-input"), kbd = $("f-kbd"), h = $("f-heart");
+  h.textContent = "♥"; h.classList.remove("broke");
+  $("f-lives-t").textContent = cur.learn ? L.copyIt : L.oneError;
+  $("f-heart").hidden = cur.learn;
+  $("f-skip").textContent = cur.learn ? L.skip : L.dunno;
+  $("f-skip").disabled = false; $("f-go").disabled = false;
+  const ko = cur.expect === "ko";
+  kbd.textContent = ko ? "⌨️ 한" : "⌨️ EN";
+  kbd.className = "kbd " + (ko ? "ko" : "en");
+  if (F.lastExpect && F.lastExpect !== cur.expect) { void kbd.offsetWidth; kbd.classList.add("swap"); }
+  F.lastExpect = cur.expect;
+  inp.value = ""; inp.lang = ko ? "ko" : "en";
+  inp.placeholder = ko ? L.phKo : L.phEn;
+  inp.setAttribute("aria-label", ko ? L.phKo : L.phEn);
+  setMsg("");
+  $("f-help").textContent = cur.learn ? L.fcHelpLearn : ko ? L.fcHelpEk : L.fcHelpKe;
+  inp.focus({ preventScroll:true });
+}
+function setMsg(text, kind, hint) {
+  const m = $("f-msg"); if (!m) return;
+  m.textContent = text || ""; m.className = "fmsg" + (kind ? " " + kind : "");
+  if (hint) m.dataset.hint = "1"; else delete m.dataset.hint;
+}
+/* Clavier ouvert : la carte rétrécit pour que tout tienne au-dessus */
+function fitKb() {
+  const vv = window.visualViewport, h = vv ? vv.height : innerHeight;
+  document.documentElement.style.setProperty("--vvh", Math.round(h) + "px");
+  if ($("fgame").classList.contains("kb") && !$("fgame").hidden) window.scrollTo(0, 0);
+}
+if (window.visualViewport) visualViewport.addEventListener("resize", fitKb);
+fitKb();
+
+function submitAnswer() {
+  const cur = F && F.cur, inp = $("f-input");
+  if (!cur || cur.done || F.busy || !inp) return;
+  const raw = inp.value.trim();
+  if (!raw) return;
+  const r = checkAnswer(cur, raw);
+  if (r.hint) { setMsg(r.hint, "", true); const k = $("f-kbd"); k.classList.remove("swap"); void k.offsetWidth; k.classList.add("swap"); return; }
+  if (r.ok) return answeredRight(r);
+  answeredWrong(raw);
+}
+function ghostFollow(p) {
+  const g1 = document.querySelector("#f-stage .g1");
+  if (g1) g1.style.transform = p == null ? "" : `translateY(${12 - 12 * p}px) scale(${.94 + .06 * p})`;
+}
+function fly(el, dir) {
+  ghostFollow(1);
+  el.classList.remove("float");
+  el.style.transition = "transform .55s cubic-bezier(.3,.5,.4,1), opacity .55s ease-in";
+  el.style.transform = `translate(${dir * innerWidth * 1.15}px,-60px) rotate(${dir * 38}deg)`;
+  el.style.opacity = 0;
+  fcLater(nextCard, 420);
+}
+function lockZone() { $("f-skip").disabled = true; $("f-go").disabled = true; }
+function flipOver(el) { el.classList.remove("float"); el.classList.add("flipped", "flipping"); sfx("flip"); fcLater(() => el.classList.remove("flipping"), 650); }
+/* Note une réponse de test ; renvoie la ceinture avant / après */
+function record(ok) {
+  const { id, dir } = F.cur, had = !!fcSt(id), before = fcBelt(id);
+  F.played++; F.queue.shift();
+  if (!(id in F.first)) F.first[id] = ok;
+  if (ok) { F.combo++; F.best = Math.max(F.best, F.combo); F.cleared.add(id); }
+  else { F.combo = 0; F.failed.add(id); F.queue.push({ id, kind:"test", dir:flipDir(dir) }); }
+  let after = before;
+  if (F.mode === "day") {
+    const s = { ...(fcSt(id) || { b:0, n:0, l:0 }) };
+    s.n++; s.d = dir;
+    if (!ok) { s.b = 0; s.l++; s.due = Date.now(); }
+    else if (F.failed.has(id)) { s.b = 0; s.due = dayAt(1); }
+    else if (had && s.b >= 4) s.due = dayAt(FC_MASTER);
+    else { s.b = had ? s.b + 1 : 1; s.due = dayAt(FC_DAYS[s.b]); }
+    prog.fc.cards[id] = s; save();
+    after = s.b;
+  }
+  updateCombo(ok); renderFcTop();
+  return { before, after, up:after > before };
+}
+function answeredRight(r) {
+  const cur = F.cur, el = $("f-card"), ans = $("f-ans"), L = T();
+  cur.done = true; F.busy = true; lockZone();
+  ans.classList.add("win");
+  $("f-input").value = "";
+  if (r.near) setMsg(L.near(r.near), "ok");
+  sfx("ok");
+  fcLater(() => speak(answersOf(cur.c.ko).join(", ")), 150);
+  if (cur.learn) {
+    /* Découverte réussie : la carte reviendra en test un peu plus loin */
+    F.queue.shift();
+    F.queue.splice(Math.min(3, F.queue.length), 0, { id:cur.id, kind:"test", dir:"ke" });
+    const [x, y] = centerOf(ans); burst(x, y, BELT_FX[0].concat(["#3F7563"]), 18, .6);
+    return fcLater(() => fly(el, 1), 1300);
+  }
+  const res = record(true);
+  const [x, y] = centerOf(ans);
+  burst(x, y, BELT_FX[res.after], 34);
+  fcLater(() => { flipOver(el); if (!res.up) { const s = el.querySelector(".stamp.ok"); s.style.transition = "opacity .2s"; s.style.opacity = 1; } }, 650);
+  if (res.up) {
+    fcLater(() => promote(el, res.after), 1150);
+    fcLater(() => fly(el, 1), res.after === 4 ? 3500 : 2800);
+  } else fcLater(() => fly(el, 1), r.near ? 2500 : 1800);
+}
+function answeredWrong(raw) {
+  const cur = F.cur, el = $("f-card"), L = T(), w = $("f-wrong");
+  sfx("bad");
+  w.textContent = raw; w.classList.remove("pop"); void w.offsetWidth; w.classList.add("pop");
+  $("f-input").value = ""; $("f-ans-t").textContent = "";
+  el.classList.remove("shake", "float"); void el.offsetWidth; el.classList.add("shake");
+  if (cur.learn) return setMsg(L.copyAgain, "err");
+  cur.errors++;
+  if (cur.errors === 1) {
+    const h = $("f-heart"); h.classList.add("broke"); h.textContent = "💔";
+    $("f-lives-t").textContent = L.noError;
+    return setMsg("");
+  }
+  failCard();
+}
+/* « Je ne sais pas » : la carte est ratée ; « Passer » (découverte) : elle reviendra quand même en test */
+function giveUp() {
+  const cur = F && F.cur;
+  if (!cur || cur.done || F.busy) return;
+  if (cur.learn) {
+    cur.done = true; F.busy = true; lockZone();
+    F.queue.shift();
+    F.queue.splice(Math.min(3, F.queue.length), 0, { id:cur.id, kind:"test", dir:"ke" });
+    return fly($("f-card"), 1);
+  }
+  failCard();
+}
+/* Carte ratée : elle se retourne sur la réponse, se fissure et repart sous le paquet */
+function failCard() {
+  const cur = F.cur, el = $("f-card"), L = T();
+  cur.done = true; F.busy = true; lockZone();
+  record(false);
+  sfx("bad");
+  const msg = L.answerWas(cur.c.en.replace(/\s*\([^)]*\)/g, ""), answersOf(cur.c.ko).join(" / "));
+  setMsg(msg, "err");
+  $("f-ans").classList.add("lose");
+  fcLater(() => { flipOver(el); speak(answersOf(cur.c.ko).join(", ")); }, 300);
+  fcLater(() => {
+    el.querySelector(".stamp.no").style.opacity = 1;
+    el.insertAdjacentHTML("beforeend", `<svg class="crack" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <path pathLength="1" d="M58 0 L52 18 L60 30 L47 47 L55 62 L44 80 L50 100"/><path pathLength="1" d="M47 47 L30 52 L20 66"/><path pathLength="1" d="M55 62 L72 66 L84 80"/></svg>`);
+    sfx("crack");
+    el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake");
+  }, 1500);
+  fcLater(() => { ghostFollow(1); el.classList.add("sink"); }, 3300);
+  fcLater(nextCard, 3850);
+}
+/* Montée de ceinture : la carte s'illumine et une ceinture vient se nouer dessus */
+function promote(el, b) {
+  const l = beltOf(b), black = b === 4;
+  el.classList.remove("float");
+  el.className = el.className.replace(/\bb\d\b/, "b" + b);
+  el.style.setProperty("--belt", l.belt.bg);
+  el.querySelectorAll(".btag").forEach(t => { t.outerHTML = beltTag(b); });
+  el.classList.add("glow");
+  const p = document.createElement("div");
+  p.className = "promo" + (black ? " black" : "");
+  p.style.setProperty("--belt", l.belt.bg); p.style.setProperty("--bfg", l.belt.fg);
+  p.innerHTML = `${beltKnot(l.belt.bg)}<b class="ko">${l.belt.ko}!</b><small>${l.name[LANG]}</small>`;
+  el.appendChild(p);
+  sfx(black ? "black" : "belt");
+  const [x, y] = centerOf(el);
+  burst(x, y, BELT_FX[b], black ? 70 : 46, black ? 1.3 : 1);
+  fcLater(() => burst(x, y - 60, BELT_FX[b], black ? 60 : 30, black ? 1.1 : .8), 380);
+  if (black) fcLater(() => burst(x, y, BELT_FX[4], 80, 1.5), 900);
+}
+
+/* Fin de session : les cartes défilent en éventail et montrent leur ceinture */
+function endFc() {
+  const L = T(), ids = F.order, n = ids.length;
+  F.finished = true; F.busy = true;
+  $("f-stage").innerHTML = ""; $("f-zone").innerHTML = ""; $("f-help").textContent = "";
+  let streakUp = false, streak = fcStreak();
+  if (F.mode === "day") {
+    const today = dayKey(dayAt(0)), s = prog.fc.streak;
+    if (s.day !== today) { s.n = s.day === dayKey(dayAt(-1)) ? s.n + 1 : 1; s.day = today; streakUp = true; save(); }
+    streak = s.n;
+  }
+  const first = ids.filter(id => F.first[id]).length;
+  const ups = ids.filter(id => fcBelt(id) > Math.max(0, F.before[id]) && F.mode === "day").length;
+  $("s-title").textContent = "잘했어요!";
+  $("s-stars").hidden = true;
+  const lines = [L.fcDone(n, first), L.bestCombo(F.best)];
+  if (ups) lines.push(L.promoted(ups));
+  if (F.mode === "free") lines.push(L.freeDone);
+  $("s-sub").textContent = lines.join(" ");
+  const spread = Math.min(64, (n - 1) * 8), step = n > 1 ? spread / (n - 1) : 0;
+  const fan = ids.map((id, k) => {
+    const c = fcById(id), b = fcBelt(id), up = F.mode === "day" && b > Math.max(0, F.before[id]);
+    return `<div class="mini b${b}${up ? " up" : ""}" style="--belt:${beltOf(b).belt.bg};transform:rotate(${(-spread / 2 + k * step).toFixed(1)}deg);z-index:${k}">
+      <div class="in"><div class="a ko">카</div><div class="z ko">${beltKnot(beltOf(b).belt.bg)}${esc(c ? answersOf(c.ko)[0] : "")}</div></div></div>`;
+  }).join("");
+  const sk = F.mode === "day" ? `<div class="sstreak" id="s-streak"><span class="big">🔥</span><span>${L.streakN(streak)}</span></div>` : "";
+  $("s-fan").innerHTML = `<div class="sfan">${fan}</div>${sk}`;
+  $("s-fan").hidden = false;
+  $("recap").innerHTML = ids.map(id => { const c = fcById(id); if (!c) return ""; const b = fcBelt(id);
+    return `<li data-ko="${esc(answersOf(c.ko).join(", "))}"><span class="bk">${beltKnot(beltOf(b).belt.bg)}</span><span class="ko">${paren(c.ko)}</span><span>${paren(c.en)}</span></li>`; }).join("");
+  $("recap").querySelectorAll("li").forEach(li => li.onclick = () => speak(li.dataset.ko));
+  const acts = $("s-actions"); acts.innerHTML = "";
+  const add = (label, primary, fn) => { const b = document.createElement("button"); b.className = "btn" + (primary ? " primary" : ""); b.textContent = label; b.onclick = fn; acts.appendChild(b); };
+  const p = fcPlan();
+  if (p.due.length + p.fresh.length) add(L.moreSession, true, () => startFc("day"));
+  add("🎯 " + L.free, !(p.due.length + p.fresh.length), () => startFc("free"));
+  add(L.toFcHome, false, goHome);
+  showResults();
+  $("sheet").querySelector(".inner").scrollTop = 0;
+  const minis = [...$("s-fan").querySelectorAll(".mini")];
+  minis.forEach((m, k) => fcLater(() => {
+    m.classList.add("on");
+    if (m.classList.contains("up")) { const [x, y] = centerOf(m); burst(x, y, BELT_FX[+m.className.match(/\bb(\d)\b/)[1]], 10, .45); }
+    if (k % 2 === 0) sfx("tick");
+  }, 500 + k * Math.max(70, 900 / n)));
+  if (sk) fcLater(() => {
+    const s = $("s-streak"); s.classList.add("lit");
+    if (streakUp) { sfx("star"); const [x, y] = centerOf(s.querySelector(".big")); burst(x, y, ["#FF7A1A", "#FFB020", "#FFE08A"], 26, .8); }
+  }, 700 + n * Math.max(70, 900 / n));
+}
+
+/* Accueil des flashcards */
+function renderFcHome() {
+  const L = T(), deck = fcDeck(), p = fcPlan(), n = p.due.length + p.fresh.length, st = fcStreak();
+  const doneToday = prog.fc.streak.day === dayKey(dayAt(0));
+  const counts = [0, 0, 0, 0, 0]; let fresh = 0;
+  deck.forEach(c => { if (fcSt(c.id)) counts[fcBelt(c.id)]++; else fresh++; });
+  let next = "";
+  if (!n) {
+    const dues = deck.map(c => fcSt(c.id)).filter(Boolean).map(s => s.due);
+    if (dues.length) next = L.nextIn(Math.max(1, Math.round((Math.min(...dues) - dayAt(0)) / 864e5)));
+  }
+  const row = (icon, name, k, cls) => `<div class="fbelt${cls || ""}">${icon}<div><div>${name}</div><div class="xbar"><span style="width:${deck.length ? Math.round(k / deck.length * 100) : 0}%"></span></div></div><span class="n">${k}</span></div>`;
+  const belts = row(`<span style="font-size:22px;text-align:center">✨</span>`, L.newCards, fresh, " new")
+    + counts.map((k, b) => row(beltKnot(LEVELS[b].belt.bg), `${LEVELS[b].name[LANG]} <span class="ko belt-ko">${LEVELS[b].belt.ko}</span>`, k)).join("");
+  const tip = prog.fc.kbTip ? "" : `<div class="fbox ftip"><h2>⌨️ ${L.kbTipT}</h2><p>${L.kbTip}</p><button class="btn" id="fc-tip-ok">${L.tipOk}</button></div>`;
+  $("ladder").innerHTML = `<div class="fhome">${tip}
+    <div class="fbox fstreak"><span class="big${st ? " lit" : ""}" style="--fg:${st ? 0 : 1}">🔥</span><div><b>${L.streakN(st)}</b><span>${doneToday ? L.streakDone : st ? L.streakKeep : L.streakStart}</span></div></div>
+    <div class="fbox ftoday"><h2>${L.today}</h2><p>${n ? L.todayMix(p.due.length, p.fresh.length) : L.upToDate + (next ? " " + next : "")}</p>
+      <button class="test-go${n ? "" : " practice"}" id="fc-go">${n ? L.start(n) : "🎯 " + L.free}</button></div>
+    <div class="fbox"><h2>${L.yourCards}</h2><p>${L.beltsNote}</p><div class="fbelts">${belts}</div></div>
+    <div class="frow">${n ? `<button class="btn" id="fc-free">🎯 ${L.free}</button>` : ""}<button class="btn" id="fc-mine-btn"${n ? "" : ' style="grid-column:1/-1"'}>＋ ${L.mine} (${prog.fc.mine.length})</button></div>
+  </div>`;
+  $("fc-go").onclick = () => startFc(n ? "day" : "free");
+  if (n) $("fc-free").onclick = () => startFc("free");
+  $("fc-mine-btn").onclick = openMine;
+  if (!prog.fc.kbTip) $("fc-tip-ok").onclick = () => { prog.fc.kbTip = true; save(); renderFcHome(); };
+  $("total").textContent = L.fcTotal(counts[4], deck.length);
+}
+$("f-back").onclick = () => confirmLeave(goHome);
+$("f-sound").onclick = () => setSound(!prog.sound);
+
+/* Mes cartes : ajout, import en bloc, modification, suppression, copie */
+let editId = null;
+function mineMsg(text, kind) { const m = $("fm-msg"); m.textContent = text || ""; m.className = "fmsg" + (kind ? " " + kind : ""); }
+function dupOf(card, skipId) {
+  const mine = new Set(answersOf(card.ko));
+  return fcDeck().find(c => c.id !== skipId && answersOf(c.ko).some(a => mine.has(a)));
+}
+function openMine() {
+  editId = null;
+  $("fm-ko").value = ""; $("fm-en").value = ""; $("fm-text").value = "";
+  mineMsg(""); renderMine();
+  openSheet("fc-mine");
+}
+function renderMine() {
+  const L = T();
+  $("fm-add").textContent = editId ? L.saveEdit : L.addCard;
+  $("fm-cancel").hidden = !editId;
+  $("fm-count").textContent = L.myCount(prog.fc.mine.length);
+  $("fm-list").innerHTML = prog.fc.mine.length ? prog.fc.mine.map(c => `<li data-id="${esc(c.id)}"><span class="ko">${paren(c.ko)}</span><span class="en">${paren(c.en)}</span>
+      <button class="edit" aria-label="${L.edit}">✎</button><button class="del" aria-label="${L.del}">✕</button></li>`).join("")
+    : `<li class="en">${L.noMine}</li>`;
+  $("fm-list").querySelectorAll("li[data-id]").forEach(li => {
+    const id = li.dataset.id, c = prog.fc.mine.find(x => x.id === id);
+    li.querySelector(".edit").onclick = () => { editId = id; $("fm-ko").value = c.ko; $("fm-en").value = c.en; mineMsg(""); renderMine(); $("fm-ko").focus(); };
+    const del = li.querySelector(".del");
+    del.onclick = () => {
+      if (!del.classList.contains("sure")) { del.classList.add("sure"); del.textContent = L.sure; return; }
+      prog.fc.mine = prog.fc.mine.filter(x => x.id !== id); delete prog.fc.cards[id];
+      if (editId === id) editId = null;
+      save(); renderMine();
+    };
+  });
+}
+const newId = () => "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+$("fm-add").onclick = () => {
+  const L = T(), ko = $("fm-ko").value.trim(), en = $("fm-en").value.trim();
+  if (!answersOf(ko).length) return mineMsg(L.errKo, "err");
+  if (!en) return mineMsg(L.errEn, "err");
+  const d = dupOf({ ko }, editId);
+  if (d) return mineMsg(L.dup(d), "err");
+  if (editId) { const c = prog.fc.mine.find(x => x.id === editId); c.ko = ko; c.en = en; editId = null; mineMsg(L.saved, "ok"); }
+  else { prog.fc.mine.push({ id:newId(), en, ko }); mineMsg(L.added, "ok"); }
+  save(); $("fm-ko").value = ""; $("fm-en").value = ""; renderMine();
+};
+$("fm-cancel").onclick = () => { editId = null; $("fm-ko").value = ""; $("fm-en").value = ""; mineMsg(""); renderMine(); };
+$("fm-import").onclick = () => {
+  const lines = $("fm-text").value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  let a = 0, d = 0, s = 0;
+  lines.forEach(line => {
+    const c = splitLine(line);
+    if (!c) return s++;
+    if (dupOf(c)) return d++;
+    prog.fc.mine.push({ id:newId(), en:c.en, ko:c.ko }); a++;
+  });
+  save(); renderMine();
+  mineMsg(T().imported(a, d, s), a ? "ok" : "err");
+  if (a) $("fm-text").value = "";
+};
+$("fm-copy").onclick = () => {
+  const L = T(), text = prog.fc.mine.map(c => `${c.en} — ${c.ko}`).join("\n");
+  if (!text) return mineMsg(L.noMine, "err");
+  const fallback = () => { const t = $("fm-text"); t.value = text; $("fm-details").open = true; t.focus(); t.select(); try { document.execCommand("copy"); } catch (e) {} mineMsg(L.copiedFallback, "ok"); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => mineMsg(L.copied, "ok"), fallback);
+  else fallback();
+};
+$("fm-close").onclick = () => closeSheet("fc-mine", () => { if (prog.game === "fc" && !$("home").hidden) renderHome(); });
+$("fc-mine").addEventListener("click", e => { if (e.target === $("fc-mine")) $("fm-close").onclick(); });
 
 applyLang();
 renderHome();
