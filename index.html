@@ -419,6 +419,41 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .fcat[aria-pressed="true"]::before{content:"✓";font-weight:700}
 .fcat.no{animation:shake .3s}
 .test-go:disabled{opacity:.5;cursor:not-allowed}
+.fmhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 0}
+.fmhead h4{margin:0!important}
+.fmhead .pill{flex:none;font-size:13px;padding:5px 12px}
+.copyb{transition:background .25s,color .25s,border-color .25s}
+.copyb.done{background:#2F9E5B;border-color:#2F9E5B;color:#fff;animation:snap .45s cubic-bezier(.2,1.8,.4,1)}
+@keyframes snap{40%{transform:scale(1.06)}}
+#fm-out{min-height:160px;font-size:14px;background:var(--bg)}
+#fm-out-w .fmsg{margin:4px 0 6px!important}
+.toast{position:fixed;left:50%;top:calc(16px + env(safe-area-inset-top,0px));z-index:40;max-width:min(92vw,440px);
+  transform:translateX(-50%);padding:12px 16px;border-radius:14px;background:var(--ink);color:var(--bg);font-weight:600;font-size:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);text-align:center}
+.toast.show{animation:toastin .35s cubic-bezier(.2,1.4,.4,1) both, toastout .3s ease-in 2.25s forwards}
+@keyframes toastin{from{opacity:0;transform:translate(-50%,-20px) scale(.9)}}
+@keyframes toastout{to{opacity:0;transform:translate(-50%,-12px)}}
+.upd{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));z-index:41;transform:translateX(-50%);width:min(92vw,440px);
+  display:flex;align-items:center;gap:10px;padding:10px 10px 10px 16px;border-radius:14px;background:var(--celadon);color:#fff;font-weight:600;font-size:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.upd span{flex:1}
+.upd button{flex:none;border:0;border-radius:10px;background:#fff;color:var(--celadon);font-weight:700;padding:8px 12px}
+.ver{margin:18px 0 0;font-size:13px;color:var(--muted)}
+/* Copies après une carte ratée */
+.drill .den{display:none}
+.drill.hid .dko{display:none}
+.drill.hid .den{display:block;animation:enter .4s cubic-bezier(.2,.9,.3,1.2)}
+.drill.hid.peek .dko{display:block;animation:none}
+.drill.hid.peek .den{display:none}
+.drill.vanish .dko{animation:vanish .45s ease-in forwards}
+@keyframes vanish{to{opacity:0;transform:scale(.6);filter:blur(6px)}}
+.drill .dtag{color:var(--celadon);font-weight:700;font-variant-numeric:tabular-nums}
+.dots{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:12px;max-width:100%}
+.dots span{width:10px;height:10px;border-radius:50%;background:var(--line);transition:background .2s}
+.dots span.on{background:var(--celadon);animation:snap .35s cubic-bezier(.2,1.8,.4,1)}
+.fans.ok1{border-style:solid;border-color:#2F9E5B;animation:okflash .35s ease-out}
+@keyframes okflash{0%{background:color-mix(in srgb,#2F9E5B 35%,var(--paper));transform:scale(1.06)}100%{background:transparent;transform:none}}
+#fgame.kb .dots{margin-top:8px}
 @media (prefers-reduced-motion:reduce){.fin,.fcard,.ghost,.mini .in{transition-duration:.01s!important}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}.card .in{transition:none}}
 </style>
@@ -524,6 +559,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
         <button class="opt" role="radio" data-sound="off"><span id="sound-off"></span><span class="check">✓</span></button>
       </div>
     </div>
+    <p class="ver" id="set-ver"></p>
     <div class="actions"><button class="btn primary" id="set-close"></button></div>
   </div>
 </div>
@@ -562,13 +598,17 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
       <div class="fnew"><input id="fm-catname" maxlength="30" autocomplete="off"><button class="btn" id="fm-catadd">＋</button></div>
       <p class="fmsg" id="fm-cmsg" aria-live="polite"></p>
     </details>
-    <h4 id="fm-count"></h4>
+    <div class="fmhead"><h4 id="fm-count"></h4><button class="pill" id="fm-all" type="button"></button></div>
     <div id="fm-list"></div>
-    <div class="actions" style="margin-top:16px"><button class="btn" id="fm-copy"></button><button class="btn primary" id="fm-close"></button></div>
+    <div class="actions" style="margin-top:16px"><button class="btn copyb" id="fm-copy"></button>
+      <div id="fm-out-w" hidden><p class="fmsg err" id="fm-out-n"></p><textarea id="fm-out" readonly></textarea></div>
+      <button class="btn primary" id="fm-close"></button></div>
   </div>
 </div>
 
 <canvas id="fx" aria-hidden="true"></canvas>
+<div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
+<div class="upd" id="upd" hidden role="status"><span id="upd-t"></span><button id="upd-go"></button></div>
 
 <div class="sheet" id="sheet" hidden>
   <div class="inner">
@@ -582,6 +622,8 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 </div>
 
 <script>
+/* Version de l'app : à changer en même temps que CACHE dans sw.js */
+const APP_VERSION = 19;
 /* Mots : "coréen=français=anglais", séparés par ";" */
 const W = s => s.split(";").map(p => { const [ko, fr, en] = p.split("="); return { ko, fr, en }; });
 
@@ -739,12 +781,19 @@ const STR = {
     todayMix:(d, n) => [d ? `${d} à revoir` : "", n ? `${n} nouvelle${n > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · "),
     start:n => `Commencer (${n} carte${n > 1 ? "s" : ""})`,
     upToDate:"✓ Tout est à jour.", nextIn:d => d <= 1 ? "Prochaine révision demain." : `Prochaine révision dans ${d} jours.`,
-    yourCards:"Tes cartes", beltsNote:"Une bonne réponse fait monter la carte d'une ceinture, une erreur la renvoie en blanche.", newCards:"Nouvelles",
+    yourCards:"Tes cartes", beltsNote:"Pour la ceinture jaune, il faut réussir la carte dans les deux sens ; ensuite, chaque bonne réponse la fait monter d'une ceinture. Une erreur la renvoie en blanche.", newCards:"Nouvelles",
     free:"Entraînement libre", mine:"Mes cartes",
     daySub:"Session du jour", freeSub:"Entraînement libre : les ceintures ne changent pas",
     fcLeft:(n, m) => `${n} / ${m} cartes`, comboPop:c => `콤보 ×${c}!`,
     newTag:"✨ Nouveau mot",
-    fcHelpLearn:"Nouveau mot : écoute-le et recopie-le en coréen. Il reviendra un peu plus loin pour un vrai test.",
+    fcHelpLearn:"Nouveau mot : écoute-le et recopie-le en coréen. Il reviendra plusieurs fois dans la session, dans les deux sens.",
+    peekMsg:"👆 Touche la carte pour voir le sens.",
+    drillLine:n => `Recopie-le ${n} fois`, drillStart:n => `Raté : recopie le mot ${n} fois en coréen.`,
+    drillHide:"🙈 Le mot se cache : écris-le de mémoire !", drillWrong:"Copie fausse, elle ne compte pas.",
+    drillDone:"✓ Bien recopié ! La carte reviendra un peu plus loin.",
+    fcHelpDrill:"Recopie le mot en coréen et valide avec ↵ à chaque fois. À mi-parcours, il se cache : écris-le de mémoire. Une copie fausse ne compte pas.",
+    halfway:"Réussi dans ce sens : elle revient dans l'autre sens pour la ceinture jaune.",
+    recallPop:"🔁 Tour de rappel !", recallMsg:"Tour de rappel : les cartes apprises ou ratées aujourd'hui reviennent une dernière fois.",
     fcHelpKe:"Écris le sens en anglais, puis valide avec ↵.",
     fcHelpEk:"Écris le mot en coréen avec le clavier coréen (touche 🌐), puis valide avec ↵.",
     copyIt:"Recopie le mot", dunno:"Je ne sais pas", skip:"Passer", phEn:"En anglais…", phKo:"한국어로…",
@@ -768,7 +817,11 @@ const STR = {
     allCards:(n, m) => `Toutes les cartes : ${n}, dont ${m} perso`, mineTag:"perso", moveLabel:"Ranger dans",
     koLabel:"Coréen", enLabel:"Traduction (en anglais)", addCard:"Ajouter la carte", saveEdit:"Enregistrer", cancelEdit:"Annuler",
     impTitle:"Importer une liste", impNote:"Une carte par ligne, au format « English — 한국어 ». Plusieurs réponses : sépare-les par « / ». Une ligne « # Cuisine » range les cartes qui suivent dans la catégorie Cuisine (créée si besoin).", impBtn:"Importer",
-    copyBtn:"Copier ma liste", copied:"Liste copiée ✓ Garde-la dans une note.", copiedFallback:"Ta liste est dans la zone d'import : copie-la.",
+    copyBtn:"📋 Copier toute la liste", copiedBtn:"✓ Liste copiée !", copiedToast:n => `📋 ${n} cartes copiées : colle-les dans une note pour les garder.`,
+    copyManual:"La copie automatique n'a pas marché : touche le texte, « Tout sélectionner », puis « Copier ».",
+    unfoldAll:"Tout déplier", foldAll:"Tout replier",
+    version:v => `Version ${v}. L'app se met à jour toute seule : ne la supprime pas de l'écran d'accueil, sinon tes cartes et ta progression sont effacées.`,
+    updT:"Nouvelle version disponible.", updGo:"Mettre à jour",
     myCount:n => `${n} carte${n > 1 ? "s" : ""} perso`, noMine:"Aucune carte perso pour l'instant.",
     errKo:"Écris le mot en coréen (en syllabes coréennes).", errEn:"Écris la traduction en anglais.",
     dup:c => `Cette carte existe déjà : ${c.en} — ${c.ko}`, added:"Carte ajoutée ✓", saved:"Carte modifiée ✓",
@@ -835,12 +888,19 @@ const STR = {
     todayMix:(d, n) => [d ? `${d} to review` : "", n ? `${n} new` : ""].filter(Boolean).join(" · "),
     start:n => `Start (${n} card${n === 1 ? "" : "s"})`,
     upToDate:"✓ All caught up.", nextIn:d => d <= 1 ? "Next review tomorrow." : `Next review in ${d} days.`,
-    yourCards:"Your cards", beltsNote:"A right answer moves a card up one belt; a mistake sends it back to white.", newCards:"New",
+    yourCards:"Your cards", beltsNote:"For yellow belt, a card must be right in both directions; after that, each right answer moves it up one belt. A mistake sends it back to white.", newCards:"New",
     free:"Free practice", mine:"My cards",
     daySub:"Today's session", freeSub:"Free practice: belts don't change",
     fcLeft:(n, m) => `${n} / ${m} cards`, comboPop:c => `콤보 ×${c}!`,
     newTag:"✨ New word",
-    fcHelpLearn:"New word: listen and copy it in Korean. It will come back a bit later for a real test.",
+    fcHelpLearn:"New word: listen and copy it in Korean. It will come back several times this session, in both directions.",
+    peekMsg:"👆 Tap the card to see the meaning.",
+    drillLine:n => `Copy it ${n} times`, drillStart:n => `Missed: copy the word ${n} times in Korean.`,
+    drillHide:"🙈 The word hides: write it from memory!", drillWrong:"Wrong copy, it doesn't count.",
+    drillDone:"✓ Well copied! The card will come back a bit later.",
+    fcHelpDrill:"Copy the word in Korean and press ↵ each time. Halfway through it hides: write it from memory. A wrong copy doesn't count.",
+    halfway:"Right in this direction: it comes back the other way for yellow belt.",
+    recallPop:"🔁 Recall round!", recallMsg:"Recall round: cards learned or missed today come back one last time.",
     fcHelpKe:"Write the meaning in English, then press ↵.",
     fcHelpEk:"Write the word with the Korean keyboard (🌐 key), then press ↵.",
     copyIt:"Copy the word", dunno:"I don't know", skip:"Skip", phEn:"In English…", phKo:"한국어로…",
@@ -864,7 +924,11 @@ const STR = {
     allCards:(n, m) => `All cards: ${n}, ${m} of them custom`, mineTag:"custom", moveLabel:"Move to",
     koLabel:"Korean", enLabel:"Translation (English)", addCard:"Add card", saveEdit:"Save", cancelEdit:"Cancel",
     impTitle:"Import a list", impNote:"One card per line, as “English — 한국어”. Several answers: separate them with “/”. A “# Cooking” line puts the cards below it in the Cooking category (created if needed).", impBtn:"Import",
-    copyBtn:"Copy my list", copied:"List copied ✓ Keep it in a note.", copiedFallback:"Your list is in the import box: copy it.",
+    copyBtn:"📋 Copy the whole list", copiedBtn:"✓ List copied!", copiedToast:n => `📋 ${n} cards copied: paste them in a note to keep them.`,
+    copyManual:"Automatic copy didn't work: tap the text, “Select All”, then “Copy”.",
+    unfoldAll:"Unfold all", foldAll:"Fold all",
+    version:v => `Version ${v}. The app updates itself: don't remove it from the home screen, or your cards and progress are erased.`,
+    updT:"A new version is available.", updGo:"Update",
     myCount:n => `${n} custom card${n === 1 ? "" : "s"}`, noMine:"No custom cards yet.",
     errKo:"Write the word in Korean (Hangul syllables).", errEn:"Write the English translation.",
     dup:c => `This card already exists: ${c.en} — ${c.ko}`, added:"Card added ✓", saved:"Card updated ✓",
@@ -1001,7 +1065,8 @@ function applyLang() {
   $("fm-newcat-l").textContent = $("fm-inewcat-l").textContent = t.newCatLabel;
   $("fm-cats-t").textContent = t.catsTitle; $("fm-catname").placeholder = t.catPh; $("fm-catadd").setAttribute("aria-label", t.catPh);
   $("fm-cancel").textContent = t.cancelEdit; $("fm-imp-t").textContent = t.impTitle; $("fm-imp-n").textContent = t.impNote;
-  $("fm-import").textContent = t.impBtn; $("fm-copy").textContent = t.copyBtn; $("fm-close").textContent = t.close;
+  $("fm-import").textContent = t.impBtn; $("fm-copy").textContent = t.copyBtn; $("fm-out-n").textContent = t.copyManual;
+  $("set-ver").textContent = t.version(APP_VERSION); $("upd-t").textContent = t.updT; $("upd-go").textContent = t.updGo; $("fm-close").textContent = t.close;
 }
 /* Panneau Réglages */
 function renderSettings() {
@@ -1816,11 +1881,33 @@ Boyfriend (romantic) — 남자친구
 Girlfriend (romantic) — 여자친구
 Boy friend (platonic, informal) — 남사친
 Girl friend (platonic, informal) — 여사친
-Télévision — 텔레비전 / TV`;
+Télévision — 텔레비전 / TV
+Mountain — 산
+Park — 공원
+Home — 집
+Department store — 백화점
+Hospital — 병원
+Bank — 은행
+Cinema / Movie theater — 영화관
+Market — 시장
+Pharmacy — 약국
+Gym — 체육관
+Coffee shop / Café — 커피숍
+Bakery — 빵집
+Bookshop / Bookstore — 서점
+Restaurant — 식당
+Convenience store — 편의점
+Downtown — 시내
+Book — 책
+School — 학교
+Classroom — 교실
+Library — 도서관
+Dormitory — 기숙사`;
 
 /* Réglages : 20 cartes par session dont 8 nouvelles au plus, 10 en entraînement libre.
    Délai avant la prochaine révision selon la ceinture atteinte : jaune 1 jour, verte 2, bleue 4, noire 8, puis 16 */
-const FC_SESSION = 20, FC_NEW = 8, FC_FREE = 10, FC_DAYS = [0, 1, 2, 4, 8], FC_MASTER = 16;
+/* FC_GAP : nombre de cartes avant qu'une carte en apprentissage revienne dans la session */
+const FC_SESSION = 20, FC_NEW = 6, FC_FREE = 10, FC_DAYS = [0, 1, 2, 4, 8], FC_MASTER = 16, FC_GAP = 3;
 const HANGUL = /[가-힣]/g;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[c]);
 const paren = s => esc(s).replace(/\(([^)]*)\)/g, "<small>($1)</small>");
@@ -1855,15 +1942,40 @@ const BASE_CATS = [
   { id:"c-food", fr:"🍚 Manger et boire", en:"🍚 Food and drinks", cards:["Bread", "Riz / Rice", "Chicken", "Juice", "Milk", "Coffee", "Drinks", "To eat", "To drink", "To cook"] },
   { id:"c-people", fr:"👥 Personnes et sentiments", en:"👥 People and feelings", cards:["Friend", "Teacher", "Boyfriend (romantic)", "Girlfriend (romantic)", "Boy friend (platonic, informal)", "Girl friend (platonic, informal)", "Love", "To love", "Like / To like"] },
   { id:"c-things", fr:"📷 Choses et animaux", en:"📷 Things and animals", cards:["Photo", "Camera", "Computer", "Télévision", "A dog"] },
-  { id:"c-school", fr:"📚 École et travail", en:"📚 School and work", cards:["To teach", "To learn", "To study", "Homework", "To do homework", "To work", "Read / To read", "To use a computer"] },
+  { id:"c-school", fr:"📚 École et travail", en:"📚 School and work", cards:["To teach", "To learn", "To study", "Homework", "To do homework", "To work", "Read / To read", "To use a computer", "Book", "School", "Classroom", "Library", "Dormitory"] },
   { id:"c-verbs", fr:"🔤 Verbes de base", en:"🔤 Basic verbs", cards:["Today", "To sit", "It's OK", "Not to exist / Not to have", "To meet", "To go", "To come", "To sleep", "To buy", "To watch / To see / To look", "To wait", "To do"] },
-  { id:"c-acts", fr:"🎯 Activités", en:"🎯 Activities", cards:["To take a picture", "To exercise / To work out", "To talk", "To go shopping", "To clean", "To do laundry", "To call (by phone)", "To sing", "To take a shower"] }
+  { id:"c-acts", fr:"🎯 Activités", en:"🎯 Activities", cards:["To take a picture", "To exercise / To work out", "To talk", "To go shopping", "To clean", "To do laundry", "To call (by phone)", "To sing", "To take a shower"] },
+  { id:"c-places", fr:"🏙️ Lieux", en:"🏙️ Places", cards:["Mountain", "Park", "Home", "Department store", "Hospital", "Bank", "Cinema / Movie theater", "Market", "Pharmacy", "Gym", "Coffee shop / Café", "Bakery", "Bookshop / Bookstore", "Restaurant", "Convenience store", "Downtown"] }
 ];
 const BASE_CAT = {};
 BASE_CATS.forEach(k => k.cards.forEach(en => { BASE_CAT[en] = k.id; }));
-if (!prog.fc.cats) prog.fc.cats = BASE_CATS.map(k => ({ id:k.id, name:k[LANG] || k.fr }));
 prog.fc.where = prog.fc.where || {};
 prog.fc.off = prog.fc.off || [];
+/* Catégories de départ : créées une fois chacune, y compris celles ajoutées par une mise à jour (🏙️ Lieux).
+   Si une catégorie perso porte déjà le même nom, elle devient la catégorie de départ (ses cartes la gardent). */
+if (!prog.fc.cats) { prog.fc.cats = []; prog.fc.seeded = []; }
+if (!prog.fc.seeded) prog.fc.seeded = prog.fc.cats.map(k => k.id).filter(id => id.startsWith("c-"));
+BASE_CATS.forEach(k => {
+  if (prog.fc.seeded.includes(k.id)) return;
+  prog.fc.seeded.push(k.id);
+  const same = prog.fc.cats.find(x => [k.fr, k.en].some(n => n.toLowerCase() === x.name.trim().toLowerCase()));
+  if (!same) return prog.fc.cats.push({ id:k.id, name:k[LANG] || k.fr });
+  const old = same.id; same.id = k.id;
+  prog.fc.mine.forEach(c => { if (c.cat === old) c.cat = k.id; });
+  Object.keys(prog.fc.where).forEach(cid => { if (prog.fc.where[cid] === old) prog.fc.where[cid] = k.id; });
+  prog.fc.off = prog.fc.off.map(x => x === old ? k.id : x);
+});
+/* Une carte perso devenue carte de l'app (même mot coréen) : on garde une seule carte, avec sa progression */
+prog.fc.mine = prog.fc.mine.filter(c => {
+  const keys = new Set((c.ko.replace(/\([^)]*\)/g, " ").match(/[가-힣 ]+/g) || []).map(a => a.replace(/ /g, "")).filter(Boolean));
+  const base = FC_BASE.find(d => d.ko.replace(/\([^)]*\)/g, " ").split(/[\/,;]/).some(a => keys.has(a.replace(/[^가-힣]/g, ""))));
+  if (!base) return true;
+  if (prog.fc.cards[c.id] && !prog.fc.cards[base.id]) prog.fc.cards[base.id] = prog.fc.cards[c.id];
+  delete prog.fc.cards[c.id];
+  if (c.cat && c.cat !== BASE_CAT[base.en] && !prog.fc.where[base.id]) prog.fc.where[base.id] = c.cat;
+  return false;
+});
+save();
 const catList = () => [{ id:MINE, name:T().myDeck }].concat(prog.fc.cats);
 const catExists = id => id === MINE || prog.fc.cats.some(k => k.id === id);
 function catOf(c) { const id = c.mine ? c.cat : (prog.fc.where[c.id] || BASE_CAT[c.en]); return id && catExists(id) ? id : MINE; }
@@ -1961,8 +2073,9 @@ function startFc(mode) {
   const steps = cards.map(c => fcSt(c.id) ? { id:c.id, kind:"test", dir:dirFor(c.id) } : { id:c.id, kind:"learn" });
   const queue = spreadAll([steps.filter(s => s.kind === "learn"), steps.filter(s => s.dir === "ke"), steps.filter(s => s.dir === "ek")]);
   const ids = queue.map(s => s.id);
-  F = { mode, queue, total:ids.length, order:ids, cleared:new Set(), failed:new Set(), first:{}, before:{},
-        combo:0, best:0, played:0, cur:null, busy:false, finished:false, composing:false, lastExpect:null, timers:[] };
+  F = { mode, queue, total:ids.length, order:ids, done:new Set(), failed:new Set(), learning:new Set(), recalled:new Set(),
+        first:{}, before:{}, last:{}, st:{}, combo:0, best:0, played:0, cur:null, busy:false, finished:false,
+        composing:false, lastExpect:null, recallNote:false, timers:[] };
   ids.forEach(id => { F.before[id] = fcSt(id) ? fcBelt(id) : -1; });
   $("home").hidden = true; $("game").hidden = true; $("mgame").hidden = true; $("fgame").hidden = false;
   $("sheet").hidden = true; $("f-results").hidden = true;
@@ -1976,8 +2089,8 @@ function startFc(mode) {
 }
 function renderFcTop() {
   if (!F) return;
-  $("f-left").textContent = T().fcLeft(F.cleared.size, F.total);
-  $("f-bar").style.width = Math.round(F.cleared.size / F.total * 100) + "%";
+  $("f-left").textContent = T().fcLeft(F.done.size, F.total);
+  $("f-bar").style.width = Math.round(F.done.size / F.total * 100) + "%";
 }
 function updateCombo(ok) {
   const el = $("f-combo"), c = F.combo;
@@ -1996,15 +2109,34 @@ function updateCombo(ok) {
     sfx("combo");
   }
 }
+/* État d'une carte pendant la session (copie : l'entraînement libre ne touche pas à la progression) */
+function stOf(id) { if (!(id in F.st)) F.st[id] = fcSt(id) ? { ...fcSt(id) } : null; return F.st[id]; }
+/* Remet une carte dans la session, quelques cartes plus loin (une seule fois dans la file) */
+function queueAt(id, dir) {
+  F.queue = F.queue.filter(x => x.id !== id);
+  F.queue.splice(Math.min(FC_GAP, F.queue.length), 0, { id, kind:"test", dir });
+}
 function nextCard() {
   if (!F) return;
-  if (!F.queue.length) return endFc();
+  if (!F.queue.length) {
+    /* Tour de rappel : chaque carte apprise ou ratée dans la session revient une dernière fois, dans l'autre sens */
+    const ids = shuffle([...F.learning].filter(id => !F.recalled.has(id)));
+    if (!ids.length) return endFc();
+    F.queue = ids.map(id => ({ id, kind:"test", dir:flipDir(F.last[id] || "ek"), recall:true }));
+    F.recallNote = true;
+  }
   const step = F.queue[0], c = fcById(step.id);
   if (!c) { F.queue.shift(); return nextCard(); }
-  const learn = step.kind === "learn", dir = learn ? "learn" : step.dir;
-  F.cur = { id:step.id, c, b:fcBelt(step.id), dir, learn, done:false, errors:0, expect:dir === "ke" ? "en" : "ko" };
+  const learn = step.kind === "learn", dir = learn ? "learn" : step.dir, st = stOf(step.id);
+  F.cur = { id:step.id, c, b:st ? st.b : 0, dir, learn, recall:!!step.recall, done:false, errors:0, expect:dir === "ke" ? "en" : "ko" };
   F.busy = false;
   renderFcCard();
+  if (F.recallNote) {
+    F.recallNote = false;
+    setMsg(T().recallMsg, "ok");
+    const [x, y] = centerOf($("f-stage"));
+    popText(T().recallPop, x, y - 60); sfx("combo");
+  }
 }
 
 /* Vérification des réponses */
@@ -2055,23 +2187,29 @@ function beltTag(b) { const l = beltOf(b); return `<span class="btag">${beltKnot
 function renderFcCard() {
   const cur = F.cur, { c, b, dir } = cur, L = T(), stage = $("f-stage");
   const ghosts = Math.min(2, F.queue.length - 1);
-  const ko = `<div class="fmain ko" lang="ko" style="--sz:${koSize(c.ko)}px">${paren(c.ko)}</div>`;
+  /* Côté coréen : seulement les mots coréens, sans les précisions entre parenthèses ni « TV » qui trahiraient la réponse */
+  const kf = answersOf(c.ko).join(" / ");
+  const ko = `<div class="fmain ko" lang="ko" style="--sz:${koSize(kf)}px">${esc(kf)}</div>`;
   const en = `<div class="fmain" lang="en" style="--sz:${enSize(c.en)}px">${paren(c.en)}</div>`;
   const ans = `<div class="fans${cur.expect === "ko" ? " ko" : ""}" id="f-ans"><span id="f-ans-t"></span><span class="caret"></span></div><div class="fwrong" id="f-wrong"></div>`;
+  /* Une seule langue par face : coréen d'un côté, anglais de l'autre */
+  const rc = cur.recall ? "🔁 " : "";
   const top = dir === "learn"
-    ? `${beltTag(b)}<span class="ntag">${L.newTag}</span>${ko}<div class="fsub" lang="en">${paren(c.en)}</div>${ans}`
-    : dir === "ke" ? `${beltTag(b)}<span class="dtag">한 → EN</span>${ko}${ans}`
-    : `${beltTag(b)}<span class="dtag">EN → 한</span>${en}${ans}`;
-  const back = dir === "ke"
-    ? `${beltTag(b)}${en}<div class="fsub ko" lang="ko">${paren(c.ko)}</div>`
-    : `${beltTag(b)}${ko}<div class="fsub" lang="en">${paren(c.en)}</div>`;
+    ? `${beltTag(b)}<span class="ntag">${L.newTag}</span>${ko}${ans}`
+    : dir === "ke" ? `${beltTag(b)}<span class="dtag">${rc}한 → EN</span>${ko}${ans}`
+    : `${beltTag(b)}<span class="dtag">${rc}EN → 한</span>${en}${ans}`;
+  const back = `${beltTag(b)}${dir === "ek" ? ko : en}`;
   stage.innerHTML = (ghosts > 1 ? `<div class="ghost g2"></div>` : "") + (ghosts > 0 ? `<div class="ghost g1"></div>` : "")
     + `<div class="fcard enter float b${b}" id="f-card" style="--belt:${beltOf(b).belt.bg}">
       <div class="fin"><div class="face front">${top}<span class="sheen"></span></div><div class="face back">${back}<span class="sheen"></span></div></div>
       <div class="stamp ok ko">알아요!</div><div class="stamp no ko">다시!</div></div>`;
   const el = $("f-card");
   el.addEventListener("animationend", e => { if (e.animationName === "enter") el.classList.remove("enter"); });
-  el.onclick = () => $("f-input").focus();
+  /* Découverte : toucher la carte la retourne pour voir le sens */
+  el.onclick = () => {
+    if (cur.learn && !cur.done && !F.busy) { el.classList.remove("float"); el.classList.toggle("flipped"); sfx("flip"); }
+    $("f-input").focus();
+  };
   renderZone();
   if (dir === "learn") fcLater(() => speak(answersOf(c.ko).join(", ")), 350);
 }
@@ -2086,6 +2224,9 @@ function buildZone() {
   const inp = $("f-input");
   inp.addEventListener("input", () => {
     $("f-ans-t") && ($("f-ans-t").textContent = inp.value);
+    const card = $("f-card");
+    if ($("f-ans")) $("f-ans").classList.remove("ok1");
+    if (F && F.cur && F.cur.learn && !F.cur.done && card && card.classList.contains("flipped")) card.classList.remove("flipped");
     if ($("f-msg").dataset.hint) setMsg("");
   });
   inp.addEventListener("compositionstart", () => { if (F) F.composing = true; });
@@ -2105,7 +2246,7 @@ function renderZone() {
   h.textContent = "♥"; h.classList.remove("broke");
   $("f-lives-t").textContent = cur.learn ? L.copyIt : L.oneError;
   $("f-heart").hidden = cur.learn;
-  $("f-skip").textContent = cur.learn ? L.skip : L.dunno;
+  $("f-skip").textContent = cur.learn ? L.skip : L.dunno; $("f-skip").hidden = false;
   $("f-skip").disabled = false; $("f-go").disabled = false;
   const ko = cur.expect === "ko";
   kbd.textContent = ko ? "⌨️ 한" : "⌨️ EN";
@@ -2115,7 +2256,7 @@ function renderZone() {
   inp.value = ""; inp.lang = ko ? "ko" : "en";
   inp.placeholder = ko ? L.phKo : L.phEn;
   inp.setAttribute("aria-label", ko ? L.phKo : L.phEn);
-  setMsg("");
+  setMsg(cur.learn ? L.peekMsg : "");
   $("f-help").textContent = cur.learn ? L.fcHelpLearn : ko ? L.fcHelpEk : L.fcHelpKe;
   inp.focus({ preventScroll:true });
 }
@@ -2138,6 +2279,7 @@ function submitAnswer() {
   if (!cur || cur.done || F.busy || !inp) return;
   const raw = inp.value.trim();
   if (!raw) return;
+  if (cur.drill) return drillAnswer(raw);
   const r = checkAnswer(cur, raw);
   if (r.hint) { setMsg(r.hint, "", true); const k = $("f-kbd"); k.classList.remove("swap"); void k.offsetWidth; k.classList.add("swap"); return; }
   if (r.ok) return answeredRight(r);
@@ -2157,26 +2299,37 @@ function fly(el, dir) {
 }
 function lockZone() { $("f-skip").disabled = true; $("f-go").disabled = true; }
 function flipOver(el) { el.classList.remove("float"); el.classList.add("flipped", "flipping"); sfx("flip"); fcLater(() => el.classList.remove("flipping"), 650); }
-/* Note une réponse de test ; renvoie la ceinture avant / après */
+/* Note une réponse de test ; renvoie la ceinture avant / après.
+   Une carte blanche (nouvelle ou ratée) passe jaune seulement quand elle est réussie dans les deux sens ;
+   entre-temps elle revient dans la session, puis une dernière fois au tour de rappel. */
 function record(ok) {
-  const { id, dir } = F.cur, had = !!fcSt(id), before = fcBelt(id);
-  F.played++; F.queue.shift();
+  const { id, dir, recall } = F.cur, prev = stOf(id), before = prev ? prev.b : 0;
+  F.played++; F.queue.shift(); F.last[id] = dir;
   if (!(id in F.first)) F.first[id] = ok;
-  if (ok) { F.combo++; F.best = Math.max(F.best, F.combo); F.cleared.add(id); }
-  else { F.combo = 0; F.failed.add(id); F.queue.push({ id, kind:"test", dir:flipDir(dir) }); }
-  let after = before;
-  if (F.mode === "day") {
-    const s = { ...(fcSt(id) || { b:0, n:0, l:0 }) };
-    s.n++; s.d = dir;
-    if (!ok) { s.b = 0; s.l++; s.due = Date.now(); }
-    else if (F.failed.has(id)) { s.b = 0; s.due = dayAt(1); }
-    else if (had && s.b >= 4) s.due = dayAt(FC_MASTER);
-    else { s.b = had ? s.b + 1 : 1; s.due = dayAt(FC_DAYS[s.b]); }
-    prog.fc.cards[id] = s; save();
-    after = s.b;
+  const s = { ...(prev || { b:0, n:0, l:0 }) }, learning = !prev || s.b === 0;
+  s.n++; s.d = dir;
+  let half = false;
+  if (!ok) {
+    F.combo = 0; F.failed.add(id); F.learning.add(id); F.recalled.delete(id); F.done.delete(id);
+    s.b = 0; s.l++; s.got = []; s.due = Date.now();
+    queueAt(id, dir);
+  } else {
+    F.combo++; F.best = Math.max(F.best, F.combo);
+    if (learning) {
+      F.learning.add(id);
+      s.got = [...new Set((s.got || []).concat(dir))];
+      if (s.got.length >= 2) { s.b = 1; s.got = []; s.due = dayAt(FC_DAYS[1]); }
+      else { half = true; s.due = Date.now(); queueAt(id, flipDir(dir)); }
+    } else if (recall) { F.recalled.add(id); F.done.add(id); }
+    else {
+      if (s.b >= 4) s.due = dayAt(FC_MASTER); else { s.b++; s.due = dayAt(FC_DAYS[s.b]); }
+      if (!F.learning.has(id)) F.done.add(id);
+    }
   }
+  F.st[id] = s;
+  if (F.mode === "day") { prog.fc.cards[id] = s; save(); }
   updateCombo(ok); renderFcTop();
-  return { before, after, up:after > before };
+  return { before, after:s.b, up:F.mode === "day" && s.b > before, half };
 }
 function answeredRight(r) {
   const cur = F.cur, el = $("f-card"), ans = $("f-ans"), L = T();
@@ -2187,13 +2340,15 @@ function answeredRight(r) {
   sfx("ok");
   fcLater(() => speak(answersOf(cur.c.ko).join(", ")), 150);
   if (cur.learn) {
-    /* Découverte réussie : la carte reviendra en test un peu plus loin */
-    F.queue.shift();
-    F.queue.splice(Math.min(3, F.queue.length), 0, { id:cur.id, kind:"test", dir:"ke" });
+    /* Découverte réussie : la carte se retourne sur son sens, puis reviendra en test un peu plus loin */
+    F.queue.shift(); F.learning.add(cur.id);
+    queueAt(cur.id, "ke");
     const [x, y] = centerOf(ans); burst(x, y, BELT_FX[0].concat(["#3F7563"]), 18, .6);
-    return fcLater(() => fly(el, 1), 1300);
+    fcLater(() => { if (!el.classList.contains("flipped")) flipOver(el); }, 500);
+    return fcLater(() => fly(el, 1), 2400);
   }
   const res = record(true);
+  if (res.half) setMsg((r.near ? L.near(r.near) + " " : "") + L.halfway, "ok");
   const [x, y] = centerOf(ans);
   burst(x, y, BELT_FX[res.after], 34);
   fcLater(() => { flipOver(el); if (!res.up) { const s = el.querySelector(".stamp.ok"); s.style.transition = "opacity .2s"; s.style.opacity = 1; } }, 650);
@@ -2220,11 +2375,11 @@ function answeredWrong(raw) {
 /* « Je ne sais pas » : la carte est ratée ; « Passer » (découverte) : elle reviendra quand même en test */
 function giveUp() {
   const cur = F && F.cur;
-  if (!cur || cur.done || F.busy) return;
+  if (!cur || cur.done || F.busy || cur.drill) return;
   if (cur.learn) {
     cur.done = true; F.busy = true; lockZone();
-    F.queue.shift();
-    F.queue.splice(Math.min(3, F.queue.length), 0, { id:cur.id, kind:"test", dir:"ke" });
+    F.queue.shift(); F.learning.add(cur.id);
+    queueAt(cur.id, "ke");
     return fly($("f-card"), 1);
   }
   failCard();
@@ -2233,7 +2388,7 @@ function giveUp() {
 function failCard() {
   const cur = F.cur, el = $("f-card"), L = T();
   cur.done = true; F.busy = true; lockZone();
-  record(false);
+  const { before } = record(false);
   sfx("bad");
   const msg = L.answerWas(cur.c.en.replace(/\s*\([^)]*\)/g, ""), answersOf(cur.c.ko).join(" / "));
   setMsg(msg, "err");
@@ -2246,8 +2401,77 @@ function failCard() {
     sfx("crack");
     el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake");
   }, 1500);
-  fcLater(() => { ghostFollow(1); el.classList.add("sink"); }, 3300);
-  fcLater(nextCard, 3850);
+  fcLater(() => startDrill(DRILL[Math.max(0, Math.min(4, before))]), 2700);
+}
+/* Copies après une carte ratée : on recopie le mot en coréen, plus souvent quand la carte était basse.
+   Première moitié avec le mot sous les yeux, seconde moitié de mémoire (le mot est caché, l'anglais sert d'indice). */
+const DRILL = [10, 7, 5, 3, 2];
+function startDrill(n) {
+  const cur = F.cur, c = cur.c, L = T(), stage = $("f-stage");
+  cur.drill = { n, k:0 }; cur.expect = "ko"; cur.done = false; cur.errors = 0;
+  const kf = answersOf(c.ko).join(" / ");
+  stage.querySelectorAll(".fcard").forEach(x => x.remove());
+  stage.insertAdjacentHTML("beforeend", `<div class="fcard drill enter b0" id="f-card" style="--belt:${beltOf(0).belt.bg}">
+    <div class="fin"><div class="face front">${beltTag(0)}<span class="dtag" id="f-dtag"></span>
+      <div class="dko"><div class="fmain ko" lang="ko" style="--sz:${koSize(kf)}px">${esc(kf)}</div></div>
+      <div class="den"><div class="fmain" lang="en" style="--sz:${enSize(c.en)}px">${paren(c.en)}</div></div>
+      <div class="fans ko" id="f-ans"><span id="f-ans-t"></span><span class="caret"></span></div><div class="fwrong" id="f-wrong"></div>
+      <div class="dots" id="f-dots">${"<span></span>".repeat(n)}</div><span class="sheen"></span></div></div></div>`);
+  const el = $("f-card");
+  el.addEventListener("animationend", e => { if (e.animationName === "enter") el.classList.remove("enter"); });
+  el.onclick = () => $("f-input").focus();
+  const kbd = $("f-kbd"), inp = $("f-input");
+  kbd.textContent = "⌨️ 한"; kbd.className = "kbd ko";
+  if (F.lastExpect !== "ko") { void kbd.offsetWidth; kbd.classList.add("swap"); }
+  F.lastExpect = "ko";
+  inp.value = ""; inp.lang = "ko"; inp.placeholder = L.phKo; inp.setAttribute("aria-label", L.phKo);
+  const h = $("f-heart"); h.hidden = false; h.textContent = "✍️"; h.classList.remove("broke");
+  $("f-lives-t").textContent = L.drillLine(n);
+  $("f-skip").hidden = true; $("f-go").disabled = false;
+  $("f-help").textContent = L.fcHelpDrill;
+  setMsg(L.drillStart(n), "err");
+  F.busy = false;
+  updateDrill();
+  inp.focus({ preventScroll:true });
+}
+function updateDrill() {
+  const d = F.cur.drill, el = $("f-card"), half = Math.ceil(d.n / 2);
+  $("f-dtag").textContent = (d.k >= half ? "🙈 " : "✍️ ") + d.k + " / " + d.n;
+  [...$("f-dots").children].forEach((x, i) => x.classList.toggle("on", i < d.k));
+  el.classList.toggle("hid", d.k >= half);
+}
+function drillAnswer(raw) {
+  const cur = F.cur, d = cur.drill, L = T(), el = $("f-card"), ans = $("f-ans"), half = Math.ceil(d.n / 2);
+  const r = checkAnswer(cur, raw);
+  if (r.hint) { setMsg(r.hint, "", true); return; }
+  $("f-input").value = ""; $("f-ans-t").textContent = "";
+  if (!r.ok) {
+    /* Copie fausse : elle ne compte pas ; de mémoire, le mot se remontre un instant */
+    sfx("bad");
+    const w = $("f-wrong"); w.textContent = raw; w.classList.remove("pop"); void w.offsetWidth; w.classList.add("pop");
+    el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake");
+    if (el.classList.contains("hid")) { el.classList.add("peek"); clearTimeout(cur.peekT); cur.peekT = fcLater(() => el.classList.remove("peek"), 1600); }
+    return setMsg(L.drillWrong, "err");
+  }
+  d.k++;
+  $("f-wrong").textContent = "";
+  ans.classList.remove("ok1"); void ans.offsetWidth; ans.classList.add("ok1");
+  speak(answersOf(cur.c.ko)[0]);
+  const dot = $("f-dots").children[d.k - 1];
+  if (dot) { const [x, y] = centerOf(dot); burst(x, y, ["#3F7563", "#6CC28A", "#B5E8C5"], 8, .35); }
+  if (d.k >= d.n) {
+    /* Toutes les copies faites : la carte repart sous le paquet et reviendra dans la session */
+    cur.done = true; F.busy = true; lockZone(); updateDrill();
+    sfx("star"); setMsg(L.drillDone, "ok");
+    const [x, y] = centerOf(el); burst(x, y, ["#3F7563", "#6CC28A", "#B5E8C5", "#FFFFFF"], 30, .8);
+    fcLater(() => { ghostFollow(1); el.classList.add("sink"); }, 900);
+    return fcLater(nextCard, 1450);
+  }
+  sfx("tick");
+  if (d.k === half) {
+    setMsg(L.drillHide, "ok");
+    el.classList.add("vanish"); fcLater(() => { el.classList.remove("vanish"); updateDrill(); }, 450);
+  } else { setMsg(""); updateDrill(); }
 }
 /* Montée de ceinture : la carte s'illumine et une ceinture vient se nouer dessus */
 function promote(el, b) {
@@ -2458,6 +2682,7 @@ function renderMine() {
   /* Toutes les cartes, rangées par catégorie */
   const mineCount = prog.fc.mine.length;
   $("fm-count").textContent = L.allCards(deck.length, mineCount);
+  $("fm-all").textContent = cats.some(k => deck.some(c => catOf(c) === k.id) && !openGroups.has(k.id)) ? L.unfoldAll : L.foldAll;
   $("fm-list").innerHTML = cats.map(k => {
     const cs = deck.filter(c => catOf(c) === k.id);
     if (!cs.length) return "";
@@ -2538,18 +2763,69 @@ $("fm-catadd").onclick = () => {
   mineMsg(L.catAdded, "ok", "fm-cmsg"); renderMine();
 };
 $("fm-catname").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("fm-catadd").onclick(); } });
-/* Copie : les cartes perso, avec un titre « # Nom » par catégorie (celles de Mon paquet d'abord, sans titre) */
-$("fm-copy").onclick = () => {
-  const L = T(), deck = fcDeck().filter(c => c.mine);
-  const text = catList().map(k => {
+/* Copie : toutes les cartes (de l'app et perso), rangées par catégorie avec un titre « # Nom »
+   (celles de Mon paquet d'abord, sans titre), que les groupes soient ouverts ou non */
+function listText() {
+  const deck = fcDeck();
+  return catList().map(k => {
     const cs = deck.filter(c => catOf(c) === k.id);
     if (!cs.length) return "";
     return (k.id === MINE ? "" : `# ${k.name}\n`) + cs.map(c => `${c.en} — ${c.ko}`).join("\n");
   }).filter(Boolean).join("\n\n");
-  if (!text) return mineMsg(L.noMine, "err");
-  const fallback = () => { const t = $("fm-text"); t.value = text; $("fm-details").open = true; t.focus(); t.select(); try { document.execCommand("copy"); } catch (e) {} mineMsg(L.copiedFallback, "ok"); };
-  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => mineMsg(L.copied, "ok"), fallback);
-  else fallback();
+}
+/* Copie dans le presse-papiers, avec une solution de secours pour les navigateurs qui refusent */
+function legacyCopy(text) {
+  const t = document.createElement("textarea");
+  t.value = text; t.setAttribute("readonly", "");
+  t.style.cssText = "position:fixed;top:0;left:0;width:2px;height:2px;opacity:0;font-size:16px";
+  document.body.appendChild(t);
+  const back = document.activeElement;
+  /* Le texte est placé dans la copie quoi que contienne la sélection */
+  const put = e => { e.clipboardData.setData("text/plain", text); e.preventDefault(); };
+  document.addEventListener("copy", put);
+  t.focus({ preventScroll:true }); t.select(); t.setSelectionRange(0, text.length);
+  let ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+  document.removeEventListener("copy", put);
+  getSelection().removeAllRanges(); t.remove();
+  if (back && back.focus) back.focus({ preventScroll:true });
+  return ok;
+}
+function copyText(text) {
+  /* La copie « ancienne manière » d'abord : elle marche dans le geste de l'utilisateur, même dans l'app installée */
+  if (legacyCopy(text)) return Promise.resolve(true);
+  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text).then(() => true, () => false);
+  return Promise.resolve(false);
+}
+function toast(text) {
+  const el = $("toast");
+  el.textContent = text; el.hidden = false;
+  el.classList.remove("show"); void el.offsetWidth; el.classList.add("show");
+  clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; el.classList.remove("show"); }, 2600);
+}
+$("fm-copy").onclick = () => {
+  const L = T(), text = listText(), n = fcDeck().length, btn = $("fm-copy");
+  $("fm-out-w").hidden = true;
+  copyText(text).then(ok => {
+    if (ok) {
+      btn.classList.remove("done"); void btn.offsetWidth; btn.classList.add("done");
+      btn.textContent = L.copiedBtn;
+      clearTimeout(btn.t); btn.t = setTimeout(() => { btn.classList.remove("done"); btn.textContent = L.copyBtn; }, 2500);
+      toast(L.copiedToast(n)); sfx("ok");
+      const [x, y] = centerOf(btn); burst(x, y, ["#2F9E5B", "#6CC28A", "#B5E8C5", "#FFFFFF"], 22, .55);
+    } else {
+      /* Dernier recours : la liste s'affiche, toute sélectionnée, pour la copier à la main */
+      const o = $("fm-out"); o.value = text; $("fm-out-w").hidden = false;
+      o.focus(); o.setSelectionRange(0, text.length);
+      o.scrollIntoView({ block:"center", behavior:"smooth" });
+    }
+  });
+};
+$("fm-out").addEventListener("focus", () => setTimeout(() => $("fm-out").setSelectionRange(0, $("fm-out").value.length), 0));
+/* Tout déplier / tout replier les groupes de cartes */
+$("fm-all").onclick = () => {
+  const groups = [...document.querySelectorAll("#fm-list .fgrp")], open = !groups.every(d => d.open);
+  groups.forEach(d => { d.open = open; if (open) openGroups.add(d.dataset.cat); else openGroups.delete(d.dataset.cat); });
+  $("fm-all").textContent = open ? T().foldAll : T().unfoldAll;
 };
 $("fm-close").onclick = () => closeSheet("fc-mine", () => { if (prog.game === "fc" && !$("home").hidden) renderHome(); });
 $("fc-mine").addEventListener("click", e => { if (e.target === $("fc-mine")) $("fm-close").onclick(); });
@@ -2562,7 +2838,18 @@ const standalone = window.navigator.standalone === true || matchMedia("(display-
 const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
 if (ios && !standalone && !prog.hideInstall) $("install").hidden = false;
 $("install-x").onclick = () => { $("install").hidden = true; prog.hideInstall = true; save(); };
-if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+/* Mises à jour : le service worker vérifie la présence d'une nouvelle version à chaque retour dans l'app ;
+   quand elle est installée, un bandeau propose de recharger (la progression reste dans le téléphone) */
+if ("serviceWorker" in navigator) {
+  const hadSw = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register("sw.js").then(reg => {
+    const check = () => { reg.update().catch(() => {}); };
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") check(); });
+    setInterval(check, 30 * 60 * 1000);
+  }).catch(() => {});
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadSw) $("upd").hidden = false; });
+}
+$("upd-go").onclick = () => { try { save(); } catch (e) {} location.reload(); };
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 </script>
 </body>
