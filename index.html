@@ -196,7 +196,8 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .mlist{margin-top:12px}
 #m-time.low{color:var(--red)}
 /* ===== Flashcards ===== */
-.games{grid-template-columns:repeat(2,1fr);gap:2px;max-width:330px}
+.games{grid-template-columns:repeat(6,1fr);gap:2px;max-width:330px}
+.games button{grid-column:span 2}.games button:nth-child(n+4){grid-column:span 3}
 .games button{padding:8px 4px;font-size:13.5px}
 #fgame{position:relative;min-height:calc(100vh - 70px);min-height:calc(100dvh - 70px)}
 .fheat{position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:var(--heat,0);transition:opacity .7s ease-out;
@@ -454,6 +455,18 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .fans.ok1{border-style:solid;border-color:#2F9E5B;animation:okflash .35s ease-out}
 @keyframes okflash{0%{background:color-mix(in srgb,#2F9E5B 35%,var(--paper));transform:scale(1.06)}100%{background:transparent;transform:none}}
 #fgame.kb .dots{margin-top:8px}
+/* ===== Nombres et heure ===== */
+#t-results{width:100%;margin:0 0 12px}
+.tpts{display:flex;align-items:center;gap:4px;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.tpts svg{width:28px;height:28px}
+.tmain.sm{font-size:30px}.tmain.xs{font-size:22px;line-height:1.35}
+.tstep{position:absolute;top:18px;right:14px;font-size:12px;font-weight:600;color:var(--muted)}
+.tchips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:8px}
+.tchips span{padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--belt) 22%,var(--paper));border:1px solid var(--line);font-weight:600;font-size:15px}
+.tdone{margin-top:10px;font-size:16px;color:#2F9E5B;font-weight:600}
+.tmx .note strong{color:var(--ink)}
+.tmx .xbar{margin:4px 0 10px}
+.tgm.kb .tmain.sm{font-size:24px}.tgm.kb .tmain.xs{font-size:18px}.tgm.kb .tchips{margin-top:4px}
 /* ===== Conjugaison ===== */
 .crule{--belt:var(--line);background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--belt);border-radius:12px;padding:10px 12px;margin:0 0 14px;font-size:14.5px;line-height:1.5}
 .crule b{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:2px}
@@ -476,19 +489,19 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .ccalc.ok{color:#2F9E5B;font-weight:700}.ccalc.bad{color:var(--red);font-weight:700}
 .ctrap{display:block;margin-top:2px;font-family:system-ui,sans-serif;font-size:13px;font-weight:600;color:var(--yellow)}
 .recap li.miss .ko{color:var(--red)}
-#cgame.kb .topbar{margin-bottom:8px}
-#cgame.kb .modes,#cgame.kb .help{display:none}
-#cgame.kb .fstats{margin-bottom:8px}
-#cgame.kb.tight .crule{padding:6px 10px;margin-bottom:8px}
-#cgame.kb.tight .crule b,#cgame.kb.tight .crule .long{display:none}
-#cgame.kb.tight .crule .short{display:block}
-#cgame.kb .ccard{padding:30px 12px 10px}
-#cgame.kb .cinf{font-size:34px}
-#cgame.kb .ctr{font-size:14px;margin-top:0}
-#cgame.kb .ccard .fans{margin-top:8px;min-height:42px;font-size:22px}
-#cgame.kb .ccalc{margin-top:4px;font-size:16px}
-#cgame.kb .cstage{margin-bottom:10px}
-@media (max-height:640px){#cgame.kb .ctr{display:none}}
+.tgm.kb .topbar{margin-bottom:8px}
+.tgm.kb .modes,.tgm.kb .help{display:none}
+.tgm.kb .fstats{margin-bottom:8px}
+.tgm.kb.tight .crule{padding:6px 10px;margin-bottom:8px}
+.tgm.kb.tight .crule b,.tgm.kb.tight .crule .long{display:none}
+.tgm.kb.tight .crule .short{display:block}
+.tgm.kb .ccard{padding:30px 12px 10px}
+.tgm.kb .cinf{font-size:34px}
+.tgm.kb .ctr{font-size:14px;margin-top:0}
+.tgm.kb .ccard .fans{margin-top:8px;min-height:42px;font-size:22px}
+.tgm.kb .ccalc{margin-top:4px;font-size:16px}
+.tgm.kb .cstage{margin-bottom:10px}
+@media (max-height:640px){.tgm.kb .ctr{display:none}}
 @media (prefers-reduced-motion:reduce){.fin,.fcard,.ghost,.mini .in{transition-duration:.01s!important}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}.card .in{transition:none}}
 </style>
@@ -502,7 +515,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
     </div>
     <div class="hero">
       <div class="toprow">
-        <div class="games" role="group" id="games"><button data-game="ws"></button><button data-game="mem"></button><button data-game="fc"></button><button data-game="cj"></button></div>
+        <div class="games" role="group" id="games"><button data-game="ws"></button><button data-game="mem"></button><button data-game="fc"></button><button data-game="cj"></button><button data-game="tm"></button></div>
         <button class="icon" id="settings-btn">⚙️</button>
       </div>
       <h1 class="ko" id="h1">낱말 찾기</h1>
@@ -576,7 +589,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
     <p class="help" id="f-help"></p>
   </section>
 
-  <section id="cgame" hidden>
+  <section id="cgame" class="tgm" hidden>
     <div class="topbar">
       <button class="back" id="c-back"></button>
       <div class="title"><span class="ko">활용</span><small id="c-sub"></small></div>
@@ -595,6 +608,22 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
     <div class="cstage" id="c-stage"></div>
     <div class="fzone" id="c-zone"></div>
     <p class="help" id="c-help"></p>
+  </section>
+
+  <section id="tgame" class="tgm" hidden>
+    <div class="topbar">
+      <button class="back" id="t-back"></button>
+      <div class="title"><span class="ko" id="t-ko"></span><small id="t-sub"></small></div>
+      <button class="icon" id="t-sound"></button>
+    </div>
+    <div class="fstats">
+      <div class="fprog"><span id="t-left"></span><div class="xbar"><span id="t-bar"></span></div></div>
+      <span class="tpts" id="t-pts"></span>
+    </div>
+    <button class="btn primary" id="t-results" hidden></button>
+    <div class="cstage" id="t-stage"></div>
+    <div class="fzone" id="t-zone"></div>
+    <p class="help" id="t-help"></p>
   </section>
 </main>
 
@@ -679,7 +708,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 
 <script>
 /* Version de l'app : à changer en même temps que CACHE dans sw.js */
-const APP_VERSION = 20;
+const APP_VERSION = 21;
 /* Mots : "coréen=français=anglais", séparés par ";" */
 const W = s => s.split(";").map(p => { const [ko, fr, en] = p.split("="); return { ko, fr, en }; });
 
@@ -1100,7 +1129,7 @@ const MEM_TIME = 25000, MEM_LIMIT = 100000, MEM_PAIRS = 8, MEM_D = 6, MEM_NEW = 
 prog.mem = prog.mem || {};
 prog.mseen = prog.mseen || {};
 prog.memUnlocked = prog.memUnlocked || [];
-if (!["mem", "fc", "cj"].includes(prog.game)) prog.game = "ws";
+if (!["mem", "fc", "cj", "tm"].includes(prog.game)) prog.game = "ws";
 const memOf = id => prog.mem[id] || {};
 const MTH = {};
 MTHEMES.forEach(t => { MTH[t.id] = t; });
@@ -1150,6 +1179,8 @@ function applyLang() {
   document.querySelector('[data-game="mem"]').textContent = t.memName;
   document.querySelector('[data-game="fc"]').textContent = t.fcName;
   document.querySelector('[data-game="cj"]').textContent = t.cjName;
+  document.querySelector('[data-game="tm"]').textContent = TMS[LANG].name;
+  $("t-back").textContent = TMS[LANG].back; $("t-sound").setAttribute("aria-label", t.sound);
   $("c-back").textContent = t.cjBack; $("c-sound").setAttribute("aria-label", t.sound);
   document.querySelector('[data-cm="d"]').textContent = t.discovery;
   document.querySelector('[data-cm="c"]').textContent = t.challenge;
@@ -1172,7 +1203,7 @@ function renderSettings() {
 }
 function setSound(on) {
   prog.sound = on; save(); renderSettings();
-  $("sound").textContent = $("m-sound").textContent = $("f-sound").textContent = $("c-sound").textContent = prog.sound ? "🔊" : "🔇";
+  $("sound").textContent = $("m-sound").textContent = $("f-sound").textContent = $("c-sound").textContent = $("t-sound").textContent = prog.sound ? "🔊" : "🔇";
 }
 document.querySelectorAll("#settings [data-lang]").forEach(b => b.onclick = () => {
   LANG = b.dataset.lang; prog.lang = LANG; save(); applyLang(); renderHome();
@@ -1251,12 +1282,13 @@ document.querySelectorAll("#games button").forEach(b => b.onclick = () => {
   prog.game = b.dataset.game; save(); renderHome();
 });
 function renderHome() {
-  const mem = prog.game === "mem", fc = prog.game === "fc", cj = prog.game === "cj";
+  const mem = prog.game === "mem", fc = prog.game === "fc", cj = prog.game === "cj", tm = prog.game === "tm";
   document.querySelectorAll("#games button").forEach(b => b.setAttribute("aria-pressed", b.dataset.game === prog.game));
-  $("h1").textContent = mem ? "짝 맞추기" : fc ? "낱말 카드" : cj ? "활용" : "낱말 찾기";
-  $("intro").textContent = mem ? T().introMem : fc ? T().introFc : cj ? T().introCj : T().intro;
+  $("h1").textContent = mem ? "짝 맞추기" : fc ? "낱말 카드" : cj ? "활용" : tm ? "숫자와 시간" : "낱말 찾기";
+  $("intro").textContent = mem ? T().introMem : fc ? T().introFc : cj ? T().introCj : tm ? TMS[LANG].intro : T().intro;
   if (mem) return renderMemHome();
   if (cj) return renderCjHome();
+  if (tm) return renderTmHome();
   if (fc) return renderFcHome();
   let got = 0;
   $("ladder").innerHTML = "";
@@ -1556,15 +1588,19 @@ $("hint").onclick = () => {
   el.classList.remove("hint", "pop"); el.style.animationDelay = ""; void el.offsetWidth; el.classList.add("hint");
 };
 function goHome() {
-  S = null; stopMemory(); M = null; stopFc(); F = null; stopConj(); C = null; updateHint();
-  $("game").hidden = true; $("mgame").hidden = true; $("fgame").hidden = true; $("cgame").hidden = true; $("home").hidden = false; $("sheet").hidden = true; $("results").hidden = true;
+  S = null; stopMemory(); M = null; stopFc(); F = null; stopConj(); C = null; stopTm(); Q = null; updateHint();
+  $("game").hidden = true; $("mgame").hidden = true; $("fgame").hidden = true; $("cgame").hidden = true; $("tgame").hidden = true; $("home").hidden = false; $("sheet").hidden = true; $("results").hidden = true;
   renderHome(); window.scrollTo(0, 0);
 }
 /* Demande confirmation si une partie est en cours (au moins un mot trouvé, grille pas finie) */
 let onLeave = null;
 function confirmLeave(action) {
   const L = T();
-  if (C) {
+  if (Q) {
+    if (Q.finished || !Q.played) return action();
+    $("c-title").textContent = L.leaveTitle;
+    $("c-text").textContent = TL().leave;
+  } else if (C) {
     if (C.finished || !C.played) return action();
     $("c-title").textContent = L.leaveTitle;
     $("c-text").textContent = C.mode === "d" ? L.leaveCjD : L.leaveCjC;
@@ -1597,14 +1633,14 @@ function closeSheet(id, then) {
   setTimeout(() => { el.hidden = true; el.classList.remove("closing"); if (then) then(); }, 250);
 }
 /* Écran de fin : on peut le fermer pour revoir sa grille, puis le rouvrir */
-function showResults() { $("results").hidden = true; $("m-results").hidden = true; $("f-results").hidden = true; $("c-results").hidden = true; openSheet("sheet"); }
+function showResults() { $("results").hidden = true; $("m-results").hidden = true; $("f-results").hidden = true; $("c-results").hidden = true; $("t-results").hidden = true; openSheet("sheet"); }
 function hideResults() {
   closeSheet("sheet", () => {
-    const b = C && C.finished ? $("c-results") : F && F.finished ? $("f-results") : M && M.finished ? $("m-results") : S && S.finished ? $("results") : null;
+    const b = Q && Q.finished ? $("t-results") : C && C.finished ? $("c-results") : F && F.finished ? $("f-results") : M && M.finished ? $("m-results") : S && S.finished ? $("results") : null;
     if (b) { b.textContent = T().seeResults; b.hidden = false; }
   });
 }
-$("results").onclick = $("m-results").onclick = $("f-results").onclick = $("c-results").onclick = showResults;
+$("results").onclick = $("m-results").onclick = $("f-results").onclick = $("c-results").onclick = $("t-results").onclick = showResults;
 $("sheet").addEventListener("click", e => { if (e.target === $("sheet")) hideResults(); });
 
 $("regen").onclick = () => confirmLeave(() => startGame(S.t.id, S.mode));
@@ -2372,8 +2408,8 @@ function fitKb() {
   const vv = window.visualViewport, h = vv ? vv.height : innerHeight;
   document.documentElement.style.setProperty("--vvh", Math.round(h) + "px");
   /* Règle de la conjugaison en version courte seulement quand le clavier prend vraiment de la place */
-  $("cgame").classList.toggle("tight", h < innerHeight * .8 || h < 560);
-  if (["fgame", "cgame"].some(id => $(id).classList.contains("kb") && !$(id).hidden)) window.scrollTo(0, 0);
+  ["cgame", "tgame"].forEach(id => $(id).classList.toggle("tight", h < innerHeight * .8 || h < 560));
+  if (["fgame", "cgame", "tgame"].some(id => $(id).classList.contains("kb") && !$(id).hidden)) window.scrollTo(0, 0);
 }
 if (window.visualViewport) visualViewport.addEventListener("resize", fitKb);
 fitKb();
@@ -3354,6 +3390,468 @@ document.querySelectorAll("#c-modes button").forEach(b => b.onclick = () => {
   const t = C.t, m = b.dataset.cm;
   confirmLeave(() => startConj(t, m));
 });
+
+/* ===== Nombres et heure 숫자와 시간 : 6 exercices, une ceinture par exercice ===== */
+/* Chaque bonne réponse (sans affichage de la solution) rapporte 1 point à l'exercice ;
+   la ceinture dépend des points et fixe la difficulté des questions. Une ceinture gagnée ne se perd pas. */
+const TM_BELTS = [0, 20, 50, 100, 160], TM_N = 10;
+prog.tm = prog.tm || {};
+const tmPts = id => (prog.tm[id] || {}).p || 0;
+const tmBelt = id => TM_BELTS.reduce((b, need, i) => tmPts(id) >= need ? i : b, 0);
+
+/* Nombres coréens */
+const SD = ["", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구"];
+const N1 = ["", "하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟", "아홉"];
+const NC = ["", "한", "두", "세", "네", "다섯", "여섯", "일곱", "여덟", "아홉"];
+const N10 = ["", "열", "스물", "서른", "마흔", "쉰", "예순", "일흔", "여든", "아흔"];
+function sino4(n) {
+  let s = "";
+  [[1000, "천"], [100, "백"], [10, "십"]].forEach(([u, w]) => { const d = Math.floor(n / u) % 10; if (d) s += (d > 1 ? SD[d] : "") + w; });
+  return s + SD[n % 10];
+}
+function sino(n) {
+  if (!n) return "영";
+  const man = Math.floor(n / 10000), r = n % 10000;
+  return (man ? (man > 1 ? sino4(man) : "") + "만" : "") + (r ? sino4(r) : "");
+}
+/* Natif (1 à 99) ; cnt : forme devant un compteur (한, 두, 세, 네, 스무) */
+const native = (n, cnt) => cnt && n === 20 ? "스무" : N10[Math.floor(n / 10)] + (cnt ? NC : N1)[n % 10];
+const monthKo = m => m === 6 ? "유월" : m === 10 ? "시월" : sino(m) + "월";
+const DAYS_KO = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"];
+const pick = a => a[rnd(a.length)];
+const between = (a, b) => a + rnd(b - a + 1);
+const fmtN = n => n.toLocaleString(LANG === "fr" ? "fr-FR" : "en-US").replace(/ | /g, " ");
+const hasBatchim = w => (w.charCodeAt(w.length - 1) - 0xAC00) % 28 !== 0;
+/* L'heure en coréen : toutes les façons acceptées, la première est celle affichée.
+   how : "" (heure 1-12 donnée), "ap" (오전 / 오후), "per" (아침 / 저녁 / 밤) */
+function timeKo(h, m, how) {
+  const h12 = h % 12 || 12, hw = native(h12, true) + " 시";
+  const mins = m === 0 ? [""] : m === 30 ? [" 반", " 삼십 분"] : [" " + sino(m) + " 분"];
+  const pre = how === "ap" ? (h < 12 ? "오전 " : "오후 ") : how === "per" ? (h < 10 ? "아침 " : h < 21 ? "저녁 " : "밤 ") : "";
+  return mins.map(x => pre + hw + x);
+}
+const hhmm = (h, m) => `${h}:${String(m).padStart(2, "0")}`;
+
+/* Phrases « à quelle heure » : nom|fr|en|infinitif|forme|fr|en|type (o : objet 을/를, p : lieu 에, i : sans nom) */
+const TM_PHR = `밥|du riz|rice|먹다|먹어요|manger|to eat|o
+커피|du café|coffee|마시다|마셔요|boire|to drink|o
+영화|un film|a movie|보다|봐요|regarder|to watch|o
+책|un livre|a book|읽다|읽어요|lire|to read|o
+한국어|le coréen|Korean|공부하다|공부해요|étudier|to study|o
+친구|un ami|a friend|만나다|만나요|rencontrer|to meet|o
+운동|du sport|exercise|하다|해요|faire|to do|o
+숙제|les devoirs|homework|하다|해요|faire|to do|o
+음악|de la musique|music|듣다|들어요|écouter|to listen to|o
+빵|du pain|bread|사다|사요|acheter|to buy|o
+편지|une lettre|a letter|쓰다|써요|écrire|to write|o
+점심|le déjeuner|lunch|먹다|먹어요|manger|to eat|o
+우유|du lait|milk|마시다|마셔요|boire|to drink|o
+샤워|une douche|a shower|하다|해요|faire|to take|o
+학교|l'école|school|가다|가요|aller|to go|p
+회사|le bureau|the office|가다|가요|aller|to go|p
+도서관|la bibliothèque|the library|가다|가요|aller|to go|p
+식당|le restaurant|the restaurant|가다|가요|aller|to go|p
+공원|le parc|the park|가다|가요|aller|to go|p
+병원|l'hôpital|the hospital|가다|가요|aller|to go|p
+은행|la banque|the bank|가다|가요|aller|to go|p
+집|la maison|home|오다|와요|venir|to come|p
+집|la maison|home|가다|가요|aller|to go|p
+|||자다|자요|dormir|to sleep|i
+|||일어나다|일어나요|se lever|to get up|i`.split("\n").map(l => { const [n, nfr, nen, inf, form, vfr, ven, k] = l.split("|"); return { n, nfr, nen, inf, form, vfr, ven, k }; });
+
+/* Une question : main (grand), sub (consigne), steps [{ label, ans:[réponses acceptées], show }], hint (affiché avec la réponse) */
+const one = (main, sub, ans, hint, extra) => ({ main, sub, steps:[{ ans:[].concat(ans), show:[].concat(ans)[0] }], hint, ...extra });
+const TMX = [
+  { id:"nb", ko:"숫자", icon:"🔢", gen(lv, L) {
+      if (lv <= 1) {
+        const n = lv ? between(11, 99) : between(1, 10), nat = Math.random() < .5;
+        return one(String(n), nat ? L.nNat : L.nSino, nat ? native(n) : sino(n), nat ? L.hNat : L.hSino);
+      }
+      const NATC = [["개", L.cGae], ["명", L.cMyeong], ["살", L.cSal], ["권", L.cGwon], ["잔", L.cJan], ["마리", L.cMari], ["시간", L.cSigan]];
+      const SINC = [["분", L.cBun], ["원", L.cWon], ["층", L.cCheung], ["일", L.cIl], ["년", L.cNyeon]];
+      if (lv === 2 || (lv === 3 && Math.random() < .5)) {
+        const nat = Math.random() < .5, [c, what] = pick(nat ? NATC : SINC);
+        const n = lv === 3 && nat ? pick([1, 2, 3, 4, 20, 21, 22, 23, 24]) : between(1, nat ? 40 : 60);
+        return one(n + c, L.nCount(what), (nat ? native(n, true) : sino(n)) + " " + c, nat ? L.hCntNat(c) : L.hCntSino(c));
+      }
+      if (lv === 3) { const n = between(100, 9999); return one(fmtN(n), L.nSino, sino(n), L.hSino); }
+      const n = pick([between(1, 9) * 10000 + between(0, 9) * 1000, between(10, 99) * 1000, between(1, 99) * 10000, between(100, 999) * 10000]);
+      const a = sino(n) + " 원";
+      return one(fmtN(n) + "원", L.nPrice, n >= 10000 && n < 20000 ? [a, "일" + a] : a, L.hMan);
+    }},
+  { id:"hr", ko:"시간", icon:"🕒", gen(lv, L) {
+      if (lv <= 2) {
+        const h = between(1, 12), m = lv === 0 ? 0 : lv === 1 ? pick([0, 30, 30]) : between(1, 59);
+        return one(hhmm(h, m), L.hRead, timeKo(h, m, ""), L.hTime);
+      }
+      if (lv === 3) { const h = between(0, 23), m = pick([0, 15, 30, 45, between(1, 59)]); return one(hhmm(h, m), L.hAp, timeKo(h, m, "ap"), L.hApH); }
+      const h = pick([6, 7, 8, 9, 18, 19, 20, 21, 22, 23]), m = pick([0, 30, between(1, 59)]);
+      return one(hhmm(h, m), L.hPer, timeKo(h, m, "per"), L.hPerH);
+    }},
+  { id:"dy", ko:"요일", icon:"📆", gen(lv, L) {
+      if (lv === 4) lv = between(1, 3);
+      const d = rnd(7);
+      if (lv === 0) return one(L.days[d], L.dName, DAYS_KO[d], L.hDays);
+      if (lv === 1) { const s = pick([1, -1]); return one(DAYS_KO[d] + " → ?", s > 0 ? L.dAfter : L.dBefore, DAYS_KO[(d + s + 7) % 7], L.hDays); }
+      const rel = lv === 2 ? pick([["어제", -1], ["내일", 1]]) : pick([["그저께", -2], ["모레", 2], ["어제", -1], ["내일", 1]]);
+      return one(`오늘은 ${DAYS_KO[d]}이에요. ${rel[0]}${hasBatchim(rel[0]) ? "은" : "는"}?`, L.dRel(L.days[d], rel[1]), DAYS_KO[(d + rel[1] + 7) % 7], L.hRel, { long:true });
+    }},
+  { id:"mo", ko:"월", icon:"🗓️", gen(lv, L) {
+      if (lv === 4) lv = between(0, 3);
+      const m = lv === 1 && Math.random() < .5 ? pick([6, 10]) : lv === 0 ? pick([1, 2, 3, 4, 5, 7, 8, 9, 11, 12]) : between(1, 12);
+      const trap = m === 6 || m === 10 ? L.hTrap(m) : L.hMonths;
+      if (lv === 0) return one(L.months[m - 1], L.mName, monthKo(m), trap);
+      if (lv === 1) return one(Math.random() < .5 ? m + "월" : L.months[m - 1], L.mName, monthKo(m), trap);
+      const s = pick([1, -1]), r = ((m - 1 + s + 12) % 12) + 1, tr = r === 6 || r === 10 ? L.hTrap(r) : L.hMonths;
+      if (lv === 2) return one(monthKo(m) + " → ?", s > 0 ? L.mAfter : L.mBefore, monthKo(r), tr);
+      return one(`이번 달은 ${monthKo(m)}이에요. ${s > 0 ? "다음 달" : "지난달"}은?`, L.mRel(L.months[m - 1], s), monthKo(r), tr, { long:true });
+    }},
+  { id:"dt", ko:"날짜", icon:"📅", gen(lv, L) {
+      const y = lv === 4 ? between(1950, 2012) : between(2000, 2035), m = between(1, 12);
+      const dmax = new Date(y, m, 0).getDate(), d = between(1, dmax);
+      const dd = sino(d) + " 일", mm = monthKo(m), yy = sino(y) + " 년";
+      if (lv === 0) return one(d + "일", L.dtWrite, dd, L.hDate);
+      if (lv === 1) return one(`${m}월 ${d}일`, L.dtWrite, `${mm} ${dd}`, m === 6 || m === 10 ? L.hTrap(m) : L.hDate);
+      if (lv === 4 && Math.random() < .5) return one(y + "년", L.dtYear, yy, L.hYear);
+      const full = `${yy} ${mm} ${dd}`;
+      if (lv === 3) {
+        const wd = (new Date(y, m - 1, d).getDay() + 6) % 7;
+        return one(`${y}년 ${m}월 ${d}일`, L.dtDay(L.days[wd]), `${full} ${DAYS_KO[wd]}`, L.hDate, { long:true });
+      }
+      return one(`${y}년 ${m}월 ${d}일`, L.dtWrite, full, lv === 4 ? L.hYear : L.hDate, { long:true });
+    }},
+  { id:"ph", ko:"몇 시에?", icon:"💬", gen(lv, L) {
+      const p = pick(TM_PHR.filter(x => lv >= 2 || x.k !== "p"));
+      const part = p.k === "o" ? p.n + (hasBatchim(p.n) ? "을" : "를") + " " : p.k === "p" ? p.n + "에 " : "";
+      const alt = p.form === "봐요" ? ["보아요"] : [];
+      const verbs = [p.form].concat(alt);
+      const q = verbs.map(v => `몇 시에 ${part}${v}?`);
+      const cue = (p.n ? p.n + " · " : "") + p.inf;
+      const what = LANG === "fr" ? (p.n ? `${p.vfr} · ${p.nfr}` : p.vfr) : (p.n ? `${p.ven} · ${p.nen}` : p.ven);
+      const hint = p.k === "o" ? L.hObj(p.n, hasBatchim(p.n)) : p.k === "p" ? L.hPlace : L.hIntr;
+      const step1 = { label:L.stepQ, ans:q, show:q[0], part, verb:p.form };
+      if (lv === 0) return { main:cue, sub:what, steps:[step1], hint, long:true };
+      let h, m, how = "", chips = [];
+      if (lv === 1) { h = between(1, 12); m = 0; }
+      else if (lv === 2) { h = between(1, 12); m = pick([0, 30, between(1, 59)]); }
+      else if (lv === 3) { h = between(0, 23); m = pick([0, 30, between(1, 59)]); how = "ap"; }
+      else { h = pick([6, 7, 8, 9, 18, 19, 20, 21, 22]); m = pick([0, 30, between(1, 59)]); how = "per"; }
+      chips.push("🕒 " + hhmm(h, m));
+      let day = "";
+      if (lv === 4) { const d = rnd(7); day = DAYS_KO[d] + " "; chips.unshift("📆 " + L.days[d]); }
+      const times = timeKo(h, m, how);
+      const a = [];
+      times.forEach(t => verbs.forEach(v => a.push(`${day}${t}에 ${part}${v}.`)));
+      return { main:cue, sub:what, chips, steps:[step1, { label:L.stepA, ans:a, show:a[0], part, verb:p.form, time:true }],
+               hint:hint + (how ? " " + (how === "ap" ? L.hApH : L.hPerH) : ""), long:true };
+    }}
+];
+const TMXI = {};
+TMX.forEach(x => { TMXI[x.id] = x; });
+const tmLevel = b => b === 0 ? 0 : Math.random() < .7 ? b : rnd(b);
+const tmKey = s => s.replace(/[^가-힣]/g, "");
+
+/* Textes du jeu */
+const TMS = {
+  fr: {
+    name:"Nombres", intro:"Les nombres dans les deux systèmes, l'heure, les jours, les mois, les dates, et les phrases « à quelle heure ». Chaque exercice a sa ceinture : plus tu réponds juste, plus elle monte, et plus les questions deviennent difficiles.",
+    back:"‹ Exercices", total:n => `${n} bonne${n > 1 ? "s" : ""} réponse${n > 1 ? "s" : ""} au total`,
+    ex:{ nb:"Nombres", hr:"Heures", dy:"Jours", mo:"Mois", dt:"Dates", ph:"Phrases" },
+    lv:{
+      nb:["1 à 10, système indiqué", "11 à 99, système indiqué", "Avec un compteur : choisis le système", "Jusqu'à 9 999 et pièges 한 / 두 / 세 / 네 / 스무", "Les prix avec 만"],
+      hr:["Heures pile : 세 시", "Avec 반 : 세 시 반", "Toutes les minutes", "Sur 24 h, avec 오전 / 오후", "Avec 아침 / 저녁 / 밤"],
+      dy:["Les jours de la semaine", "Le jour d'avant ou d'après", "어제 / 내일", "Avec 그저께 / 모레", "Tout mélangé"],
+      mo:["Les mois", "Les pièges 유월 et 시월", "Le mois d'avant ou d'après", "지난달 / 다음 달", "Tout mélangé"],
+      dt:["Le jour : 이십삼 일", "Mois + jour", "Date complète", "Date + jour de la semaine", "Années de naissance"],
+      ph:["La question seule", "Question + réponse, heure pile", "Lieux avec 에, minutes et 반", "Avec 오전 / 오후", "Avec le jour et 아침 / 저녁 / 밤"]
+    },
+    toNext:(n, m, belt) => `${n} / ${m} vers la ${belt.toLowerCase()}`, maxed:n => `Ceinture noire ✓ · ${n} bonnes réponses`,
+    play:"▶ Jouer 10 questions",
+    nNat:"En nombres natifs (하나, 둘…)", nSino:"En nombres sino (일, 이…)", nCount:w => `Lis-le avec le bon système · ${w}`, nPrice:"Lis le prix",
+    cGae:"objets", cMyeong:"personnes", cSal:"âge", cGwon:"livres", cJan:"verres", cMari:"animaux", cSigan:"durée en heures",
+    cBun:"minutes", cWon:"wons", cCheung:"étage", cIl:"jours", cNyeon:"années",
+    hNat:"Natif : 하나 둘 셋 넷 다섯 여섯 일곱 여덟 아홉 열", hSino:"Sino : 일 이 삼 사 오 육 칠 팔 구 십",
+    hCntNat:c => `${c} → nombres natifs ; devant un compteur : 한, 두, 세, 네, 스무`, hCntSino:c => `${c} → nombres sino`, hMan:"10 000 = 만 : on compte par 만 (15 000 = 만오천)",
+    hRead:"Écris l'heure", hAp:"Avec 오전 (matin) ou 오후 (après-midi)", hPer:"Avec 아침 (6-9 h), 저녁 (18-20 h) ou 밤 (21-23 h)",
+    hTime:"Heures en natif (세 시), minutes en sino (이십 분)", hApH:"0-11 h → 오전, 12-23 h → 오후 (sur 12 heures)", hPerH:"아침 6-9 h · 저녁 18-20 h · 밤 21-23 h",
+    days:["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
+    months:["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+    dName:"En coréen", dAfter:"Le jour d'après", dBefore:"Le jour d'avant",
+    dRel:(d, s) => `Aujourd'hui c'est ${d}. ${s === 1 ? "Demain" : s === -1 ? "Hier" : s === 2 ? "Après-demain" : "Avant-hier"} ?`,
+    hDays:"월 화 수 목 금 토 일 + 요일", hRel:"그저께 -2 · 어제 -1 · 오늘 · 내일 +1 · 모레 +2",
+    mName:"En coréen", mAfter:"Le mois d'après", mBefore:"Le mois d'avant",
+    mRel:(m, s) => `Ce mois-ci c'est ${m}. Le mois ${s > 0 ? "prochain" : "dernier"} ?`,
+    hMonths:"Nombre sino + 월", hTrap:m => m === 6 ? "Piège : 6월 = 유월 (pas 육월)" : "Piège : 10월 = 시월 (pas 십월)",
+    dtWrite:"Écris la date en lettres", dtYear:"Écris l'année en lettres", dtDay:d => `Écris la date et le jour (${d})`,
+    hDate:"Dates en nombres sino : 년, 월, 일", hYear:"1998 = 천구백구십팔 (sans 일 devant 천)",
+    stepQ:"❓ La question", stepA:"💬 La réponse",
+    hObj:(n, b) => `${n} finit par ${b ? "une consonne → 을" : "une voyelle → 를"}`, hPlace:"Un lieu où l'on va → 에", hIntr:"Pas de complément",
+    digits:"✍️ Écris le nombre en lettres coréennes.",
+    try:"Pas tout à fait, réessaie !", copy:"Recopie la bonne réponse pour continuer.", copied:"Pas de point pour celle-ci, on continue.",
+    fixVerb:"Vérifie le verbe.", fixPart:"Vérifie la particule (을 / 를 / 에).", fixTime:"Vérifie l'heure.", fixQ:"La question commence par 몇 시에.",
+    prog:(n, m) => `${n} / ${m} questions`, pts:n => `+${n} point${n > 1 ? "s" : ""}`,
+    help:"Écris en hangeul avec le clavier coréen. Une erreur permise par question ; à la deuxième, la réponse s'affiche et tu la recopies (sans point).",
+    beltUp:b => `🥋 ${b} !`, endScore:(n, m) => `${n} réponse${n > 1 ? "s" : ""} juste${n > 1 ? "s" : ""} sur ${m}.`, endPts:(n, p, m, b) => `+${n} point${n > 1 ? "s" : ""} : ${p} / ${m} vers la ${b.toLowerCase()}.`,
+    endMax:n => `+${n} point${n > 1 ? "s" : ""}. Ceinture noire, bravo !`, endNew:b => `Nouvelle ceinture : ${b} ! Les questions vont être plus difficiles.`,
+    again:"Encore 10 questions", other:"Retour aux exercices", see:"Voir la carte",
+    leave:"Les points déjà gagnés sont gardés."
+  },
+  en: {
+    name:"Numbers", intro:"Numbers in both systems, time, weekdays, months, dates, and \"what time\" sentences. Each exercise has its own belt: the more you get right, the higher it goes, and the harder the questions get.",
+    back:"‹ Exercises", total:n => `${n} right answer${n === 1 ? "" : "s"} in all`,
+    ex:{ nb:"Numbers", hr:"Time", dy:"Weekdays", mo:"Months", dt:"Dates", ph:"Sentences" },
+    lv:{
+      nb:["1 to 10, system given", "11 to 99, system given", "With a counter: pick the system", "Up to 9,999 and 한 / 두 / 세 / 네 / 스무 traps", "Prices with 만"],
+      hr:["On the hour: 세 시", "With 반: 세 시 반", "Any minute", "24-hour clock, with 오전 / 오후", "With 아침 / 저녁 / 밤"],
+      dy:["The days of the week", "The day before or after", "어제 / 내일", "With 그저께 / 모레", "All mixed"],
+      mo:["The months", "The 유월 and 시월 traps", "The month before or after", "지난달 / 다음 달", "All mixed"],
+      dt:["The day: 이십삼 일", "Month + day", "Full date", "Date + weekday", "Birth years"],
+      ph:["The question only", "Question + answer, on the hour", "Places with 에, minutes and 반", "With 오전 / 오후", "With the day and 아침 / 저녁 / 밤"]
+    },
+    toNext:(n, m, belt) => `${n} / ${m} to the ${belt.toLowerCase()}`, maxed:n => `Black belt ✓ · ${n} right answers`,
+    play:"▶ Play 10 questions",
+    nNat:"In native numbers (하나, 둘…)", nSino:"In Sino numbers (일, 이…)", nCount:w => `Read it with the right system · ${w}`, nPrice:"Read the price",
+    cGae:"things", cMyeong:"people", cSal:"age", cGwon:"books", cJan:"glasses", cMari:"animals", cSigan:"hours (duration)",
+    cBun:"minutes", cWon:"won", cCheung:"floor", cIl:"days", cNyeon:"years",
+    hNat:"Native: 하나 둘 셋 넷 다섯 여섯 일곱 여덟 아홉 열", hSino:"Sino: 일 이 삼 사 오 육 칠 팔 구 십",
+    hCntNat:c => `${c} → native numbers; before a counter: 한, 두, 세, 네, 스무`, hCntSino:c => `${c} → Sino numbers`, hMan:"10,000 = 만: count in 만 (15,000 = 만오천)",
+    hRead:"Write the time", hAp:"With 오전 (a.m.) or 오후 (p.m.)", hPer:"With 아침 (6-9), 저녁 (18-20) or 밤 (21-23)",
+    hTime:"Hours in native (세 시), minutes in Sino (이십 분)", hApH:"0-11 → 오전, 12-23 → 오후 (12-hour clock)", hPerH:"아침 6-9 · 저녁 18-20 · 밤 21-23",
+    days:["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    months:["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    dName:"In Korean", dAfter:"The day after", dBefore:"The day before",
+    dRel:(d, s) => `Today is ${d}. ${s === 1 ? "Tomorrow" : s === -1 ? "Yesterday" : s === 2 ? "The day after tomorrow" : "The day before yesterday"}?`,
+    hDays:"월 화 수 목 금 토 일 + 요일", hRel:"그저께 -2 · 어제 -1 · 오늘 · 내일 +1 · 모레 +2",
+    mName:"In Korean", mAfter:"The month after", mBefore:"The month before",
+    mRel:(m, s) => `This month is ${m}. ${s > 0 ? "Next" : "Last"} month?`,
+    hMonths:"Sino number + 월", hTrap:m => m === 6 ? "Trap: June = 유월 (not 육월)" : "Trap: October = 시월 (not 십월)",
+    dtWrite:"Write the date in letters", dtYear:"Write the year in letters", dtDay:d => `Write the date and the weekday (${d})`,
+    hDate:"Dates use Sino numbers: 년, 월, 일", hYear:"1998 = 천구백구십팔 (no 일 before 천)",
+    stepQ:"❓ The question", stepA:"💬 The answer",
+    hObj:(n, b) => `${n} ends in ${b ? "a consonant → 을" : "a vowel → 를"}`, hPlace:"A place you go to → 에", hIntr:"No object",
+    digits:"✍️ Write the number in Korean letters.",
+    try:"Not quite, try again!", copy:"Type the right answer to go on.", copied:"No point for this one, moving on.",
+    fixVerb:"Check the verb.", fixPart:"Check the particle (을 / 를 / 에).", fixTime:"Check the time.", fixQ:"The question starts with 몇 시에.",
+    prog:(n, m) => `${n} / ${m} questions`, pts:n => `+${n} point${n === 1 ? "" : "s"}`,
+    help:"Write in Hangul with the Korean keyboard. One mistake allowed per question; on the second, the answer shows up and you type it out (no point).",
+    beltUp:b => `🥋 ${b}!`, endScore:(n, m) => `${n} of ${m} right.`, endPts:(n, p, m, b) => `+${n} point${n === 1 ? "" : "s"}: ${p} / ${m} to the ${b.toLowerCase()}.`,
+    endMax:n => `+${n} point${n === 1 ? "" : "s"}. Black belt, well done!`, endNew:b => `New belt: ${b}! The questions will get harder.`,
+    again:"10 more questions", other:"Back to exercises", see:"See the card",
+    leave:"Points you've earned are kept."
+  }
+};
+const TL = () => TMS[LANG];
+
+/* Accueil : un bloc par exercice, avec sa ceinture */
+function renderTmHome() {
+  const L = TL();
+  $("ladder").innerHTML = "";
+  let all = 0;
+  TMX.forEach(x => {
+    const b = tmBelt(x.id), p = tmPts(x.id), lv = LEVELS[b], next = LEVELS[b + 1]; all += p;
+    const el = document.createElement("div");
+    el.className = "level tmx";
+    const lo = TM_BELTS[b], hi = TM_BELTS[b + 1];
+    const progTxt = next ? L.toNext(p, hi, next.name[LANG]) : L.maxed(p);
+    const pct = next ? Math.round((p - lo) / (hi - lo) * 100) : 100;
+    el.innerHTML = `<div class="badge" aria-hidden="true">${beltKnot(lv.belt.bg)}</div><div>
+      <h2>${x.icon} ${L.ex[x.id]} <span class="ko belt-ko">${x.ko}</span></h2>
+      <p class="note"><strong>${lv.name[LANG]}</strong> · ${L.lv[x.id][b]}</p>
+      <p class="words-total">${progTxt}</p><div class="xbar"><span style="width:${pct}%"></span></div></div>`;
+    const go = document.createElement("button");
+    go.className = "test-go"; go.textContent = L.play;
+    go.onclick = () => startTm(x.id);
+    el.lastElementChild.appendChild(go);
+    $("ladder").appendChild(el);
+  });
+  $("total").textContent = L.total(all);
+}
+
+/* Partie : 10 questions tirées selon la ceinture de l'exercice */
+let Q = null;
+function tmLater(fn, ms) { const game = Q; const id = setTimeout(() => { if (Q === game) fn(); }, RM.matches ? Math.min(ms, 300) : ms); if (Q) Q.timers.push(id); }
+function stopTm() {
+  if (!Q) return;
+  Q.timers.forEach(clearTimeout);
+  const i = $("t-input"); if (i && document.activeElement === i) i.blur();
+  $("tgame").classList.remove("kb");
+}
+function startTm(id) {
+  stopTm(); stopConj(); C = null;
+  S = null; stopMemory(); M = null; stopFc(); F = null;
+  const x = TMXI[id], L = TL(), b = tmBelt(id), items = [], seen = new Set();
+  for (let k = 0; items.length < TM_N && k < 200; k++) {
+    const it = x.gen(tmLevel(b), L), key = it.main + "|" + it.steps.map(s => s.show).join("|");
+    if (seen.has(key)) continue;
+    seen.add(key); items.push(it);
+  }
+  Q = { id, x, items, i:-1, step:0, tries:0, copy:false, right:0, gained:0, beltBefore:b, busy:false, finished:false, played:false, timers:[], composing:false };
+  $("home").hidden = true; $("game").hidden = true; $("mgame").hidden = true; $("fgame").hidden = true; $("cgame").hidden = true; $("tgame").hidden = false;
+  $("sheet").hidden = true; $("t-results").hidden = true;
+  $("t-sound").textContent = prog.sound ? "🔊" : "🔇";
+  $("t-help").textContent = L.help;
+  window.scrollTo(0, 0);
+  if (!$("t-input")) buildTmZone();
+  tmHeader();
+  nextTm();
+}
+function tmHeader() {
+  const L = TL(), b = tmBelt(Q.id), p = tmPts(Q.id), next = TM_BELTS[b + 1];
+  $("t-ko").textContent = Q.x.ko;
+  $("t-sub").textContent = `${L.ex[Q.id]} · ${LEVELS[b].name[LANG]}`;
+  $("t-pts").innerHTML = `${beltKnot(LEVELS[b].belt.bg)}<span>${next ? `${p} / ${next}` : p}</span>`;
+}
+function buildTmZone() {
+  $("t-zone").innerHTML = `<div class="fline"><span class="lives"><span class="heart" id="t-heart">♥</span><span id="t-lives-t"></span></span>
+      <button class="fskip" id="t-skip" type="button"></button></div>
+    <form class="fform" id="t-form" autocomplete="off" novalidate><span class="kbd ko" aria-hidden="true">⌨️ 한</span>
+      <input id="t-input" type="text" lang="ko" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+      <button class="fgo" id="t-go" type="submit">↵</button></form>
+    <p class="fmsg" id="t-msg" aria-live="polite"></p>`;
+  const inp = $("t-input");
+  inp.addEventListener("input", () => { if ($("t-ans-t")) $("t-ans-t").textContent = inp.value; if ($("t-msg").dataset.hint) tmMsg(""); });
+  inp.addEventListener("compositionstart", () => { if (Q) Q.composing = true; });
+  inp.addEventListener("compositionend", () => { if (Q) Q.composing = false; if ($("t-ans-t")) $("t-ans-t").textContent = inp.value; });
+  inp.addEventListener("focus", () => { $("tgame").classList.add("kb"); fitKb(); setTimeout(fitKb, 350); });
+  inp.addEventListener("blur", () => { $("tgame").classList.remove("kb"); });
+  $("t-form").addEventListener("submit", e => {
+    e.preventDefault();
+    if (Q && Q.composing) { Q.composing = false; setTimeout(tmSubmit, 40); } else tmSubmit();
+  });
+  ["t-go", "t-skip"].forEach(id => $(id).addEventListener("pointerdown", e => { if (document.activeElement === inp) e.preventDefault(); }));
+  $("t-skip").onclick = () => { if (Q && !Q.busy && !Q.copy && !Q.finished) tmReveal(); };
+}
+function tmMsg(text, kind, hint) {
+  const m = $("t-msg"); if (!m) return;
+  m.textContent = text || ""; m.className = "fmsg" + (kind ? " " + kind : "");
+  if (hint) m.dataset.hint = "1"; else delete m.dataset.hint;
+}
+function nextTm() {
+  Q.i++;
+  if (Q.i >= Q.items.length) return finishTm();
+  Q.step = 0; Q.missed = false;
+  renderTmCard(true);
+}
+function renderTmCard(enter) {
+  const it = Q.items[Q.i], st = it.steps[Q.step], L = TL(), multi = it.steps.length > 1;
+  Q.tries = 0; Q.copy = false; Q.busy = false;
+  const done = multi && Q.step > 0 ? `<div class="tdone ko">✓ ${esc(it.steps[0].show)}</div>` : "";
+  const sz = it.main.length > 18 ? " xs" : it.main.length > 9 || it.long ? " sm" : "";
+  $("t-stage").innerHTML = `<div class="ccard${enter ? " enter" : ""}" id="t-card" style="--belt:${LEVELS[tmBelt(Q.id)].belt.bg}">
+      ${beltTag(tmBelt(Q.id))}${multi ? `<span class="tstep">${st.label} · ${Q.step + 1}/${it.steps.length}</span>` : ""}
+      <div class="cinf ko tmain${sz}">${esc(it.main)}</div><div class="ctr">${esc(it.sub)}</div>
+      ${it.chips ? `<div class="tchips">${it.chips.map(c => `<span>${esc(c)}</span>`).join("")}</div>` : ""}
+      ${done}<div class="fans ko" id="t-ans"><span id="t-ans-t"></span><span class="caret"></span></div>
+      <div class="fwrong" id="t-wrong"></div><div class="ccalc ko" id="t-calc"></div></div>`;
+  const inp = $("t-input");
+  inp.value = ""; inp.placeholder = "한국어로…"; inp.setAttribute("aria-label", st.label || it.sub);
+  const h = $("t-heart"); h.textContent = "♥"; h.classList.remove("broke");
+  $("t-lives-t").textContent = T().oneError;
+  $("t-skip").textContent = T().dunno; $("t-skip").hidden = false; $("t-skip").disabled = false; $("t-go").disabled = false;
+  $("t-left").textContent = L.prog(Q.i, Q.items.length);
+  $("t-bar").style.width = Math.round(Q.i / Q.items.length * 100) + "%";
+  tmMsg("");
+  inp.focus({ preventScroll:true });
+}
+function tmShow(kind) {
+  const it = Q.items[Q.i], st = it.steps[Q.step], el = $("t-calc");
+  el.innerHTML = esc(st.show) + (it.hint ? `<span class="ctrap">${esc(it.hint)}</span>` : "");
+  el.className = "ccalc ko show " + kind;
+}
+function tmSubmit() {
+  if (!Q || Q.busy || Q.finished) return;
+  const inp = $("t-input"), raw = inp.value.trim();
+  if (!raw) return;
+  const L = TL(), it = Q.items[Q.i], st = it.steps[Q.step];
+  if (/[a-z]/i.test(raw)) return tmMsg(T().kbKo, "", true);
+  if (/[ㄱ-ㆎ]/.test(raw)) return tmMsg(T().incomplete, "", true);
+  if (/[0-9]/.test(raw)) return tmMsg(L.digits, "", true);
+  Q.played = true;
+  const v = tmKey(raw), ok = st.ans.some(a => tmKey(a) === v);
+  if (Q.copy) {
+    if (!ok) { tmShake(raw); tmMsg(L.copy, "err"); return; }
+    Q.busy = true; sfx("ok"); speak(st.show);
+    $("t-ans").classList.add("win");
+    return tmLater(tmAdvance, 900);
+  }
+  if (ok) return tmRight();
+  tmShake(raw);
+  Q.tries++;
+  if (Q.tries >= 2) return tmReveal();
+  $("t-heart").classList.add("broke"); $("t-lives-t").textContent = T().noError;
+  tmMsg(st.verb ? tmWhy(st, v) : L.try, "err");
+}
+/* Phrases : on dit quelle partie est fausse */
+function tmWhy(st, v) {
+  const L = TL();
+  if (!st.time && !v.startsWith("몇시에")) return L.fixQ;
+  if (!v.endsWith(tmKey(st.verb)) && !(st.verb === "봐요" && v.endsWith("보아요"))) return L.fixVerb;
+  if (st.part && !v.includes(tmKey(st.part))) return L.fixPart;
+  return st.time ? L.fixTime : L.try;
+}
+function tmShake(raw) {
+  const card = $("t-card"), wr = $("t-wrong");
+  sfx("bad");
+  card.classList.remove("shake", "enter"); void card.offsetWidth; card.classList.add("shake");
+  wr.textContent = raw; wr.classList.remove("pop"); void wr.offsetWidth; wr.classList.add("pop");
+  $("t-input").value = ""; $("t-ans-t").textContent = "";
+}
+function tmReveal() {
+  Q.copy = true; Q.missed = true; Q.played = true;
+  sfx("crack"); tmShow("bad");
+  $("t-skip").hidden = true; $("t-heart").classList.add("broke");
+  $("t-input").value = ""; $("t-ans-t").textContent = "";
+  tmMsg(TL().copy, "err");
+  $("t-input").focus({ preventScroll:true });
+}
+function tmRight() {
+  const it = Q.items[Q.i], st = it.steps[Q.step];
+  Q.busy = true;
+  $("t-ans-t").textContent = st.show; $("t-ans").classList.add("win"); $("t-card").classList.add("good");
+  $("t-wrong").textContent = "";
+  tmShow("ok"); tmMsg("알아요! ✓", "ok");
+  sfx("ok"); speak(st.show);
+  if (!RM.matches) { const [x, y] = centerOf($("t-ans")); burst(x, y, BELT_FX[tmBelt(Q.id)], 22, 1); }
+  tmLater(tmAdvance, 1300);
+}
+function tmAdvance() {
+  const it = Q.items[Q.i];
+  if (Q.step < it.steps.length - 1) { Q.step++; return renderTmCard(false); }
+  if (!Q.missed) {
+    const before = tmBelt(Q.id), p = prog.tm[Q.id] || (prog.tm[Q.id] = { p:0 });
+    p.p = (p.p || 0) + 1; Q.right++; Q.gained++; save();
+    const after = tmBelt(Q.id);
+    if (after > before) {
+      sfx(after === 4 ? "black" : "belt");
+      toast(TL().beltUp(LEVELS[after].name[LANG]));
+      if (!RM.matches) { const [x, y] = centerOf($("t-card")); burst(x, y, BELT_FX[after], 60, 1.4); }
+    }
+    tmHeader();
+  }
+  nextTm();
+}
+function finishTm() {
+  Q.finished = true; Q.busy = true;
+  const inp = $("t-input"); if (inp) inp.blur();
+  $("t-left").textContent = TL().prog(Q.items.length, Q.items.length); $("t-bar").style.width = "100%";
+  const L = TL(), b = tmBelt(Q.id), next = TM_BELTS[b + 1], p = tmPts(Q.id);
+  $("s-fan").hidden = true; $("s-stars").hidden = true;
+  $("s-title").textContent = Q.right >= 8 ? "잘했어요!" : Q.right >= 5 ? "좋아요!" : "아쉬워요!";
+  const lines = [L.endScore(Q.right, Q.items.length), next ? L.endPts(Q.gained, p, next, LEVELS[b + 1].name[LANG]) : L.endMax(Q.gained)];
+  if (b > Q.beltBefore) { lines.push(L.endNew(LEVELS[b].name[LANG])); setTimeout(() => sfx("star"), 250); }
+  $("s-sub").textContent = lines.join(" ");
+  $("recap").innerHTML = Q.items.map(it => `<li><span class="ko">${esc(it.steps[it.steps.length - 1].show)}</span><span>${esc(it.main)}</span></li>`).join("");
+  $("recap").querySelectorAll("li").forEach((el, k) => el.onclick = () => speak(Q.items[k].steps[Q.items[k].steps.length - 1].show));
+  const acts = $("s-actions"); acts.innerHTML = "";
+  const add = (label, primary, fn) => { const bt = document.createElement("button"); bt.className = "btn" + (primary ? " primary" : ""); bt.textContent = label; bt.onclick = fn; acts.appendChild(bt); };
+  const id = Q.id;
+  add(L.again, true, () => startTm(id));
+  add(L.other, false, goHome);
+  add(L.see, false, hideResults);
+  showResults();
+}
+$("t-back").onclick = () => confirmLeave(goHome);
+$("t-sound").onclick = () => setSound(!prog.sound);
 
 applyLang();
 renderHome();
