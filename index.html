@@ -196,7 +196,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .mlist{margin-top:12px}
 #m-time.low{color:var(--red)}
 /* ===== Flashcards ===== */
-.games{grid-template-columns:repeat(3,1fr);max-width:330px}
+.games{grid-template-columns:repeat(2,1fr);gap:2px;max-width:330px}
 .games button{padding:8px 4px;font-size:13.5px}
 #fgame{position:relative;min-height:calc(100vh - 70px);min-height:calc(100dvh - 70px)}
 .fheat{position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:var(--heat,0);transition:opacity .7s ease-out;
@@ -454,6 +454,41 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 .fans.ok1{border-style:solid;border-color:#2F9E5B;animation:okflash .35s ease-out}
 @keyframes okflash{0%{background:color-mix(in srgb,#2F9E5B 35%,var(--paper));transform:scale(1.06)}100%{background:transparent;transform:none}}
 #fgame.kb .dots{margin-top:8px}
+/* ===== Conjugaison ===== */
+.crule{--belt:var(--line);background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--belt);border-radius:12px;padding:10px 12px;margin:0 0 14px;font-size:14.5px;line-height:1.5}
+.crule b{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:2px}
+.crule .short{display:none;font-weight:600;font-size:15px}
+#c-results{width:100%;margin:0 0 12px}
+.cstage{max-width:360px;margin:0 auto 14px}
+.ccard{position:relative;--belt:#F7F7F2;border-radius:20px;background:var(--paper);border:1px solid var(--line);padding:42px 16px 16px;text-align:center;overflow:hidden;
+  box-shadow:0 14px 30px -18px rgba(0,0,0,.45);cursor:pointer;user-select:none;-webkit-user-select:none;transition:border-color .2s}
+.ccard::before{content:"";position:absolute;left:0;right:0;top:0;height:9px;background:var(--belt);box-shadow:inset 0 -1px 0 color-mix(in srgb,var(--ink) 18%,transparent)}
+.ccard.enter{animation:cin .4s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes cin{from{transform:translateY(18px) scale(.94);opacity:0}}
+.ccard.shake{animation:fshake .45s}
+.ccard.good{border-color:#2F9E5B}
+.cnew{position:absolute;top:20px;right:16px;width:9px;height:9px;border-radius:50%;background:var(--red)}
+.cinf{font-size:44px;line-height:1.15;font-weight:700}
+.ctr{margin-top:4px;color:var(--muted);font-size:15px}
+.ccard .fans{margin:14px auto 0}
+.ccalc{min-height:1.5em;margin-top:8px;font-size:18px;color:var(--muted);line-height:1.35}
+.ccalc.show{animation:win .5s cubic-bezier(.2,1.6,.4,1) both}
+.ccalc.ok{color:#2F9E5B;font-weight:700}.ccalc.bad{color:var(--red);font-weight:700}
+.ctrap{display:block;margin-top:2px;font-family:system-ui,sans-serif;font-size:13px;font-weight:600;color:var(--yellow)}
+.recap li.miss .ko{color:var(--red)}
+#cgame.kb .topbar{margin-bottom:8px}
+#cgame.kb .modes,#cgame.kb .help{display:none}
+#cgame.kb .fstats{margin-bottom:8px}
+#cgame.kb.tight .crule{padding:6px 10px;margin-bottom:8px}
+#cgame.kb.tight .crule b,#cgame.kb.tight .crule .long{display:none}
+#cgame.kb.tight .crule .short{display:block}
+#cgame.kb .ccard{padding:30px 12px 10px}
+#cgame.kb .cinf{font-size:34px}
+#cgame.kb .ctr{font-size:14px;margin-top:0}
+#cgame.kb .ccard .fans{margin-top:8px;min-height:42px;font-size:22px}
+#cgame.kb .ccalc{margin-top:4px;font-size:16px}
+#cgame.kb .cstage{margin-bottom:10px}
+@media (max-height:640px){#cgame.kb .ctr{display:none}}
 @media (prefers-reduced-motion:reduce){.fin,.fcard,.ghost,.mini .in{transition-duration:.01s!important}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}.card .in{transition:none}}
 </style>
@@ -467,7 +502,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
     </div>
     <div class="hero">
       <div class="toprow">
-        <div class="games" role="group" id="games"><button data-game="ws"></button><button data-game="mem"></button><button data-game="fc"></button></div>
+        <div class="games" role="group" id="games"><button data-game="ws"></button><button data-game="mem"></button><button data-game="fc"></button><button data-game="cj"></button></div>
         <button class="icon" id="settings-btn">⚙️</button>
       </div>
       <h1 class="ko" id="h1">낱말 찾기</h1>
@@ -539,6 +574,27 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
     <div class="stage" id="f-stage"></div>
     <div class="fzone" id="f-zone"></div>
     <p class="help" id="f-help"></p>
+  </section>
+
+  <section id="cgame" hidden>
+    <div class="topbar">
+      <button class="back" id="c-back"></button>
+      <div class="title"><span class="ko">활용</span><small id="c-sub"></small></div>
+      <button class="icon" id="c-sound"></button>
+    </div>
+    <div class="modes" role="group" id="c-modes">
+      <button data-cm="d"></button>
+      <button data-cm="c"></button>
+    </div>
+    <div class="fstats">
+      <div class="fprog"><span id="c-left"></span><div class="xbar"><span id="c-bar"></span></div></div>
+      <span class="mtime" id="c-time"></span>
+    </div>
+    <div class="crule" id="c-rule"></div>
+    <button class="btn primary" id="c-results" hidden></button>
+    <div class="cstage" id="c-stage"></div>
+    <div class="fzone" id="c-zone"></div>
+    <p class="help" id="c-help"></p>
   </section>
 </main>
 
@@ -623,7 +679,7 @@ main{max-width:520px;margin:0 auto;padding:22px 18px 48px}
 
 <script>
 /* Version de l'app : à changer en même temps que CACHE dans sw.js */
-const APP_VERSION = 19;
+const APP_VERSION = 20;
 /* Mots : "coréen=français=anglais", séparés par ";" */
 const W = s => s.split(";").map(p => { const [ko, fr, en] = p.split("="); return { ko, fr, en }; });
 
@@ -772,6 +828,24 @@ const STR = {
     star3:"Moins de 25 secondes : troisième étoile !", goal3:b => `Ton record : ${b}. Passe sous 25 s pour la troisième étoile.`,
     memReplay:"Rejouer", memReplaySame:"Rejouer avec ces mots", memWith:"🃏 Memory avec ces mots", seeCards:"Voir les cartes",
     leaveMemText:"Cette partie ne sera pas comptée.", leaveMemTextD:"Les verbes déjà trouvés restent découverts.",
+    cjName:"Conjugaison",
+    introCj:"Conjugue au présent poli (-아요 / -어요), du simple 하다 jusqu'aux irréguliers. Découvre chaque groupe avec sa règle, puis réussis le défi : les 8 verbes sans aide, une seule erreur permise.",
+    cjBack:"‹ Groupes", cjRule:"📘 Règle", cjListen:"Toucher pour écouter l'infinitif", cjPh:"Forme en -요, au clavier coréen",
+    cjHelpD:"Écris la forme en -요 au clavier coréen. Une erreur est permise ; à la deuxième, la réponse s'affiche, tu la recopies et le verbe revient plus loin. Touche la carte pour écouter l'infinitif.",
+    cjHelpC:"Les 8 verbes du groupe, sans la règle. Une seule erreur permise sur tout le défi.",
+    cjLockedC:"Découvre les 8 verbes pour débloquer le défi",
+    cjProg:(n, m) => `${n} / ${m} verbe${m > 1 ? "s" : ""}`,
+    cjTry:"Pas tout à fait, réessaie !", cjCopy:"Recopie la bonne forme pour continuer.", cjBackLater:"Il reviendra plus loin.",
+    cjNear:f => `✓ Juste, mais on dit plutôt ${f}.`,
+    cjLast:"Faux ! Plus aucune erreur permise.", cjLostNow:"Deuxième erreur : voici la bonne forme.",
+    cjTrap:{ wi:"Piège : ㅟ ne fusionne pas.", eu:"Piège : ㅡ simple, pas la règle du 르.", reg:"Piège : ce ㅂ est régulier." },
+    cjLost:"Deux erreurs : le défi est perdu.", cjLostSub:(n, m) => `${n} verbe${n > 1 ? "s" : ""} sur ${m} réussi${n > 1 ? "s" : ""}. Relis la règle en découverte et retente !`,
+    cjWin:t => `Défi réussi en ${t} : groupe maîtrisé !`,
+    cjPlayed:n => `${n} verbes conjugués.`, cjReviewD:"Révision terminée.",
+    cjDoneD:"Les 8 verbes sont découverts ! Défi débloqué : les 8 sans aide, une seule erreur permise.",
+    cjProgD:(n, left) => `${n} nouveau${n > 1 ? "x" : ""} verbe${n > 1 ? "s" : ""}. ${left ? `Encore ${left} à découvrir.` : ""}`,
+    cjNext:x => `Groupe suivant : ${x}`, cjToGroups:"Retour aux groupes", cjSee:"Voir la carte",
+    leaveCjD:"Les verbes déjà réussis restent découverts.", leaveCjC:"Ce défi ne comptera pas.",
     fcName:"Flashcards",
     introFc:"Des flashcards de ton vocabulaire, où tu écris chaque réponse : une fois en anglais, la fois suivante en coréen. Chaque carte gagne sa propre ceinture : plus tu la connais, plus elle revient tard.",
     fcTotal:(n, m) => `${n} carte${n > 1 ? "s" : ""} en ceinture noire sur ${m}`,
@@ -879,6 +953,24 @@ const STR = {
     star3:"Under 25 seconds: third star!", goal3:b => `Your best: ${b}. Get under 25 s for the third star.`,
     memReplay:"Play again", memReplaySame:"Replay with these words", memWith:"🃏 Memory with these words", seeCards:"See the cards",
     leaveMemText:"This game won't count.", leaveMemTextD:"Verbs you've found stay discovered.",
+    cjName:"Conjugation",
+    introCj:"Conjugate in the polite present (-아요 / -어요), from simple 하다 verbs to the irregulars. Discover each group with its rule, then pass the challenge: all 8 verbs with no help and only one mistake allowed.",
+    cjBack:"‹ Groups", cjRule:"📘 Rule", cjListen:"Tap to hear the dictionary form", cjPh:"-요 form, with the Korean keyboard",
+    cjHelpD:"Type the -요 form with the Korean keyboard. One mistake is allowed; on the second, the answer shows up, you type it out and the verb comes back later. Tap the card to hear the dictionary form.",
+    cjHelpC:"All 8 verbs of the group, without the rule. Only one mistake allowed in the whole challenge.",
+    cjLockedC:"Discover all 8 verbs to unlock Challenge",
+    cjProg:(n, m) => `${n} / ${m} verb${m === 1 ? "" : "s"}`,
+    cjTry:"Not quite, try again!", cjCopy:"Type the right form to go on.", cjBackLater:"It will come back later.",
+    cjNear:f => `✓ Right, but people usually say ${f}.`,
+    cjLast:"Wrong! No more mistakes allowed.", cjLostNow:"Second mistake: here's the right form.",
+    cjTrap:{ wi:"Trap: ㅟ doesn't merge.", eu:"Trap: plain ㅡ, not the 르 rule.", reg:"Trap: this ㅂ is regular." },
+    cjLost:"Two mistakes: the challenge is lost.", cjLostSub:(n, m) => `${n} of ${m} verbs right. Go over the rule in Discovery and try again!`,
+    cjWin:t => `Challenge passed in ${t}: group mastered!`,
+    cjPlayed:n => `${n} verbs conjugated.`, cjReviewD:"Review done.",
+    cjDoneD:"All 8 verbs discovered! Challenge unlocked: all 8 with no help, only one mistake allowed.",
+    cjProgD:(n, left) => `${n} new verb${n === 1 ? "" : "s"}. ${left ? `${left} left to discover.` : ""}`,
+    cjNext:x => `Next group: ${x}`, cjToGroups:"Back to groups", cjSee:"See the card",
+    leaveCjD:"Verbs you got right stay discovered.", leaveCjC:"This challenge won't count.",
     fcName:"Flashcards",
     introFc:"Flashcards of your own vocabulary where you write every answer: once in English, the next time in Korean. Each card earns its own belt: the better you know it, the later it comes back.",
     fcTotal:(n, m) => `${n} of ${m} cards at black belt`,
@@ -1008,7 +1100,7 @@ const MEM_TIME = 25000, MEM_LIMIT = 100000, MEM_PAIRS = 8, MEM_D = 6, MEM_NEW = 
 prog.mem = prog.mem || {};
 prog.mseen = prog.mseen || {};
 prog.memUnlocked = prog.memUnlocked || [];
-if (prog.game !== "mem" && prog.game !== "fc") prog.game = "ws";
+if (!["mem", "fc", "cj"].includes(prog.game)) prog.game = "ws";
 const memOf = id => prog.mem[id] || {};
 const MTH = {};
 MTHEMES.forEach(t => { MTH[t.id] = t; });
@@ -1057,6 +1149,11 @@ function applyLang() {
   document.querySelector('[data-game="ws"]').textContent = t.wsName;
   document.querySelector('[data-game="mem"]').textContent = t.memName;
   document.querySelector('[data-game="fc"]').textContent = t.fcName;
+  document.querySelector('[data-game="cj"]').textContent = t.cjName;
+  $("c-back").textContent = t.cjBack; $("c-sound").setAttribute("aria-label", t.sound);
+  document.querySelector('[data-cm="d"]').textContent = t.discovery;
+  document.querySelector('[data-cm="c"]').textContent = t.challenge;
+  $("c-modes").setAttribute("aria-label", t.modesLabel);
   $("f-back").textContent = t.back.replace(/Thèmes|Themes/, t.fcName);
   $("f-sound").setAttribute("aria-label", t.sound);
   $("fm-title").textContent = t.mine; $("fm-note").textContent = t.fmNote;
@@ -1075,7 +1172,7 @@ function renderSettings() {
 }
 function setSound(on) {
   prog.sound = on; save(); renderSettings();
-  $("sound").textContent = $("m-sound").textContent = $("f-sound").textContent = prog.sound ? "🔊" : "🔇";
+  $("sound").textContent = $("m-sound").textContent = $("f-sound").textContent = $("c-sound").textContent = prog.sound ? "🔊" : "🔇";
 }
 document.querySelectorAll("#settings [data-lang]").forEach(b => b.onclick = () => {
   LANG = b.dataset.lang; prog.lang = LANG; save(); applyLang(); renderHome();
@@ -1154,11 +1251,12 @@ document.querySelectorAll("#games button").forEach(b => b.onclick = () => {
   prog.game = b.dataset.game; save(); renderHome();
 });
 function renderHome() {
-  const mem = prog.game === "mem", fc = prog.game === "fc";
+  const mem = prog.game === "mem", fc = prog.game === "fc", cj = prog.game === "cj";
   document.querySelectorAll("#games button").forEach(b => b.setAttribute("aria-pressed", b.dataset.game === prog.game));
-  $("h1").textContent = mem ? "짝 맞추기" : fc ? "낱말 카드" : "낱말 찾기";
-  $("intro").textContent = mem ? T().introMem : fc ? T().introFc : T().intro;
+  $("h1").textContent = mem ? "짝 맞추기" : fc ? "낱말 카드" : cj ? "활용" : "낱말 찾기";
+  $("intro").textContent = mem ? T().introMem : fc ? T().introFc : cj ? T().introCj : T().intro;
   if (mem) return renderMemHome();
+  if (cj) return renderCjHome();
   if (fc) return renderFcHome();
   let got = 0;
   $("ladder").innerHTML = "";
@@ -1458,15 +1556,19 @@ $("hint").onclick = () => {
   el.classList.remove("hint", "pop"); el.style.animationDelay = ""; void el.offsetWidth; el.classList.add("hint");
 };
 function goHome() {
-  S = null; stopMemory(); M = null; stopFc(); F = null; updateHint();
-  $("game").hidden = true; $("mgame").hidden = true; $("fgame").hidden = true; $("home").hidden = false; $("sheet").hidden = true; $("results").hidden = true;
+  S = null; stopMemory(); M = null; stopFc(); F = null; stopConj(); C = null; updateHint();
+  $("game").hidden = true; $("mgame").hidden = true; $("fgame").hidden = true; $("cgame").hidden = true; $("home").hidden = false; $("sheet").hidden = true; $("results").hidden = true;
   renderHome(); window.scrollTo(0, 0);
 }
 /* Demande confirmation si une partie est en cours (au moins un mot trouvé, grille pas finie) */
 let onLeave = null;
 function confirmLeave(action) {
   const L = T();
-  if (F) {
+  if (C) {
+    if (C.finished || !C.played) return action();
+    $("c-title").textContent = L.leaveTitle;
+    $("c-text").textContent = C.mode === "d" ? L.leaveCjD : L.leaveCjC;
+  } else if (F) {
     if (F.finished || !F.played) return action();
     $("c-title").textContent = L.leaveFcTitle;
     $("c-text").textContent = F.mode === "day" ? L.leaveFcText : L.leaveFcFree;
@@ -1495,14 +1597,14 @@ function closeSheet(id, then) {
   setTimeout(() => { el.hidden = true; el.classList.remove("closing"); if (then) then(); }, 250);
 }
 /* Écran de fin : on peut le fermer pour revoir sa grille, puis le rouvrir */
-function showResults() { $("results").hidden = true; $("m-results").hidden = true; $("f-results").hidden = true; openSheet("sheet"); }
+function showResults() { $("results").hidden = true; $("m-results").hidden = true; $("f-results").hidden = true; $("c-results").hidden = true; openSheet("sheet"); }
 function hideResults() {
   closeSheet("sheet", () => {
-    const b = F && F.finished ? $("f-results") : M && M.finished ? $("m-results") : S && S.finished ? $("results") : null;
+    const b = C && C.finished ? $("c-results") : F && F.finished ? $("f-results") : M && M.finished ? $("m-results") : S && S.finished ? $("results") : null;
     if (b) { b.textContent = T().seeResults; b.hidden = false; }
   });
 }
-$("results").onclick = $("m-results").onclick = $("f-results").onclick = showResults;
+$("results").onclick = $("m-results").onclick = $("f-results").onclick = $("c-results").onclick = showResults;
 $("sheet").addEventListener("click", e => { if (e.target === $("sheet")) hideResults(); });
 
 $("regen").onclick = () => confirmLeave(() => startGame(S.t.id, S.mode));
@@ -2269,7 +2371,9 @@ function setMsg(text, kind, hint) {
 function fitKb() {
   const vv = window.visualViewport, h = vv ? vv.height : innerHeight;
   document.documentElement.style.setProperty("--vvh", Math.round(h) + "px");
-  if ($("fgame").classList.contains("kb") && !$("fgame").hidden) window.scrollTo(0, 0);
+  /* Règle de la conjugaison en version courte seulement quand le clavier prend vraiment de la place */
+  $("cgame").classList.toggle("tight", h < innerHeight * .8 || h < 560);
+  if (["fgame", "cgame"].some(id => $(id).classList.contains("kb") && !$(id).hidden)) window.scrollTo(0, 0);
 }
 if (window.visualViewport) visualViewport.addEventListener("resize", fitKb);
 fitKb();
@@ -2829,6 +2933,427 @@ $("fm-all").onclick = () => {
 };
 $("fm-close").onclick = () => closeSheet("fc-mine", () => { if (prog.game === "fc" && !$("home").hidden) renderHome(); });
 $("fc-mine").addEventListener("click", e => { if (e.target === $("fc-mine")) $("fm-close").onclick(); });
+
+/* ===== Conjugaison 활용 : le présent poli -아요 / -어요 ===== */
+/* Verbes : "infinitif=forme en -요=français=anglais[=type]", séparés par ";"
+   type : s (ㅅ irrégulier dans un groupe ㄷ), !wi / !eu / !reg = piège (ㅟ qui ne fusionne pas, ㅡ simple, ㅂ régulier) */
+const CJ = s => s.split(";").map(p => { const [inf, form, fr, en, k] = p.split("="); return { ko:inf, inf, form, fr, en, k:k || "" }; });
+const CLEVELS = [
+  { note:{ fr:"Les verbes en 하다 : 공부하다 → 공부해요.", en:"하다 verbs: 공부하다 → 공부해요." },
+    themes:[
+      { id:"c1-actions", ko:"행동", fr:"Actions", en:"Actions", kind:"ha",
+        words:CJ("공부하다=공부해요=étudier=to study;일하다=일해요=travailler=to work;운동하다=운동해요=faire du sport=to exercise;요리하다=요리해요=cuisiner=to cook;청소하다=청소해요=faire le ménage=to clean;전화하다=전화해요=téléphoner=to phone;노래하다=노래해요=chanter=to sing;말하다=말해요=parler=to speak") },
+      { id:"c1-aimer", ko:"말과 마음", fr:"Parler et aimer", en:"Talking and liking", kind:"ha",
+        words:CJ("좋아하다=좋아해요=aimer bien=to like;싫어하다=싫어해요=détester=to dislike;사랑하다=사랑해요=aimer=to love;이야기하다=이야기해요=raconter=to talk, to tell;설명하다=설명해요=expliquer=to explain;인사하다=인사해요=saluer=to greet;약속하다=약속해요=promettre=to promise;쇼핑하다=쇼핑해요=faire du shopping=to go shopping") },
+      { id:"c1-etats", ko:"상태", fr:"États", en:"States", kind:"ha",
+        words:CJ("조용하다=조용해요=être calme=to be quiet;깨끗하다=깨끗해요=être propre=to be clean;피곤하다=피곤해요=être fatigué=to be tired;따뜻하다=따뜻해요=être doux, tiède=to be warm;시원하다=시원해요=être frais=to be cool;유명하다=유명해요=être célèbre=to be famous;행복하다=행복해요=être heureux=to be happy;필요하다=필요해요=être nécessaire=to be needed") },
+      { id:"c1-quotidien", ko:"일상", fr:"Quotidien", en:"Daily life", kind:"ha",
+        words:CJ("빨래하다=빨래해요=faire la lessive=to do laundry;샤워하다=샤워해요=se doucher=to shower;수영하다=수영해요=nager=to swim;산책하다=산책해요=se promener=to take a walk;생각하다=생각해요=penser=to think;시작하다=시작해요=commencer=to start;준비하다=준비해요=préparer=to prepare;사용하다=사용해요=utiliser=to use") }
+    ]},
+  { note:{ fr:"아요 ou 어요 selon la dernière voyelle, sans fusion : 살아요, 먹어요.", en:"아요 or 어요 depending on the last vowel, nothing merges: 살아요, 먹어요." },
+    themes:[
+      { id:"c2-a1", ko:"아요 ①", fr:"ㅏ / ㅗ → 아요", en:"ㅏ / ㅗ → 아요", kind:"reg",
+        words:CJ("살다=살아요=habiter=to live;앉다=앉아요=s'asseoir=to sit;받다=받아요=recevoir=to receive;놀다=놀아요=s'amuser=to have fun;닫다=닫아요=fermer=to close;많다=많아요=être nombreux=to be many;좋다=좋아요=être bon=to be good;찾다=찾아요=chercher=to look for") },
+      { id:"c2-a2", ko:"아요 ②", fr:"ㅏ / ㅗ → 아요 (suite)", en:"ㅏ / ㅗ → 아요 (more)", kind:"reg",
+        words:CJ("작다=작아요=être petit=to be small;얇다=얇아요=être fin=to be thin;괜찮다=괜찮아요=aller bien=to be OK;팔다=팔아요=vendre=to sell;깎다=깎아요=éplucher, baisser un prix=to peel, to cut a price;볶다=볶아요=faire sauter=to stir-fry;녹다=녹아요=fondre=to melt;막다=막아요=bloquer=to block") },
+      { id:"c2-eo1", ko:"어요 ①", fr:"Autres voyelles → 어요", en:"Other vowels → 어요", kind:"reg",
+        words:CJ("먹다=먹어요=manger=to eat;읽다=읽어요=lire=to read;있다=있어요=il y a, avoir=to be there, to have;없다=없어요=il n'y a pas=not to be there, not to have;웃다=웃어요=rire=to laugh;씻다=씻어요=se laver=to wash;벗다=벗어요=enlever=to take off;젊다=젊어요=être jeune=to be young") },
+      { id:"c2-eo2", ko:"어요 ②", fr:"Autres voyelles → 어요 (suite)", en:"Other vowels → 어요 (more)", kind:"reg",
+        words:CJ("신다=신어요=mettre (des chaussures)=to put on (shoes);길다=길어요=être long=to be long;울다=울어요=pleurer=to cry;열다=열어요=ouvrir=to open;넣다=넣어요=mettre dedans=to put in;믿다=믿어요=croire=to believe;접다=접어요=plier=to fold;끊다=끊어요=couper, raccrocher=to cut off, to hang up") }
+    ]},
+  { note:{ fr:"Les voyelles qui fusionnent : 가요, 봐요, 마셔요, 돼요.", en:"Vowels that merge: 가요, 봐요, 마셔요, 돼요." },
+    themes:[
+      { id:"c3-a", ko:"가요 · 서요", fr:"ㅏ / ㅓ qui fusionnent", en:"ㅏ / ㅓ merging", kind:"reg",
+        words:CJ("가다=가요=aller=to go;자다=자요=dormir=to sleep;사다=사요=acheter=to buy;만나다=만나요=rencontrer=to meet;타다=타요=monter (dans un véhicule)=to get on, to ride;일어나다=일어나요=se lever=to get up;서다=서요=se tenir debout=to stand;건너다=건너요=traverser=to cross") },
+      { id:"c3-wa", ko:"봐요 · 워요", fr:"ㅗ → ㅘ, ㅜ → ㅝ", en:"ㅗ → ㅘ, ㅜ → ㅝ", kind:"reg",
+        words:CJ("보다=봐요=voir=to see;오다=와요=venir=to come;배우다=배워요=apprendre=to learn;주다=줘요=donner=to give;바꾸다=바꿔요=changer=to change;나누다=나눠요=partager=to share;춤추다=춤춰요=danser=to dance;세우다=세워요=garer, dresser=to park, to set up") },
+      { id:"c3-yeo", ko:"마셔요", fr:"ㅣ → ㅕ", en:"ㅣ → ㅕ", kind:"reg",
+        words:CJ("마시다=마셔요=boire=to drink;기다리다=기다려요=attendre=to wait;가르치다=가르쳐요=enseigner=to teach;다니다=다녀요=fréquenter=to attend (regularly);지다=져요=perdre (un match)=to lose (a game);그리다=그려요=dessiner=to draw;내리다=내려요=descendre=to get off;버리다=버려요=jeter=to throw away") },
+      { id:"c3-dwae", ko:"내요 · 돼요", fr:"ㅐ, ㅕ, ㅚ et un piège", en:"ㅐ, ㅕ, ㅚ and a trap", kind:"reg",
+        words:CJ("보내다=보내요=envoyer=to send;지내다=지내요=passer le temps=to spend time, to get along;내다=내요=payer=to pay;끝내다=끝내요=finir=to finish;켜다=켜요=allumer=to turn on;펴다=펴요=déplier=to unfold;되다=돼요=devenir=to become;쉬다=쉬어요=se reposer=to rest=!wi") }
+    ]},
+  { note:{ fr:"Le ㅡ qui tombe et les verbes en 르 : 바빠요, 몰라요.", en:"Dropping ㅡ and 르 verbs: 바빠요, 몰라요." },
+    themes:[
+      { id:"c4-eu1", ko:"써요", fr:"ㅡ qui tombe → 어요", en:"Dropping ㅡ → 어요", kind:"eu",
+        words:CJ("쓰다=써요=écrire=to write;크다=커요=être grand=to be big;끄다=꺼요=éteindre=to turn off;뜨다=떠요=se lever (le soleil)=to rise (the sun);기쁘다=기뻐요=être joyeux=to be glad;슬프다=슬퍼요=être triste=to be sad;예쁘다=예뻐요=être joli=to be pretty;치르다=치러요=passer (un examen)=to take (an exam)=!eu") },
+      { id:"c4-eu2", ko:"바빠요", fr:"ㅡ qui tombe → 아요", en:"Dropping ㅡ → 아요", kind:"eu",
+        words:CJ("바쁘다=바빠요=être occupé=to be busy;아프다=아파요=avoir mal=to hurt, to be sick;나쁘다=나빠요=être mauvais=to be bad;배고프다=배고파요=avoir faim=to be hungry;모으다=모아요=rassembler=to collect;잠그다=잠가요=verrouiller=to lock;담그다=담가요=faire mariner=to pickle, to soak;따르다=따라요=suivre=to follow=!eu") },
+      { id:"c4-reu1", ko:"몰라요", fr:"르 → ㄹ라요", en:"르 → ㄹ라요", kind:"reu",
+        words:CJ("모르다=몰라요=ne pas savoir=not to know;고르다=골라요=choisir=to choose;다르다=달라요=être différent=to be different;바르다=발라요=étaler=to spread, to apply;오르다=올라요=monter=to rise, to climb;자르다=잘라요=couper=to cut;마르다=말라요=sécher=to dry;빠르다=빨라요=être rapide=to be fast") },
+      { id:"c4-reu2", ko:"불러요", fr:"르 → ㄹ러요", en:"르 → ㄹ러요", kind:"reu",
+        words:CJ("부르다=불러요=appeler, chanter=to call, to sing;누르다=눌러요=appuyer=to press;흐르다=흘러요=couler=to flow;서두르다=서둘러요=se dépêcher=to hurry;배부르다=배불러요=être rassasié=to be full;기르다=길러요=élever=to raise;지르다=질러요=crier=to shout;게으르다=게을러요=être paresseux=to be lazy") }
+    ]},
+  { note:{ fr:"Les irréguliers ㅂ, ㄷ, ㅅ, ㅎ : 추워요, 걸어요, 나아요, 그래요.", en:"Irregular ㅂ, ㄷ, ㅅ, ㅎ verbs: 추워요, 걸어요, 나아요, 그래요." },
+    themes:[
+      { id:"c5-b1", ko:"추워요", fr:"ㅂ → 워요", en:"ㅂ → 워요", kind:"b",
+        words:CJ("춥다=추워요=faire froid=to be cold;덥다=더워요=faire chaud=to be hot;쉽다=쉬워요=être facile=to be easy;어렵다=어려워요=être difficile=to be difficult;맵다=매워요=être épicé=to be spicy;무겁다=무거워요=être lourd=to be heavy;가볍다=가벼워요=être léger=to be light;귀엽다=귀여워요=être mignon=to be cute") },
+      { id:"c5-b2", ko:"도와요", fr:"ㅂ : exceptions et pièges", en:"ㅂ: exceptions and traps", kind:"b",
+        words:CJ("돕다=도와요=aider=to help;곱다=고와요=être joli, doux=to be lovely;굽다=구워요=griller=to grill;눕다=누워요=s'allonger=to lie down;가깝다=가까워요=être proche=to be close;입다=입어요=mettre (un vêtement)=to wear=!reg;좁다=좁아요=être étroit=to be narrow=!reg;잡다=잡아요=attraper=to catch=!reg") },
+      { id:"c5-ds", ko:"걸어요 · 나아요", fr:"ㄷ → ㄹ, ㅅ qui tombe", en:"ㄷ → ㄹ, dropping ㅅ", kind:"d",
+        words:CJ("걷다=걸어요=marcher=to walk;듣다=들어요=écouter=to listen;묻다=물어요=demander=to ask;싣다=실어요=charger=to load;깨닫다=깨달아요=se rendre compte=to realize;낫다=나아요=guérir=to get better=s;짓다=지어요=construire=to build=s;붓다=부어요=verser=to pour=s") },
+      { id:"c5-h", ko:"그래요", fr:"ㅎ qui tombe", en:"Dropping ㅎ", kind:"h",
+        words:CJ("그렇다=그래요=être ainsi=to be so;이렇다=이래요=être comme ceci=to be like this;저렇다=저래요=être comme cela=to be like that;어떻다=어때요=être comment=to be how;빨갛다=빨개요=être rouge=to be red;노랗다=노래요=être jaune=to be yellow;파랗다=파래요=être bleu=to be blue;하얗다=하얘요=être blanc=to be white") }
+    ]}
+].map((m, li) => ({ ...m, id:"C" + (li + 1), name:LEVELS[li].name, belt:LEVELS[li].belt }));
+/* La règle de chaque groupe : une version complète (découverte) et une formule courte (clavier ouvert) */
+const CRULES = {
+  ha:{ fr:"하다 devient 해요. On garde tout ce qui est avant : 공부하다 → 공부해요.", en:"하다 becomes 해요. Keep everything before it: 공부하다 → 공부해요.", s:{ fr:"하다 → 해요", en:"하다 → 해요" } },
+  a:{ fr:"Enlève 다. Si la dernière voyelle est ㅏ ou ㅗ, ajoute 아요 : 살다 → 살 + 아요 → 살아요.", en:"Drop 다. If the last vowel is ㅏ or ㅗ, add 아요: 살다 → 살 + 아요 → 살아요.", s:{ fr:"ㅏ ㅗ → 아요 · sinon 어요", en:"ㅏ ㅗ → 아요 · else 어요" } },
+  eo:{ fr:"Enlève 다. Si la dernière voyelle n'est ni ㅏ ni ㅗ, ajoute 어요 : 먹다 → 먹 + 어요 → 먹어요.", en:"Drop 다. If the last vowel is neither ㅏ nor ㅗ, add 어요: 먹다 → 먹 + 어요 → 먹어요.", s:{ fr:"ㅏ ㅗ → 아요 · sinon 어요", en:"ㅏ ㅗ → 아요 · else 어요" } },
+  "c3-a":{ fr:"Pas de consonne finale : la voyelle fusionne. ㅏ + 아 et ㅓ + 어 ne font qu'un : 가다 → 가요, 서다 → 서요.", en:"No final consonant: the vowels merge. ㅏ + 아 and ㅓ + 어 become one: 가다 → 가요, 서다 → 서요.", s:{ fr:"가 + 아요 → 가요", en:"가 + 아요 → 가요" } },
+  "c3-wa":{ fr:"ㅗ + 아 → ㅘ et ㅜ + 어 → ㅝ : 보다 → 봐요, 배우다 → 배워요.", en:"ㅗ + 아 → ㅘ and ㅜ + 어 → ㅝ: 보다 → 봐요, 배우다 → 배워요.", s:{ fr:"ㅗ+아 → ㅘ · ㅜ+어 → ㅝ", en:"ㅗ+아 → ㅘ · ㅜ+어 → ㅝ" } },
+  "c3-yeo":{ fr:"ㅣ + 어 → ㅕ : 마시다 → 마셔요.", en:"ㅣ + 어 → ㅕ: 마시다 → 마셔요.", s:{ fr:"ㅣ+어 → ㅕ", en:"ㅣ+어 → ㅕ" } },
+  "c3-dwae":{ fr:"ㅐ et ㅕ avalent le 어 (보내요, 켜요), ㅚ + 어 → ㅙ (돼요). Attention : ㅟ ne fusionne pas (쉬어요).", en:"ㅐ and ㅕ swallow the 어 (보내요, 켜요), ㅚ + 어 → ㅙ (돼요). Careful: ㅟ doesn't merge (쉬어요).", s:{ fr:"ㅐ ㅕ = · ㅚ+어 → ㅙ · ㅟ+어요", en:"ㅐ ㅕ = · ㅚ+어 → ㅙ · ㅟ+어요" } },
+  "c4-eu1":{ fr:"Le ㅡ tombe. Une seule syllabe, ou une voyelle d'avant autre que ㅏ/ㅗ → 어요 : 쓰다 → 써요, 기쁘다 → 기뻐요.", en:"The ㅡ drops. One syllable, or a vowel before it other than ㅏ/ㅗ → 어요: 쓰다 → 써요, 기쁘다 → 기뻐요.", s:{ fr:"ㅡ ✕ → 어요", en:"ㅡ ✕ → 어요" } },
+  "c4-eu2":{ fr:"Le ㅡ tombe. Voyelle d'avant ㅏ ou ㅗ → 아요 : 바쁘다 → 바빠요.", en:"The ㅡ drops. Vowel before it ㅏ or ㅗ → 아요: 바쁘다 → 바빠요.", s:{ fr:"ㅡ ✕ · ㅏ ㅗ avant → 아요", en:"ㅡ ✕ · ㅏ ㅗ before → 아요" } },
+  "c4-reu1":{ fr:"Verbes en 르 : le ㄹ se double. 르 devient ㄹ라 après ㅏ ou ㅗ : 모르다 → 몰라요.", en:"르 verbs: the ㄹ doubles. 르 becomes ㄹ라 after ㅏ or ㅗ: 모르다 → 몰라요.", s:{ fr:"르 → ㄹ라요", en:"르 → ㄹ라요" } },
+  "c4-reu2":{ fr:"Après les autres voyelles, 르 devient ㄹ러 : 부르다 → 불러요.", en:"After the other vowels, 르 becomes ㄹ러: 부르다 → 불러요.", s:{ fr:"르 → ㄹ러요", en:"르 → ㄹ러요" } },
+  "c5-b1":{ fr:"ㅂ irrégulier : le ㅂ devient 우, et 우 + 어 → 워 : 춥다 → 추우 + 어요 → 추워요.", en:"Irregular ㅂ: the ㅂ becomes 우, and 우 + 어 → 워: 춥다 → 추우 + 어요 → 추워요.", s:{ fr:"ㅂ → 워요", en:"ㅂ → 워요" } },
+  "c5-b2":{ fr:"돕다 et 곱다 donnent 와요 (도와요). Mais certains verbes en ㅂ sont réguliers : 입다 → 입어요.", en:"돕다 and 곱다 give 와요 (도와요). But some ㅂ verbs are regular: 입다 → 입어요.", s:{ fr:"돕 곱 → 와요 · 입 좁 잡 réguliers", en:"돕 곱 → 와요 · 입 좁 잡 regular" } },
+  "c5-ds":{ fr:"ㄷ irrégulier : le ㄷ devient ㄹ (걷다 → 걸어요). ㅅ irrégulier : le ㅅ tombe, sans fusion (낫다 → 나아요).", en:"Irregular ㄷ: the ㄷ becomes ㄹ (걷다 → 걸어요). Irregular ㅅ: the ㅅ drops, nothing merges (낫다 → 나아요).", s:{ fr:"ㄷ → ㄹ · ㅅ ✕", en:"ㄷ → ㄹ · ㅅ ✕" } },
+  "c5-h":{ fr:"ㅎ irrégulier : le ㅎ tombe et ㅏ/ㅓ devient ㅐ (그렇다 → 그래요) ; ㅑ devient ㅒ (하얗다 → 하얘요).", en:"Irregular ㅎ: the ㅎ drops and ㅏ/ㅓ becomes ㅐ (그렇다 → 그래요); ㅑ becomes ㅒ (하얗다 → 하얘요).", s:{ fr:"ㅎ ✕ · ㅏ ㅓ → ㅐ", en:"ㅎ ✕ · ㅏ ㅓ → ㅐ" } }
+};
+const ruleOf = t => CRULES[t.id] || CRULES[t.id.startsWith("c1") ? "ha" : /-a\d/.test(t.id) ? "a" : "eo"];
+const CTHEMES = CLEVELS.flatMap(l => l.themes.map(t => Object.assign(t, { level:l })));
+
+/* Le calcul : ce que devient le radical, la terminaison, la forme finale */
+const HB = 0xAC00;
+const hsplit = s => { const c = s.charCodeAt(0) - HB; return [Math.floor(c / 588), Math.floor(c % 588 / 28), c % 28]; };
+const hjoin = (l, v, t) => String.fromCharCode(HB + (l * 21 + v) * 28 + (t || 0));
+const harm = syl => [0, 2, 8].includes(hsplit(syl)[1]) ? "아" : "어";
+function conjugate(inf, kind) {
+  const st = inf.slice(0, -1), last = st.slice(-1), head = st.slice(0, -1), [l, v, t] = hsplit(last);
+  const out = (mid, e, form, long) => ({ calc:`${mid} + ${e}요 → ${form}`, form, long });
+  if (kind === "ha") { const f = head + "해요"; return { calc:`${head} + 해요 → ${f}`, form:f }; }
+  if (kind === "reg") {
+    const e = harm(last);
+    if (t) return out(st, e, st + e + "요");
+    const merge = { 0:e === "아" ? v : -1, 4:4, 1:1, 5:5, 6:6, 8:9, 13:14, 20:6, 11:10 }[v];
+    if (merge == null || merge < 0) return out(st, e, st + e + "요");
+    const long = [8, 13, 20, 11, 1].includes(v) && inf !== "오다" && inf !== "지다" ? st + e + "요" : null;
+    return out(st, e, head + hjoin(l, merge) + "요", long);
+  }
+  if (kind === "eu") {
+    const e = head ? harm(head.slice(-1)) : "어";
+    return out(`${st} (ㅡ ✕)`, e, head + hjoin(l, e === "아" ? 0 : 4) + "요");
+  }
+  if (kind === "reu") {
+    const p = head.slice(-1), [pl, pv] = hsplit(p), e = harm(p), np = head.slice(0, -1) + hjoin(pl, pv, 8);
+    return out(`${st} → ${np}ㄹ`, e, np + hjoin(5, e === "아" ? 0 : 4) + "요");
+  }
+  if (kind === "b") {
+    const s0 = head + hjoin(l, v), o = st === "돕" || st === "곱";
+    return out(`${st} → ${s0}${o ? "오" : "우"}`, o ? "아" : "어", s0 + (o ? "와" : "워") + "요");
+  }
+  if (kind === "d" || kind === "s") {
+    const s1 = head + hjoin(l, v, kind === "d" ? 8 : 0), e = harm(last);
+    return out(`${st} → ${s1}`, e, s1 + e + "요");
+  }
+  if (kind === "h") {
+    const e = harm(last);
+    return out(`${st} (ㅎ ✕)`, e, head + hjoin(l, v === 2 ? 3 : 1) + "요");
+  }
+  return { calc:`${inf} → ?`, form:"" };
+}
+CTHEMES.forEach(t => t.words.forEach(w => {
+  w.trap = w.k.startsWith("!") ? w.k.slice(1) : "";
+  w.kind = w.trap ? (w.trap === "wi" ? "reg" : w.trap) : (w.k || t.kind);
+  const r = conjugate(w.inf, w.kind);
+  w.calc = r.form === w.form ? r.calc : `${w.inf} → ${w.form}`;
+  w.long = r.form === w.form ? r.long : null;
+  w.ok = r.form === w.form;
+}));
+
+/* Progression : ★ quand les 8 verbes du groupe sont découverts, ★★ quand le défi est réussi (une erreur au plus) ;
+   les 8 étoiles d'une ceinture ouvrent la suivante, une ceinture ouverte ne se referme jamais */
+const CJ_D = 4, CJ_NEW = 2;
+prog.conj = prog.conj || {};
+prog.cseen = prog.cseen || {};
+prog.conjUnlocked = prog.conjUnlocked || [];
+const CTH = {};
+CTHEMES.forEach(t => { CTH[t.id] = t; });
+const cjOf = id => prog.conj[id] || {};
+const cjStars = id => ({ a:countIn(prog.cseen, CTH[id]) === CTH[id].words.length, b:!!cjOf(id).c });
+const cjStarCount = l => l.themes.reduce((n, t) => { const s = cjStars(t.id); return n + (s.a ? 1 : 0) + (s.b ? 1 : 0); }, 0);
+function cjUnlocked(li) {
+  const l = CLEVELS[li];
+  if (li === 0 || prog.conjUnlocked.includes(l.id) || l.themes.some(t => (prog.cseen[t.id] || []).length > 0)) return true;
+  const p = CLEVELS[li - 1];
+  return cjStarCount(p) === p.themes.length * 2;
+}
+function renderCjHome() {
+  let got = 0;
+  $("ladder").innerHTML = "";
+  CLEVELS.forEach((l, li) => {
+    const open = cjUnlocked(li), prev = CLEVELS[li - 1];
+    const el = document.createElement("div");
+    el.className = "level" + (open ? "" : " locked");
+    const note = open ? `<p class="note">${l.note[LANG]}</p>`
+      : `<p class="lock">${T().memLocked(prev.name[LANG], cjStarCount(prev), prev.themes.length * 2)}</p>`;
+    el.innerHTML = `<div class="badge" aria-hidden="true">${beltKnot(l.belt.bg)}</div><div><h2>${l.name[LANG]} <span class="ko belt-ko">${l.belt.ko}</span></h2>${note}<div class="themes"></div></div>`;
+    const box = el.querySelector(".themes");
+    l.themes.forEach(t => {
+      const p = cjOf(t.id), s = cjStars(t.id), n = (s.a ? 1 : 0) + (s.b ? 1 : 0); got += n;
+      const m = t.words.length, nd = countIn(prog.cseen, t);
+      const best = p.best != null ? `<small class="best full">⏱ ${T().bestLabel} ${fmtTime(p.best)}</small>` : "";
+      const b = document.createElement("button");
+      b.className = "theme";
+      b.innerHTML = `<span class="t-ko ko">${t.ko}</span><span class="t-fr">${t[LANG]}${best}</span>
+        <span class="wc${s.a ? " full" : ""}" aria-label="${T().countMD(nd, m)}">${s.a ? "✓ " : ""}${nd}/${m}</span>
+        <span class="bar" style="width:${Math.round(nd / m * 100)}%"></span>
+        <span class="stars" aria-label="${T().starsLabel(n, 2)}"><span class="${s.a?"on":""}">★</span><span class="${s.b?"on":""}">★</span></span>`;
+      b.disabled = !open;
+      b.onclick = () => startConj(t, s.a && !s.b ? "c" : "d");
+      box.appendChild(b);
+    });
+    $("ladder").appendChild(el);
+  });
+  $("total").textContent = T().total(got, CTHEMES.length * 2);
+}
+
+/* Partie : découverte (4 verbes, 2 nouveaux au plus après la première) ou défi (les 8, une erreur au plus) */
+let C = null;
+function pickCjWords(t) {
+  const seen = new Set(prog.cseen[t.id] || []);
+  const fresh = shuffle(t.words.filter(w => !seen.has(w.ko))), old = shuffle(t.words.filter(w => seen.has(w.ko)));
+  if (!old.length) return fresh.slice(0, CJ_D);
+  const pick = fresh.slice(0, CJ_NEW).concat(old.slice(0, CJ_D - Math.min(CJ_NEW, fresh.length)));
+  return shuffle(pick.concat(fresh.slice(CJ_NEW, CJ_NEW + CJ_D - pick.length)).slice(0, CJ_D));
+}
+function cjLater(fn, ms) { const game = C; const id = setTimeout(() => { if (C === game) fn(); }, RM.matches ? Math.min(ms, 300) : ms); if (C) C.timers.push(id); }
+function stopConj() {
+  if (!C) return;
+  C.timers.forEach(clearTimeout); clearInterval(C.timer);
+  const i = $("c-input"); if (i && document.activeElement === i) i.blur();
+  $("cgame").classList.remove("kb");
+}
+function startConj(t, opt) {
+  stopConj();
+  S = null; stopMemory(); M = null; stopFc(); F = null;
+  const mode = opt === "c" && cjStars(t.id).a ? "c" : "d";
+  const words = mode === "c" ? shuffle(t.words) : pickCjWords(t);
+  C = { t, mode, words, queue:words.slice(), done:new Set(), cur:null, tries:0, copy:false, errs:0, busy:false,
+        finished:false, lost:false, played:false, newCount:0, t0:0, elapsed:0, timer:null, timers:[], composing:false,
+        starsBefore:cjStars(t.id) };
+  $("home").hidden = true; $("game").hidden = true; $("mgame").hidden = true; $("fgame").hidden = true; $("cgame").hidden = false;
+  $("sheet").hidden = true; $("c-results").hidden = true;
+  const L = T(), li = CLEVELS.indexOf(t.level);
+  $("c-sub").textContent = `${t.level.name[LANG]}, ${t[LANG]}`;
+  $("c-sound").textContent = prog.sound ? "🔊" : "🔇";
+  document.querySelectorAll("#c-modes button").forEach(b => b.setAttribute("aria-pressed", b.dataset.cm === mode));
+  const cBtn = document.querySelector('[data-cm="c"]'), locked = !cjStars(t.id).a;
+  cBtn.disabled = locked;
+  cBtn.textContent = (locked ? "🔒 " : "") + L.challenge;
+  cBtn.setAttribute("aria-label", locked ? L.cjLockedC : L.challenge);
+  const r = ruleOf(t);
+  $("c-rule").hidden = mode === "c";
+  $("c-rule").style.setProperty("--belt", t.level.belt.bg);
+  $("c-rule").innerHTML = `<b>${L.cjRule}</b><span class="long ko-mix">${r[LANG]}</span><span class="short">${r.s[LANG]}</span>`;
+  $("c-time").hidden = mode !== "c"; $("c-time").textContent = fmtTime(0);
+  $("c-help").textContent = mode === "c" ? L.cjHelpC : L.cjHelpD;
+  C.belt = li;
+  window.scrollTo(0, 0);
+  if (!$("c-input")) buildCjZone();
+  if (mode === "c") { C.t0 = Date.now(); C.timer = setInterval(() => { if (C && !C.finished) { C.elapsed = Date.now() - C.t0; $("c-time").textContent = fmtTime(C.elapsed); } }, 100); }
+  nextCj();
+}
+function buildCjZone() {
+  $("c-zone").innerHTML = `<div class="fline"><span class="lives"><span class="heart" id="c-heart">♥</span><span id="c-lives-t"></span></span>
+      <button class="fskip" id="c-skip" type="button"></button></div>
+    <form class="fform" id="c-form" autocomplete="off" novalidate><span class="kbd ko" aria-hidden="true">⌨️ 한</span>
+      <input id="c-input" type="text" lang="ko" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+      <button class="fgo" id="c-go" type="submit">↵</button></form>
+    <p class="fmsg" id="c-msg" aria-live="polite"></p>`;
+  const inp = $("c-input");
+  inp.addEventListener("input", () => { if ($("c-ans-t")) $("c-ans-t").textContent = inp.value; if ($("c-msg").dataset.hint) cjMsg(""); });
+  inp.addEventListener("compositionstart", () => { if (C) C.composing = true; });
+  inp.addEventListener("compositionend", () => { if (C) C.composing = false; if ($("c-ans-t")) $("c-ans-t").textContent = inp.value; });
+  inp.addEventListener("focus", () => { $("cgame").classList.add("kb"); fitKb(); setTimeout(fitKb, 350); });
+  inp.addEventListener("blur", () => { $("cgame").classList.remove("kb"); });
+  $("c-form").addEventListener("submit", e => {
+    e.preventDefault();
+    if (C && C.composing) { C.composing = false; setTimeout(cjSubmit, 40); } else cjSubmit();
+  });
+  ["c-go", "c-skip"].forEach(id => $(id).addEventListener("pointerdown", e => { if (document.activeElement === inp) e.preventDefault(); }));
+  $("c-skip").onclick = () => { if (C && C.cur && !C.busy && !C.copy && C.mode === "d") cjReveal(); };
+}
+function cjMsg(text, kind, hint) {
+  const m = $("c-msg"); if (!m) return;
+  m.textContent = text || ""; m.className = "fmsg" + (kind ? " " + kind : "");
+  if (hint) m.dataset.hint = "1"; else delete m.dataset.hint;
+}
+function cjLives() {
+  const L = T(), h = $("c-heart"), d = C.mode === "d", used = d ? C.tries : C.errs;
+  h.textContent = "♥"; h.classList.toggle("broke", used >= 1);
+  $("c-lives-t").textContent = used >= 1 ? L.noError : L.oneError;
+  $("c-skip").textContent = L.dunno;
+  $("c-skip").hidden = !d; $("c-skip").disabled = false; $("c-go").disabled = false;
+}
+function cjProgress() {
+  const n = C.done.size, m = C.words.length;
+  $("c-left").textContent = T().cjProg(n, m);
+  $("c-bar").style.width = Math.round(n / m * 100) + "%";
+}
+function nextCj() {
+  if (!C.queue.length) return finishConj();
+  const w = C.queue.shift(), L = T();
+  C.cur = w; C.tries = 0; C.copy = false; C.busy = false;
+  const fresh = C.mode === "d" && !(prog.cseen[C.t.id] || []).includes(w.ko);
+  $("c-stage").innerHTML = `<div class="ccard enter" id="c-card" style="--belt:${C.t.level.belt.bg}" role="button" tabindex="-1" aria-label="${L.cjListen}">
+      ${beltTag(C.belt)}${fresh ? `<span class="cnew" title="${L.newWord}"></span>` : ""}
+      <div class="cinf ko">${esc(w.inf)}</div><div class="ctr">${esc(w[LANG])}</div>
+      <div class="fans ko" id="c-ans"><span id="c-ans-t"></span><span class="caret"></span></div>
+      <div class="fwrong" id="c-wrong"></div><div class="ccalc ko" id="c-calc"></div></div>`;
+  $("c-card").onclick = () => speak(w.inf);
+  const inp = $("c-input");
+  inp.value = ""; inp.placeholder = L.phKo; inp.setAttribute("aria-label", L.cjPh);
+  cjLives(); cjProgress(); cjMsg("");
+  inp.focus({ preventScroll:true });
+}
+function cjCheck(raw) {
+  const L = T();
+  if (/[a-z]/i.test(raw)) return { hint:L.kbKo };
+  if (/[ㄱ-ㆎ]/.test(raw)) return { hint:L.incomplete };
+  const v = raw.replace(/[^가-힣]/g, ""), w = C.cur;
+  if (v === w.form) return { ok:true };
+  if (w.long && v === w.long) return { ok:true, near:true };
+  return { ok:false };
+}
+function cjSubmit() {
+  const w = C && C.cur, inp = $("c-input");
+  if (!w || C.busy || C.finished || !inp) return;
+  const raw = inp.value.trim();
+  if (!raw) return;
+  const r = cjCheck(raw);
+  if (r.hint) { cjMsg(r.hint, "", true); const k = document.querySelector("#c-form .kbd"); k.classList.remove("swap"); void k.offsetWidth; k.classList.add("swap"); return; }
+  C.played = true;
+  if (C.copy) {
+    if (!r.ok) { cjShake(raw); cjMsg(T().cjCopy, "err"); return; }
+    C.busy = true; sfx("ok"); speak(w.form);
+    $("c-ans").classList.add("win");
+    cjMsg(T().cjBackLater, "ok");
+    C.queue.push(w);
+    return cjLater(nextCj, 1100);
+  }
+  if (r.ok) return cjRight(r.near);
+  cjWrong(raw);
+}
+function cjShake(raw) {
+  const card = $("c-card"), wr = $("c-wrong");
+  sfx("bad");
+  card.classList.remove("shake", "enter"); void card.offsetWidth; card.classList.add("shake");
+  wr.textContent = raw; wr.classList.remove("pop"); void wr.offsetWidth; wr.classList.add("pop");
+  $("c-input").value = ""; $("c-ans-t").textContent = "";
+}
+function cjShowCalc(kind) {
+  const w = C.cur, el = $("c-calc"), L = T();
+  el.innerHTML = esc(w.calc) + (w.trap ? `<span class="ctrap">${L.cjTrap[w.trap]}</span>` : "");
+  el.className = "ccalc ko show " + kind;
+}
+function cjRight(near) {
+  const w = C.cur, L = T();
+  C.busy = true;
+  if (C.mode === "d") {
+    const a = prog.cseen[C.t.id] || (prog.cseen[C.t.id] = []);
+    if (!a.includes(w.ko)) { a.push(w.ko); C.newCount++; save(); }
+  }
+  C.done.add(w.ko); cjProgress();
+  $("c-ans-t").textContent = w.form;
+  $("c-ans").classList.add("win"); $("c-card").classList.add("good");
+  $("c-wrong").textContent = "";
+  cjShowCalc("ok");
+  cjMsg(near ? L.cjNear(w.form) : "알아요! ✓", "ok");
+  sfx("ok"); speak(w.form);
+  const lv = BELT_FX[Math.max(0, C.belt)];
+  if (!RM.matches) { const [x, y] = centerOf($("c-ans")); burst(x, y, lv, 26, 1); }
+  cjLater(nextCj, near ? 1900 : 1300);
+}
+function cjWrong(raw) {
+  const L = T(), h = $("c-heart");
+  cjShake(raw);
+  if (C.mode === "d") {
+    C.tries++;
+    if (C.tries >= 2) return cjReveal();
+    h.classList.add("broke"); $("c-lives-t").textContent = L.noError;
+    cjMsg(L.cjTry, "err");
+    return;
+  }
+  C.errs++;
+  if (C.errs >= 2) {
+    C.busy = true; C.lost = true;
+    $("c-ans-t").textContent = C.cur.form; $("c-ans").classList.add("lose");
+    cjShowCalc("bad");
+    cjMsg(L.cjLostNow, "err");
+    $("c-go").disabled = true;
+    return cjLater(finishConj, 2400);
+  }
+  h.classList.add("broke"); $("c-lives-t").textContent = L.noError;
+  cjMsg(L.cjLast, "err");
+}
+/* Deuxième erreur ou « Je ne sais pas » : la réponse s'affiche, on la recopie, le verbe revient plus loin */
+function cjReveal() {
+  const L = T();
+  C.copy = true; C.played = true;
+  sfx("crack");
+  cjShowCalc("bad");
+  $("c-skip").hidden = true;
+  $("c-heart").classList.add("broke");
+  $("c-input").value = ""; $("c-ans-t").textContent = "";
+  cjMsg(L.cjCopy, "err");
+  $("c-input").focus({ preventScroll:true });
+}
+function finishConj() {
+  if (C.finished) return;
+  C.finished = true; C.busy = true;
+  clearInterval(C.timer);
+  if (C.mode === "c") C.elapsed = Date.now() - C.t0;
+  const i = $("c-input"); if (i) i.blur();
+  $("s-fan").hidden = true;
+  const L = T(), { mode, t, words, lost } = C, time = C.elapsed;
+  const li = CLEVELS.indexOf(t.level), nextL = CLEVELS[li + 1];
+  const wasOpen = nextL ? cjUnlocked(li + 1) : true, before = C.starsBefore;
+  const p = { ...cjOf(t.id) }, prevBest = p.best;
+  if (mode === "c" && !lost) { p.c = true; if (prevBest == null || time < prevBest) p.best = time; }
+  prog.conj[t.id] = p;
+  const after = cjStars(t.id);
+  const opened = nextL && !wasOpen && cjUnlocked(li + 1);
+  if (opened) prog.conjUnlocked.push(nextL.id);
+  save();
+  const lines = [];
+  $("s-title").textContent = lost ? "아쉬워요!" : "잘했어요!";
+  if (lost) lines.push(L.cjLost, L.cjLostSub(C.done.size, words.length));
+  else if (mode === "c") lines.push(L.cjWin(fmtTime(time)) + (prevBest != null && time < prevBest ? " " + L.record : ""));
+  else {
+    const left = t.words.length - countIn(prog.cseen, t);
+    lines.push(L.cjPlayed(words.length), after.a ? (before.a ? L.cjReviewD : L.cjDoneD) : L.cjProgD(C.newCount, left));
+  }
+  if (opened) lines.push(L.unlocked(nextL.name[LANG]));
+  const stars = [[before.a, after.a], [before.b, after.b]];
+  renderSheetStars(stars);
+  if (stars.some(([b, a]) => a && !b)) setTimeout(() => sfx("star"), 250);
+  $("s-sub").textContent = lines.join(" ");
+  $("recap").innerHTML = words.map(w => `<li class="${lost && !C.done.has(w.ko) ? "miss" : ""}"><span class="ko">${esc(w.inf)} → ${esc(w.form)}</span><span>${esc(w[LANG])}</span></li>`).join("");
+  $("recap").querySelectorAll("li").forEach((el, k) => el.onclick = () => speak(words[k].form));
+  const acts = $("s-actions"); acts.innerHTML = "";
+  const add = (label, primary, fn) => { const b = document.createElement("button"); b.className = "btn" + (primary ? " primary" : ""); b.textContent = label; b.onclick = fn; acts.appendChild(b); };
+  const st = cjStars(t.id);
+  if (mode === "c") add(lost ? L.tryAgain : L.memReplay, lost || !st.b, () => startConj(t, "c"));
+  else if (!st.a) add(L.keepD, true, () => startConj(t, "d"));
+  else add(L.memChallenge, !st.b, () => startConj(t, "c"));
+  const next = CTHEMES[CTHEMES.indexOf(t) + 1];
+  if (next && cjUnlocked(CLEVELS.indexOf(next.level))) add(L.cjNext(next[LANG]), st.a && st.b, () => startConj(next, "d"));
+  if (mode === "d" && st.a) add(L.memReplay, false, () => startConj(t, "d"));
+  add(L.cjToGroups, false, goHome);
+  add(L.cjSee, false, hideResults);
+  showResults();
+}
+$("c-back").onclick = () => confirmLeave(goHome);
+$("c-sound").onclick = () => setSound(!prog.sound);
+document.querySelectorAll("#c-modes button").forEach(b => b.onclick = () => {
+  if (!C || b.dataset.cm === C.mode || b.disabled) return;
+  const t = C.t, m = b.dataset.cm;
+  confirmLeave(() => startConj(t, m));
+});
 
 applyLang();
 renderHome();
